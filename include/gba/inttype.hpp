@@ -1,0 +1,50 @@
+/*
+===============================================================================
+
+ Copyright (C) 2022 gba-hpp contributors
+ For conditions of distribution and use, see copyright notice in LICENSE.md
+
+===============================================================================
+*/
+
+#ifndef GBAXX_INTTYPE_HPP
+#define GBAXX_INTTYPE_HPP
+
+#include <cstdint>
+#include <type_traits>
+
+namespace gba {
+
+template <typename T, typename Sign>
+using copysign = std::conditional_t<std::is_signed_v<Sign>, std::make_signed_t<T>, std::make_unsigned_t<T>>;
+
+template <std::size_t MinBits, typename Sign = signed>
+using inttype = copysign<
+    typename std::conditional_t<MinBits == 0, void,
+        typename std::conditional_t<MinBits <= 8, std::int8_t,
+            typename std::conditional_t<MinBits <= 16, std::int16_t,
+                typename std::conditional_t<MinBits <= 32, std::int32_t,
+                    typename std::conditional_t<MinBits <= 64, std::int64_t,
+                        void
+                    >
+                >
+            >
+        >
+    >, Sign>;
+
+template <std::size_t Bits, typename Sign = unsigned>
+using uinttype = inttype<Bits, Sign>;
+
+using int8 = inttype<8>;
+using int16 = inttype<16>;
+using int32 = inttype<32>;
+using int64 = inttype<64>;
+
+using uint8 = uinttype<8>;
+using uint16 = uinttype<16>;
+using uint32 = uinttype<32>;
+using uint64 = uinttype<64>;
+
+} // namespace gba
+
+#endif // define GBAXX_INTTYPE_HPP

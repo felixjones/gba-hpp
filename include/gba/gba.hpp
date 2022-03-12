@@ -31,8 +31,9 @@
  * ( GBAXX_VERSION_MAJOR * 10000 ) + ( GBAXX_VERSION_MINOR * 100 ) + ( GBAXX_VERSION_PATCH * 1 )
  * \endcode
  */
-#define GBAXX_VERSION ( GBAXX_VERSION_MAJOR * 10000 ) + ( GBAXX_VERSION_MINOR * 100 ) + GBAXX_VERSION_PATCH
+#define GBAXX_VERSION ((GBAXX_VERSION_MAJOR * 10000) + (GBAXX_VERSION_MINOR * 100) + GBAXX_VERSION_PATCH)
 
 #include <gba/inttype.hpp>
+#include <gba/vectype.hpp>
 
 #endif // define GBAXX_GBA_HPP

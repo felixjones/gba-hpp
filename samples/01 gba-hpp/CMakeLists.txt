@@ -18,5 +18,12 @@ add_subdirectory(../../ ${CMAKE_CURRENT_BINARY_DIR}/gba-hpp)
 
 add_executable(game main.cpp)
 set_target_properties(game PROPERTIES SUFFIX ".elf")
-
 target_link_libraries(game PRIVATE rom gba-hpp)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(warnings -Weverything -Wno-c++98-compat)
+else()
+    set(warnings -Wall -Wextra -Wshadow -Wnon-virtual-dtor)
+endif()
+
+target_compile_options(game PRIVATE -O0 -mthumb ${warnings} -pedantic)

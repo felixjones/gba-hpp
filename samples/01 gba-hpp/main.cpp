@@ -10,5 +10,7 @@
 #include <gba/gba.hpp>
 
 int main() {
+    using namespace gba;
+
     return 0;
 }

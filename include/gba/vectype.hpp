@@ -11,6 +11,7 @@
 #define GBAXX_VECTYPE_HPP
 
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 
 namespace gba {

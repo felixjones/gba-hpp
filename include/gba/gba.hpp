@@ -36,4 +36,7 @@
 #include <gba/inttype.hpp>
 #include <gba/vectype.hpp>
 
+#include <gba/bios/math.hpp>
+#include <gba/bios/swi_call.hpp>
+
 #endif // define GBAXX_GBA_HPP

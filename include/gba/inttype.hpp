@@ -10,6 +10,7 @@
 #ifndef GBAXX_INTTYPE_HPP
 #define GBAXX_INTTYPE_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <type_traits>
 

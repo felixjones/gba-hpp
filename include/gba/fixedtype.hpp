@@ -10,26 +10,218 @@
 #ifndef GBAXX_FIXEDTYPE_HPP
 #define GBAXX_FIXEDTYPE_HPP
 
+#include <cmath>
 #include <cstddef>
+#include <type_traits>
 
 #include <gba/inttype.hpp>
 
 namespace gba {
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign = signed>
-class fixed {
-private:
-    using data_type = inttype<IntBits + FracBits, Sign>;
+template <int shift, typename T> requires std::is_integral_v<T>
+constexpr auto signed_shift(T v) noexcept {
+    return shift < 0 ? v << std::abs(shift) : v >> shift;
+}
 
-    data_type m_data = {};
-public:
-    template <typename T>
-    consteval fixed(T v) requires std::is_floating_point_v<T> : m_data { static_cast<data_type>(v * (1 << FracBits) + 0.5) } {}
-};
+template <std::size_t IntBits, std::size_t FracBits, typename Sign = signed>
+class fixed;
 
 template <std::size_t Integer, std::size_t Fractional, typename Sign = unsigned>
 using ufixed = fixed<Integer, Fractional, Sign>;
 
+template <class T>
+concept is_fixed = std::is_same_v<T, fixed<T::integer_bits, T::fractional_bits, typename T::sign>>;
+
+template <class Lhs, class Rhs = Lhs> requires is_fixed<Lhs> && is_fixed<Rhs>
+struct fixed_promote {
+private:
+    using data_type = decltype(typename Lhs::data_type{} + typename Rhs::data_type{});
+
+    static constexpr auto is_signed = std::is_signed_v<typename Lhs::data_type> || std::is_signed_v<typename Rhs::data_type>;
+    static constexpr auto integer_bits = std::max(Lhs::integer_bits, Rhs::integer_bits) - is_signed;
+    static constexpr auto fractional_bits = std::max(Lhs::fractional_bits, Rhs::fractional_bits);
+    static constexpr auto data_type_bits = std::numeric_limits<data_type>::digits;
+
+    static constexpr auto real_integer_bits = ((integer_bits + fractional_bits) > data_type_bits ? integer_bits : (data_type_bits - fractional_bits));
+    static constexpr auto real_fractional_bits = data_type_bits - real_integer_bits;
+public:
+    using type = fixed<real_integer_bits + is_signed, real_fractional_bits, data_type>;
+};
+
+template <class Lhs, class Rhs = Lhs> requires is_fixed<Lhs> && is_fixed<Rhs>
+using fixed_promote_t = typename fixed_promote<Lhs, Rhs>::type;
+
+template <std::size_t IntBits, std::size_t FracBits, typename Sign>
+class fixed {
+public:
+    using data_type = inttype<IntBits + FracBits, Sign>;
+
+    using sign = Sign;
+    static constexpr auto integer_bits = IntBits;
+    static constexpr auto fractional_bits = FracBits;
+
+    static constexpr auto from_data(data_type v) noexcept {
+        return fixed(v, 0);
+    }
+
+    constexpr fixed() noexcept : m_data {} {}
+
+    template <std::size_t RI, std::size_t RF, typename RS> requires (IntBits >= RI && FracBits >= RF)
+    constexpr fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
+
+    template <std::size_t RI, std::size_t RF, typename RS>
+    constexpr explicit fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
+
+    template <typename T>
+    consteval fixed(T v) noexcept requires std::is_floating_point_v<T> : m_data {static_cast<data_type>(v * (1 << FracBits) + 0.5)} {}
+
+    template <typename T>
+    constexpr fixed(T v) noexcept requires std::is_integral_v<T> : m_data {static_cast<data_type>(v << FracBits)} {}
+
+    template <typename T>
+    constexpr explicit operator T() const noexcept requires std::is_integral_v<T> && (!std::is_same_v<bool, T>) {
+        constexpr auto spare_bits = std::numeric_limits<std::make_unsigned_t<data_type>>::digits - (IntBits + FracBits);
+
+        return static_cast<T>((m_data << spare_bits) >> (FracBits + spare_bits));
+    }
+
+    constexpr explicit operator bool() const noexcept {
+        return static_cast<bool>(m_data);
+    }
+
+    constexpr auto data() const noexcept {
+        return m_data;
+    }
+
+    constexpr auto operator+() const noexcept {
+        return fixed_promote_t<fixed>(*this);
+    }
+
+    constexpr auto operator-() const noexcept {
+        return from_data(-m_data);
+    }
+
+    template <class Rhs> requires gba::is_fixed<Rhs>
+    constexpr auto& operator+=(Rhs rhs) noexcept {
+        m_data += convert_from(rhs).data();
+        return *this;
+    }
+
+    template <class Rhs> requires std::is_integral_v<Rhs>
+    constexpr auto& operator+=(Rhs rhs) noexcept {
+        m_data += fixed(rhs).data();
+        return *this;
+    }
+
+    template <class Rhs> requires gba::is_fixed<Rhs>
+    constexpr auto& operator-=(Rhs rhs) noexcept {
+        m_data -= convert_from(rhs).data();
+        return *this;
+    }
+
+    template <class Rhs> requires std::is_integral_v<Rhs>
+    constexpr auto& operator-=(Rhs rhs) noexcept {
+        m_data -= fixed(rhs).data();
+        return *this;
+    }
+public:
+    constexpr fixed(data_type v, int) noexcept : m_data {v} {}
+
+    template <class Rhs> requires is_fixed<Rhs>
+    constexpr static auto convert_from(Rhs rhs) noexcept {
+        constexpr auto shift = static_cast<int>(Rhs::fractional_bits) - static_cast<int>(fractional_bits);
+
+        return from_data(signed_shift<shift>(rhs.data()));
+    }
+
+    data_type m_data;
+};
+
 } // namespace gba
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    using promote_type = gba::fixed_promote_t<Lhs, decltype(rhs)>;
+
+    return promote_type::from_data(promote_type(lhs).data() + promote_type(rhs).data());
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && std::is_integral_v<Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    return Lhs::from_data(lhs.data() + Lhs(rhs).data());
+}
+
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs::from_data(Rhs(lhs).data() + rhs.data());
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    using promote_type = gba::fixed_promote_t<Lhs, decltype(rhs)>;
+
+    return promote_type::from_data(promote_type(lhs).data() - promote_type(rhs).data());
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && std::is_integral_v<Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    return Lhs::from_data(lhs.data() - Lhs(rhs).data());
+}
+
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs::from_data(Rhs(lhs).data() - rhs.data());
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+    using promote_type = gba::fixed_promote_t<Lhs, decltype(rhs)>;
+
+    return promote_type(lhs).data() <=> promote_type(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && std::is_integral_v<Rhs>
+constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+    return lhs.data() <=> Lhs(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs).data() <=> rhs.data();
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator==(Lhs lhs, Rhs rhs) noexcept {
+    using promote_type = gba::fixed_promote_t<Lhs, decltype(rhs)>;
+
+    return promote_type(lhs).data() == promote_type(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && std::is_integral_v<Rhs>
+constexpr auto operator==(Lhs lhs, Rhs rhs) noexcept {
+    return lhs.data() == Lhs(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator==(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs).data() == rhs.data();
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator!=(Lhs lhs, Rhs rhs) noexcept {
+    using promote_type = gba::fixed_promote_t<Lhs, decltype(rhs)>;
+
+    return promote_type(lhs).data() != promote_type(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires gba::is_fixed<Lhs> && std::is_integral_v<Rhs>
+constexpr auto operator!=(Lhs lhs, Rhs rhs) noexcept {
+    return lhs.data() != Lhs(rhs).data();
+}
+
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::is_fixed<Rhs>
+constexpr auto operator!=(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs).data() != rhs.data();
+}
 
 #endif // define GBAXX_FIXEDTYPE_HPP

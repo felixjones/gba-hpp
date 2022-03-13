@@ -9,7 +9,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(gba-hpp CXX)
+project(sample CXX)
 
 # Add gba-toolchain libraries
 gba_add_library_subdirectory(rom)
@@ -21,7 +21,7 @@ set_target_properties(game PROPERTIES SUFFIX ".elf")
 target_link_libraries(game PRIVATE rom gba-hpp)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(warnings -Weverything -Wno-c++98-compat)
+    set(warnings -Weverything -Wno-c++98-compat -Wno-c++20-compat)
 else()
     set(warnings -Wall -Wextra -Wshadow -Wnon-virtual-dtor)
 endif()

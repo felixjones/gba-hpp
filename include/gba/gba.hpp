@@ -33,6 +33,7 @@
  */
 #define GBAXX_VERSION ((GBAXX_VERSION_MAJOR * 10000) + (GBAXX_VERSION_MINOR * 100) + GBAXX_VERSION_PATCH)
 
+#include <gba/fixedtype.hpp>
 #include <gba/inttype.hpp>
 #include <gba/vectype.hpp>
 

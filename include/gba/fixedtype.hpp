@@ -78,14 +78,14 @@ public:
     template <std::size_t RI, std::size_t RF, typename RS>
     constexpr explicit fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
 
-    template <typename T>
-    consteval fixed(T v) noexcept requires std::is_floating_point_v<T> : m_data {static_cast<data_type>(v * (1 << FracBits) + 0.5)} {}
+    template <typename T> requires std::is_floating_point_v<T>
+    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1 << FracBits) + 0.5)} {}
 
-    template <typename T>
-    constexpr fixed(T v) noexcept requires std::is_integral_v<T> : m_data {static_cast<data_type>(v) << FracBits} {}
+    template <typename T> requires std::is_integral_v<T>
+    constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v) << FracBits} {}
 
-    template <typename T>
-    constexpr explicit operator T() const noexcept requires std::is_integral_v<T> && (!std::is_same_v<bool, T>) {
+    template <typename T> requires std::is_integral_v<T> && (!std::is_same_v<bool, T>)
+    constexpr explicit operator T() const noexcept {
         constexpr auto spare_bits = std::numeric_limits<std::make_unsigned_t<data_type>>::digits - (IntBits + FracBits);
 
         return static_cast<T>((m_data << spare_bits) >> (FracBits + spare_bits));

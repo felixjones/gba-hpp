@@ -38,6 +38,9 @@
 #include <gba/math.hpp>
 #include <gba/vectype.hpp>
 
+#include <gba/util/diff_filter.hpp>
+
+#include <gba/bios/decompress.hpp>
 #include <gba/bios/math.hpp>
 #include <gba/bios/swi_call.hpp>
 

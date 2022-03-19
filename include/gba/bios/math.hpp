@@ -35,12 +35,12 @@ inline auto Sqrt(uint32 arg) noexcept {
 
 [[nodiscard, gnu::const, gnu::always_inline]]
 inline auto ArcTan(fixed<18, 14> arg) noexcept {
-    return swi<0x09, uint32>(arg);
+    return swi<0x09, int32>(arg);
 }
 
 [[nodiscard, gnu::const, gnu::always_inline]]
 inline auto ArcTan2(fixed<18, 14> x, fixed<18, 14> y) noexcept {
-    return swi<0x0A, uint32>(x, y);
+    return swi<0x0A, int32>(x, y);
 }
 
 } // namespace gba::bios

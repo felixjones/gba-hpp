@@ -16,7 +16,7 @@
 
 namespace gba {
 
-template <class Lhs, class Rhs> requires is_fixed<Lhs> && is_fixed<Rhs>
+template <class Lhs, class Rhs> requires IsFixed<Lhs> && IsFixed<Rhs>
 constexpr auto nextafter(Lhs from, Rhs to) noexcept {
     using promote_type = fixed_promote_t<Lhs, Rhs>;
 
@@ -32,7 +32,7 @@ constexpr auto nextafter(Lhs from, Rhs to) noexcept {
     return f;
 }
 
-template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && is_fixed<Rhs>
+template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && IsFixed<Rhs>
 constexpr auto nextafter(Lhs from, Rhs to) noexcept {
     using promote_type = fixed_promote_t<Rhs>;
 

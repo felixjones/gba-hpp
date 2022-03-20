@@ -20,10 +20,10 @@
 
 namespace gba::util {
 
-template <class Array>
+template <class T>
 concept DiffableArray = requires {
-    requires IsArray<Array>;
-    requires sizeof(array_value_type<Array>) == 1 || sizeof(array_value_type<Array>) == 2;
+    requires Array<T>;
+    requires sizeof(array_value_type<T>) == 1 || sizeof(array_value_type<T>) == 2;
 };
 
 consteval auto diff_filter(const DiffableArray auto& data) noexcept {

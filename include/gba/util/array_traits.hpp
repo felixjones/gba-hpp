@@ -31,15 +31,15 @@ auto array_type_stub(T(&)[N]) -> T;
 
 } // namespace detail
 
-template <class Array>
-constexpr auto array_size = decltype(detail::array_size_stub(std::declval<const Array&>()))::value;
+template <class T>
+constexpr auto array_size = decltype(detail::array_size_stub(std::declval<const T&>()))::value;
 
-template <class Array>
-using array_value_type = decltype(detail::array_type_stub(std::declval<const Array&>()));
+template <class T>
+using array_value_type = decltype(detail::array_type_stub(std::declval<const T&>()));
 
-template <class Array>
-concept IsArray = requires {
-    requires std::is_array_v<Array> || std::is_same_v<Array, std::array<typename Array::value_type, array_size<Array>>>;
+template <class T>
+concept Array = requires {
+    requires std::is_array_v<T> || std::is_same_v<T, std::array<array_value_type<T>, array_size<T>>>;
 };
 
 } // namespace gba::util

@@ -39,6 +39,7 @@
 #include <gba/vectype.hpp>
 
 #include <gba/util/array_traits.hpp>
+#include <gba/util/byte_array.hpp>
 #include <gba/util/diff_filter.hpp>
 
 #include <gba/bios/decompress.hpp>

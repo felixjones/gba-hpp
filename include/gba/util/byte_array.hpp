@@ -24,7 +24,13 @@ concept IntegerArray = requires {
     requires std::is_integral_v<array_value_type<T>>;
 };
 
-consteval auto to_byte_array(const IntegerArray auto& data) noexcept {
+template <class T>
+concept ByteArray = requires {
+    requires Array<T>;
+    requires std::is_same_v<std::byte, array_value_type<T>>;
+};
+
+consteval ByteArray auto to_byte_array(const IntegerArray auto& data) noexcept {
     using value_type = array_value_type<decltype(data)>;
     constexpr auto size = array_size<decltype(data)>;
     constexpr auto sizeof_type = sizeof(value_type);

@@ -43,22 +43,27 @@ struct uncomp_header {
 };
 
 [[gnu::always_inline]]
-inline void RLUnCompReadNormalWrite8bit(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+inline void HuffUnComp(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+    swi<0x13, void>(__builtin_assume_aligned(source, 4), __builtin_assume_aligned(destination, 4));
+}
+
+[[gnu::always_inline]]
+inline void RLUnCompWRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
     swi<0x14, void>(__builtin_assume_aligned(source, 4), destination);
 }
 
 [[gnu::always_inline]]
-inline void RLUnCompReadNormalWrite16bit(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+inline void RLUnCompVRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
     swi<0x15, void>(__builtin_assume_aligned(source, 4), __builtin_assume_aligned(destination, 2));
 }
 
 [[gnu::always_inline]]
-inline void Diff8bitUnFilterWrite8bit(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+inline void Diff8bitUnFilterWRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
     swi<0x16, void>(__builtin_assume_aligned(source, 4), destination);
 }
 
 [[gnu::always_inline]]
-inline void Diff8bitUnFilterWrite16bit(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+inline void Diff8bitUnFilterVRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
     swi<0x17, void>(__builtin_assume_aligned(source, 4), __builtin_assume_aligned(destination, 2));
 }
 

@@ -15,7 +15,6 @@
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
-#include <variant>
 
 #include <gba/inttype.hpp>
 
@@ -29,15 +28,15 @@ template <typename T, std::size_t N, class Compare>
 class constexpr_priority_queue {
 private:
 public:
-    constexpr explicit constexpr_priority_queue(const Compare &compare) noexcept : m_compare{compare} {}
+    constexpr explicit constexpr_priority_queue(const Compare& compare) noexcept : m_compare{compare} {}
 
-    constexpr void push(const T &value) noexcept {
+    constexpr void push(const T& value) noexcept {
         m_buffer[m_size++] = value;
         std::sort(m_buffer.begin(), std::next(m_buffer.begin(), m_size), m_compare);
     }
 
     [[nodiscard]]
-    constexpr const T &top() const noexcept {
+    constexpr const T& top() const noexcept {
         return m_buffer[0];
     }
 
@@ -57,7 +56,7 @@ public:
     }
 
 private:
-    const Compare &m_compare;
+    const Compare& m_compare;
     std::array<T, N> m_buffer{};
     std::size_t m_size{};
 };
@@ -65,16 +64,16 @@ private:
 struct node_type {
     std::byte data{};
     std::size_t weight{};
-    node_type *node0{};
-    node_type *node1{};
+    node_type* node0{};
+    node_type* node1{};
 
     [[nodiscard]]
-    consteval bool is_leaf() const noexcept {
+    consteval auto is_leaf() const noexcept {
         return node0 == nullptr && node1 == nullptr;
     }
 
     [[nodiscard]]
-    constexpr bool is_branch() const noexcept {
+    constexpr auto is_branch() const noexcept {
         return node0 != nullptr && node1 != nullptr;
     }
 };
@@ -82,16 +81,18 @@ struct node_type {
 template <std::size_t N>
 class node_allocator {
 public:
-    constexpr node_type *alloc(std::byte data, std::size_t weight) noexcept {
-        auto &node = m_buffer[m_size++];
+    [[nodiscard]]
+    constexpr auto* alloc(std::byte data, std::size_t weight) noexcept {
+        auto& node = m_buffer[m_size++];
         node.data = data;
         node.weight = weight;
         node.node0 = node.node1 = nullptr;
         return &node;
     }
 
-    constexpr node_type *alloc(std::size_t weight, node_type *node0, node_type *node1) noexcept {
-        auto &node = m_buffer[m_size++];
+    [[nodiscard]]
+    constexpr auto* alloc(std::size_t weight, node_type* node0, node_type* node1) noexcept {
+        auto& node = m_buffer[m_size++];
         node.data = {};
         node.weight = weight;
         node.node0 = node0;
@@ -104,7 +105,8 @@ private:
     std::size_t m_size{};
 };
 
-constexpr bool node_compare(const node_type *node0, const node_type *node1) noexcept {
+[[nodiscard]]
+constexpr bool node_compare(const node_type* node0, const node_type* node1) noexcept {
     return node0->weight < node1->weight;
 }
 
@@ -118,11 +120,11 @@ struct bit_code {
         return copy;
     }
 
-    std::uint64_t value{};
+    uint64 value{};
     std::size_t length{};
 };
 
-consteval void encode(const node_type *node, bit_code code, std::array<bit_code, 0x100> &bitCodes) noexcept {
+consteval void encode(const node_type* node, bit_code code, std::array<bit_code, 0x100>& bitCodes) noexcept {
     if (node->is_branch()) {
         encode(node->node0, code + 0, bitCodes);
         encode(node->node1, code + 1, bitCodes);
@@ -134,23 +136,23 @@ consteval void encode(const node_type *node, bit_code code, std::array<bit_code,
 template <std::size_t N>
 class flat_node_tree {
 public:
-    constexpr explicit flat_node_tree(const node_type *node) noexcept {
+    constexpr explicit flat_node_tree(const node_type* node) noexcept {
         m_buffer[m_size++] = node;
         flatten(node);
     }
 
     [[nodiscard]]
-    constexpr const auto *operator[](std::size_t idx) const noexcept {
+    constexpr const auto* operator[](std::size_t idx) const noexcept {
         return m_buffer[idx];
     }
 
     [[nodiscard]]
-    constexpr std::size_t size() const {
+    constexpr auto size() const noexcept {
         return m_size;
     }
 
     [[nodiscard]]
-    constexpr std::size_t index_of(const node_type *node) const noexcept {
+    constexpr auto index_of(const node_type* node) const noexcept {
         for (std::size_t ii = 0; ii < m_size; ++ii) {
             if (m_buffer[ii] == node) {
                 return ii;
@@ -160,12 +162,12 @@ public:
     }
 
     [[nodiscard]]
-    constexpr std::size_t index_of(const node_type &node) const noexcept {
+    constexpr auto index_of(const node_type& node) const noexcept {
         return index_of(&node);
     }
 
 private:
-    constexpr void flatten(const node_type *node) noexcept {
+    constexpr void flatten(const node_type* node) noexcept {
         if (node->is_branch()) {
             m_buffer[m_size++] = node->node0;
             m_buffer[m_size++] = node->node1;
@@ -175,12 +177,12 @@ private:
         }
     }
 
-    std::array<const node_type *, N> m_buffer{};
+    std::array<const node_type*, N> m_buffer{};
     std::size_t m_size{};
 };
 
 template <std::size_t BitLength>
-consteval auto compress_32mib(const ByteArray auto &data) noexcept {
+consteval auto compress_32mib(const ByteArray auto& data) noexcept {
     struct compressed_type {
         std::array<std::byte, 0x2000000> data;
         std::size_t uncompressed_length;
@@ -204,7 +206,7 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
 
     node_allocator<0x400> nodeAllocator{};
 
-    constexpr_priority_queue<node_type *, 0x400, decltype(node_compare)> pq(node_compare);
+    constexpr_priority_queue<node_type*, 0x400, decltype(node_compare)> pq(node_compare);
     for (std::size_t ii = 0; ii < frequencies.size(); ++ii) {
         if (frequencies[ii]) {
             pq.push(nodeAllocator.alloc(std::byte(ii), frequencies[ii]));
@@ -213,21 +215,21 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
 
     if (pq.size() <= 1) {
         // Constant value, make root point to it twice
-        auto *node01 = pq.top();
+        auto* node01 = pq.top();
         pq.pop();
         pq.push(nodeAllocator.alloc(node01->weight + node01->weight, node01, node01));
     } else {
         while (pq.size() > 1) {
-            auto *node0 = pq.top();
+            auto* node0 = pq.top();
             pq.pop();
-            auto *node1 = pq.top();
+            auto* node1 = pq.top();
             pq.pop();
 
             pq.push(nodeAllocator.alloc(node0->weight + node1->weight, node0, node1));
         }
     }
 
-    auto *root = pq.top();
+    auto* root = pq.top();
 
     std::array<bit_code, 0x100> bitcodes{};
     encode(root, bit_code(), bitcodes);
@@ -237,7 +239,7 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
 
     flat_node_tree<0x400> nodes(root);
     for (std::size_t ii = 0; ii < nodes.size(); ++ii) {
-        const auto &n = *nodes[ii];
+        const auto& n = *nodes[ii];
 
         if (n.is_branch()) {
             const auto offset = (nodes.index_of(n.node0) - nodes.index_of(n)) - 1;
@@ -254,8 +256,8 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
         }
     }
 
-    auto &result = compressed.data;
-    std::size_t &resultLength = compressed.compressed_length;
+    auto& result = compressed.data;
+    auto& resultLength = compressed.compressed_length;
 
     // Remember where we will write tableSize
     auto dataOffsetCur = resultLength++;
@@ -268,7 +270,7 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
     std::array<bit_code, 0x2000000> bitArray{};
     std::size_t bitArrayLen = 0;
 
-    for (const auto &b: data) {
+    for (const auto& b: data) {
         const auto byte = static_cast<int>(b);
         if constexpr (BitLength == 4) {
             bitArray[bitArrayLen++] = bitcodes[byte & 0xf];
@@ -282,10 +284,10 @@ consteval auto compress_32mib(const ByteArray auto &data) noexcept {
 
     result[dataOffsetCur] = std::byte((resultLength / 2) - 1);
 
-    std::uint32_t word = 0;
+    uint32 word = 0;
     std::size_t wordLen = 32;
     for (std::size_t ii = 0; ii < bitArrayLen; ++ii) {
-        const auto &bc = bitArray[ii];
+        const auto& bc = bitArray[ii];
 
         for (std::size_t jj = 0; jj < bc.length; ++jj) {
             --wordLen;
@@ -323,7 +325,7 @@ consteval auto huffman_compress_8(auto callable) noexcept {
         std::array<std::byte, data_32mib.compressed_length> data;
     };
 
-    huffman_type compressed {};
+    huffman_type compressed{};
     compressed.type = bios::uncomp_header::type::huffman_8;
     compressed.length = ((data_32mib.uncompressed_length + 3) >> 2) << 2;
 
@@ -339,7 +341,7 @@ consteval auto huffman_compress_4(auto callable) noexcept {
         std::array<std::byte, data_32mib.compressed_length> data;
     };
 
-    huffman_type compressed {};
+    huffman_type compressed{};
     compressed.type = bios::uncomp_header::type::huffman_4;
     compressed.length = ((data_32mib.uncompressed_length + 3) >> 2) << 2;
 

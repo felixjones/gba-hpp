@@ -44,6 +44,16 @@ struct uncomp_header {
 };
 
 [[gnu::always_inline]]
+inline void LZ77UnCompWRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+    swi<0x11, void>(__builtin_assume_aligned(source, 4), destination);
+}
+
+[[gnu::always_inline]]
+inline void LZ77UnCompVRAM(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
+    swi<0x12, void>(__builtin_assume_aligned(source, 4), __builtin_assume_aligned(destination, 2));
+}
+
+[[gnu::always_inline]]
 inline void HuffUnComp(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
     swi<0x13, void>(__builtin_assume_aligned(source, 4), destination);
 }

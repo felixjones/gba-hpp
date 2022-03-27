@@ -33,12 +33,12 @@ consteval auto rle_compress_32mib(const ByteArray auto& data) noexcept {
 
     constexpr auto size = array_size<decltype(data)>;
 
-    compressed_type compressed {};
+    compressed_type compressed{};
     compressed.uncompressed_length = array_size<decltype(data)>;
     compressed.compressed_length = 0;
 
     auto& result = compressed.data;
-    std::size_t& resultLength = compressed.compressed_length;
+    auto& resultLength = compressed.compressed_length;
 
     for (std::size_t ii = 0; ii < size; ++ii) {
         std::size_t count = 1;
@@ -97,7 +97,7 @@ consteval auto rle_compress(auto callable) noexcept {
         std::array<std::byte, data_32mib.compressed_length> data;
     };
 
-    rle_type compressed {};
+    rle_type compressed{};
     compressed.type = bios::uncomp_header::type::rle;
     compressed.length = data_32mib.uncompressed_length;
 

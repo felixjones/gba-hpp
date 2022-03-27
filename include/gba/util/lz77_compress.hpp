@@ -219,14 +219,18 @@ consteval auto compress_32mib(const ByteArray auto& data) noexcept {
     }
 
     if (blockBuffer.size()) {
+        const auto spare = 8 - blockBuffer.size();
         const auto span = blockBuffer.flush();
         for (std::size_t ii = 0; ii < span.size; ++ii) {
             result[resultLength++] = span.data[ii];
         }
+
+        // Pad the spare bytes
+        resultLength += spare;
     }
 
-    // Pad to multiple of 8
-    resultLength = ((resultLength + 7) / 8) * 8;
+    // Pad to multiple of 4
+    resultLength = ((resultLength + 3) / 4) * 4;
 
     return compressed;
 }

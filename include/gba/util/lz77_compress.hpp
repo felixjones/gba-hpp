@@ -15,6 +15,11 @@
 #include <cstddef>
 #include <variant>
 
+#include <gba/inttype.hpp>
+
+#include <gba/util/byte_array.hpp>
+#include <gba/bios/decompress.hpp>
+
 namespace gba::util {
 namespace detail::lz77 {
 
@@ -90,7 +95,7 @@ public:
         span_type buffer{};
         buffer.size = 1;
 
-        std::uint8_t bitMask = 0;
+        uint8 bitMask = 0;
         for (std::size_t ii = 0; ii < m_size; ++ii) {
             const auto& block = m_buffer[ii];
 

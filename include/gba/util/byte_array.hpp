@@ -11,6 +11,7 @@
 #define GBAXX_UTIL_BYTE_ARRAY_HPP
 
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <type_traits>
 
@@ -44,6 +45,17 @@ consteval ByteArray auto to_byte_array(const IntegerArray auto& data) noexcept {
             result[index++] = std::byte(span & 0xff);
             span >>= 8;
         }
+    }
+    return result;
+}
+
+consteval ByteArray auto to_byte_array(std::integral auto data) noexcept {
+    std::array<std::byte, sizeof(data)> result {};
+    std::size_t index = 0;
+
+    for (std::size_t ii = 0; ii < sizeof(data); ++ii) {
+        result[index++] = std::byte(data & 0xff);
+        data >>= 8;
     }
     return result;
 }

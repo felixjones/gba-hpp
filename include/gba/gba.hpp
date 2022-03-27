@@ -41,6 +41,7 @@
 #include <gba/util/array_traits.hpp>
 #include <gba/util/byte_array.hpp>
 #include <gba/util/diff_filter.hpp>
+#include <gba/util/huff_compress.hpp>
 #include <gba/util/rle_compress.hpp>
 
 #include <gba/bios/decompress.hpp>

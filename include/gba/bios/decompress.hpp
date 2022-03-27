@@ -32,7 +32,8 @@ inline void BitUnPack(const void* __restrict__ source, void* __restrict__ destin
 struct uncomp_header {
     enum class type : uint32 {
         lz77 = 0x10,
-        huffman = 0x20,
+        huffman_4 = 0x24,
+        huffman_8 = 0x28,
         rle = 0x30,
         filter_8 = 0x81,
         filter_16 = 0x82,
@@ -44,7 +45,7 @@ struct uncomp_header {
 
 [[gnu::always_inline]]
 inline void HuffUnComp(const uncomp_header* __restrict__ source, void* __restrict__ destination) noexcept {
-    swi<0x13, void>(__builtin_assume_aligned(source, 4), __builtin_assume_aligned(destination, 4));
+    swi<0x13, void>(__builtin_assume_aligned(source, 4), destination);
 }
 
 [[gnu::always_inline]]

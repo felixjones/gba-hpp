@@ -11,6 +11,7 @@
 #define GBAXX_BIOS_SWI_CALL_HPP
 
 #include <cstddef>
+#include <type_traits>
 
 namespace gba::bios {
 

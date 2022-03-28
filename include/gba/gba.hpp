@@ -45,8 +45,11 @@
 #include <gba/util/lz77_compress.hpp>
 #include <gba/util/rle_compress.hpp>
 
+#include <gba/bios/checksum.hpp>
+#include <gba/bios/cpuset.hpp>
 #include <gba/bios/decompress.hpp>
 #include <gba/bios/math.hpp>
+#include <gba/bios/reset.hpp>
 #include <gba/bios/swi_call.hpp>
 
 #endif // define GBAXX_GBA_HPP

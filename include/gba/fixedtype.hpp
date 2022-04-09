@@ -23,11 +23,17 @@ constexpr auto signed_shift(T v) noexcept {
     return shift < 0 ? v << std::abs(shift) : v >> shift;
 }
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign = signed>
+template <std::size_t IntBits, std::size_t FracBits, typename Sign = signed> requires (std::is_unsigned_v<Sign> || IntBits > 0)
 class fixed;
 
-template <std::size_t Integer, std::size_t Fractional, typename Sign = unsigned>
-using ufixed = fixed<Integer, Fractional, Sign>;
+template <std::size_t IntBits, std::size_t FracBits, typename Sign = unsigned>
+using ufixed = fixed<IntBits, FracBits, Sign>;
+
+template <std::size_t FracBits, typename Sign = signed> requires (FracBits < (32 + std::is_unsigned_v<Sign>))
+using make_fixed = fixed<32 - FracBits, FracBits, Sign>;
+
+template <std::size_t FracBits, typename Sign = unsigned>
+using make_ufixed = make_fixed<FracBits, Sign>;
 
 template <class T>
 concept IsFixed = std::is_same_v<T, fixed<T::integer_bits, T::fractional_bits, typename T::sign>>;
@@ -57,7 +63,7 @@ using fixed_promote_wider = fixed_promote_t<
         fixed<Rhs::integer_bits, Lhs::fractional_bits + Rhs::fractional_bits, typename Rhs::sign>
     >;
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign>
+template <std::size_t IntBits, std::size_t FracBits, typename Sign> requires (std::is_unsigned_v<Sign> || IntBits > 0)
 class fixed {
 public:
     using data_type = inttype<IntBits + FracBits, Sign>;
@@ -79,7 +85,7 @@ public:
     constexpr explicit fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
 
     template <typename T> requires std::is_floating_point_v<T>
-    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1 << FracBits) + 0.5)} {}
+    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits) + 0.5)} {}
 
     template <typename T> requires std::is_integral_v<T>
     constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v) << FracBits} {}

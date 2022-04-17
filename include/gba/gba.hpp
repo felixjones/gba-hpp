@@ -35,6 +35,7 @@
 
 #include <gba/fixedtype.hpp>
 #include <gba/inttype.hpp>
+#include <gba/ioregister.hpp>
 #include <gba/math.hpp>
 #include <gba/vectype.hpp>
 
@@ -48,6 +49,7 @@
 #include <gba/ext/agbabi.hpp>
 
 #include <gba/util/array_traits.hpp>
+#include <gba/util/bit_container.hpp>
 #include <gba/util/byte_array.hpp>
 #include <gba/util/diff_filter.hpp>
 #include <gba/util/huff_compress.hpp>

@@ -17,7 +17,7 @@
 namespace gba {
 
 template <std::size_t X>
-concept IsPowerOfTwo = ( X == 0) || std::has_single_bit( X);
+concept IsPowerOfTwo = (X == 0) || std::has_single_bit(X);
 
 template <typename T, std::size_t N> requires IsPowerOfTwo<N>
 using vec [[gnu::vector_size(sizeof(T) * N)]] = T;

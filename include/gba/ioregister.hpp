@@ -103,6 +103,14 @@ public:
     constexpr auto operator<=>(const register_ptr& rhs) const noexcept  = default;
 
     constexpr explicit register_ptr(std::uintptr_t address) noexcept : m_address{address} {}
+    constexpr explicit register_ptr(std::nullptr_t) noexcept {}
+    explicit register_ptr(element_type* pointer) noexcept : m_address{reinterpret_cast<std::uintptr_t>(pointer)} {}
+    explicit register_ptr(volatile element_type* pointer) noexcept : m_address{reinterpret_cast<std::uintptr_t>(pointer)} {}
+
+    [[nodiscard]]
+    volatile auto* get() const noexcept {
+        return reinterpret_cast<volatile element_type*>(m_address);
+    }
 
     [[nodiscard]]
     auto&& operator[](std::ptrdiff_t idx) const noexcept {
@@ -116,7 +124,7 @@ public:
 
     [[nodiscard]]
     volatile auto* operator->() const noexcept {
-        return reinterpret_cast<volatile element_type*>(m_address);
+        return get();
     }
 
     [[nodiscard]]

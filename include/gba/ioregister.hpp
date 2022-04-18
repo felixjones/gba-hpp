@@ -20,7 +20,7 @@ namespace gba::io {
 template <class Type, std::uintptr_t Address>
 inline auto register_read() noexcept {
     if constexpr (std::is_fundamental_v<Type>) {
-        return *reinterpret_cast<volatile Type*>(Address);
+        return *reinterpret_cast<const volatile Type*>(Address);
     } else if constexpr (std::is_trivially_copyable_v<Type>) {
         return static_cast<Type>(*reinterpret_cast<const volatile util::bit_container<Type>*>(Address));
     } else {
@@ -51,6 +51,86 @@ inline void register_emplace(Args&&... args) noexcept {
         static_assert(util::always_false<Type>);
     }
 }
+
+template <typename Type>
+class register_ptr {
+public:
+    using element_type = std::remove_extent_t<Type>;
+
+    class reference_type {
+        friend register_ptr;
+    public:
+        reference_type(const reference_type&) = delete;
+        reference_type& operator=(const reference_type&) = delete;
+
+        auto& operator=(const element_type& value) const&& noexcept {
+            if constexpr (std::is_const_v<element_type>) {
+                static_assert(util::always_false<element_type>);
+            }
+            if constexpr (std::is_fundamental_v<Type>) {
+                *reinterpret_cast<volatile element_type*>(m_address) = value;
+            } else if constexpr (std::is_trivially_copyable_v<Type>) {
+                *reinterpret_cast<volatile util::bit_container<element_type>*>(m_address) = util::bit_container<Type>{value};
+            } else {
+                static_assert(util::always_false<element_type>);
+            }
+            return value;
+        }
+
+        operator element_type() const&& noexcept {
+            if constexpr (std::is_fundamental_v<element_type>) {
+                return *reinterpret_cast<const volatile element_type*>(m_address);
+            } else if constexpr (std::is_trivially_copyable_v<element_type>) {
+                return static_cast<element_type>(*reinterpret_cast<const volatile util::bit_container<element_type>*>(m_address));
+            } else {
+                static_assert(util::always_false<element_type>);
+            }
+        }
+    protected:
+        constexpr reference_type() noexcept = default;
+
+        [[nodiscard]]
+        static reference_type construct() noexcept {
+            return reference_type{};
+        }
+    private:
+        std::uintptr_t m_address{};
+    };
+
+    constexpr register_ptr() noexcept = default;
+    constexpr register_ptr(const register_ptr&) noexcept = default;
+    constexpr register_ptr& operator=(const register_ptr&) noexcept = default;
+    constexpr auto operator<=>(const register_ptr& rhs) const noexcept  = default;
+
+    constexpr explicit register_ptr(std::uintptr_t address) noexcept : m_address{address} {}
+
+    [[nodiscard]]
+    auto&& operator[](std::ptrdiff_t idx) const noexcept {
+        return make_ref(m_address + sizeof(element_type) * idx);
+    }
+
+    [[nodiscard]]
+    auto&& operator*() const noexcept {
+        return make_ref(m_address);
+    }
+
+    [[nodiscard]]
+    volatile auto* operator->() const noexcept {
+        return reinterpret_cast<volatile element_type*>(m_address);
+    }
+
+    [[nodiscard]]
+    constexpr explicit operator bool() const noexcept {
+        return m_address;
+    }
+private:
+    static auto&& make_ref(std::uintptr_t address, reference_type&& ref = reference_type::construct()) noexcept {
+        ref.m_address = address;
+        return std::move(ref);
+    }
+
+    std::uintptr_t m_address{};
+};
 
 } // namespace gba::io
 

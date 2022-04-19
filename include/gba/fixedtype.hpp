@@ -85,7 +85,7 @@ public:
     constexpr explicit fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
 
     template <typename T> requires std::is_floating_point_v<T>
-    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits) + 0.5)} {}
+    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits))} {}
 
     template <typename T> requires std::is_integral_v<T>
     constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v) << FracBits} {}
@@ -94,7 +94,13 @@ public:
     constexpr explicit operator T() const noexcept {
         constexpr auto spare_bits = std::numeric_limits<std::make_unsigned_t<data_type>>::digits - (IntBits + FracBits);
 
-        return static_cast<T>((m_data << spare_bits) >> (FracBits + spare_bits));
+        if constexpr (std::is_signed_v<Sign> && std::is_signed_v<T>) {
+            const auto banged = (m_data << spare_bits) >> spare_bits;
+
+            return static_cast<T>(banged / (1LL << FracBits));
+        } else {
+            return static_cast<T>((m_data << spare_bits) >> (FracBits + spare_bits));
+        }
     }
 
     constexpr explicit operator bool() const noexcept {

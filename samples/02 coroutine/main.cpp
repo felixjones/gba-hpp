@@ -22,7 +22,7 @@ int main() {
     myFiber();
 
     // Fibonacci pull
-    auto fibPull = pull_coroutine<int>(stack, [](auto& yield){
+    auto fibPull = coroutine<int>::pull_type(stack, [](auto& yield){
         auto first = 1, second = 1;
         yield(first);
         yield(second);
@@ -41,7 +41,7 @@ int main() {
 
     // Fibonacci push
     a = 0;
-    auto fibPush = push_coroutine<int>(stack, [&a](auto& yield) {
+    auto fibPush = coroutine<int>::push_type(stack, [&a](auto& yield) {
         for (int i : yield) {
             a += i;
         }

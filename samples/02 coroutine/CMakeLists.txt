@@ -26,4 +26,4 @@ else()
     set(warnings -Wall -Wextra -Wshadow -Wnon-virtual-dtor)
 endif()
 
-target_compile_options(game PRIVATE -O0 -mthumb ${warnings} -pedantic)
+target_compile_options(game PRIVATE -mthumb ${warnings} -pedantic)

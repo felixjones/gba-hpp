@@ -12,12 +12,16 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
 namespace gba {
 
 template <typename T, typename Sign>
 using copysign = std::conditional_t<std::is_signed_v<Sign>, std::make_signed_t<T>, std::make_unsigned_t<T>>;
+
+template <typename T> requires std::integral<T>
+constexpr auto binary_digits = static_cast<std::size_t>(std::numeric_limits<T>::digits + std::is_signed_v<T>);
 
 template <std::size_t MinBits, typename Sign = signed>
 using inttype = copysign<

@@ -78,7 +78,7 @@ constexpr auto round(T x) noexcept {
 
 template <class T> requires IsFixed<T>
 constexpr auto abs(T x) noexcept {
-    if constexpr (std::is_signed_v<typename T::sign>) {
+    if constexpr (T::is_signed) {
         if (x < 0) {
             return 0 - x;
         }
@@ -89,14 +89,14 @@ constexpr auto abs(T x) noexcept {
 template <class T> requires IsFixed<T>
 constexpr auto mod(T x, std::integral auto* iptr) noexcept {
     // Attempt to return fraction within a 32-bit word
-    constexpr auto result_integer_bits = std::max(17 - static_cast<int>(T::fractional_bits), std::is_signed_v<typename T::data_type> ? 1 : 0);
-    using result_type = fixed<result_integer_bits, T::fractional_bits, typename T::sign>;
+    using result_data_type = std::conditional_t<binary_digits<typename T::data_type> >= 32, typename T::data_type, copysign<int32, typename T::sign>>;
+    using result_type = fixed<T::is_signed ? 1 : 0, T::fractional_bits, result_data_type>;
 
     constexpr auto fractional_mask = (1LL << T::fractional_bits) - 1;
 
-    *iptr = static_cast<typename T::data_type>(x);
+    *iptr = static_cast<std::remove_pointer_t<decltype(iptr)>>(x);
 
-    if constexpr (std::is_signed_v<typename T::sign>) {
+    if constexpr (T::is_signed) {
         if (x < 0) {
             constexpr auto sign_bits = std::numeric_limits<std::make_unsigned_t<typename T::data_type>>::digits - T::fractional_bits;
             constexpr auto integer_mask = ((1LL << sign_bits) - 1) << T::fractional_bits;

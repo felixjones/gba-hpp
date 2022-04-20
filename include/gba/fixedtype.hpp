@@ -23,54 +23,79 @@ constexpr auto signed_shift(T v) noexcept {
     return shift < 0 ? v << std::abs(shift) : v >> shift;
 }
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign = signed> requires (std::is_unsigned_v<Sign> || IntBits > 0)
+template <std::size_t IntBits, std::size_t FracBits, typename DataType = int32> requires (std::is_unsigned_v<DataType> || IntBits > 0) && (IntBits + FracBits <= binary_digits<DataType>)
 class fixed;
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign = unsigned>
-using ufixed = fixed<IntBits, FracBits, Sign>;
+template <std::size_t IntBits, std::size_t FracBits, typename DataType = uint32>
+using ufixed = fixed<IntBits, FracBits, DataType>;
 
-template <std::size_t FracBits, typename Sign = signed> requires (FracBits < (32 + std::is_unsigned_v<Sign>))
-using make_fixed = fixed<32 - FracBits, FracBits, Sign>;
+template <std::size_t FracBits, typename DataType = int32> requires (FracBits < std::numeric_limits<DataType>::digits)
+using make_fixed = fixed<binary_digits<DataType> - FracBits, FracBits, DataType>;
 
-template <std::size_t FracBits, typename Sign = unsigned>
-using make_ufixed = make_fixed<FracBits, Sign>;
+template <std::size_t FracBits, typename DataType = uint32>
+using make_ufixed = make_fixed<FracBits, DataType>;
 
 template <class T>
-concept IsFixed = std::is_same_v<T, fixed<T::integer_bits, T::fractional_bits, typename T::sign>>;
+concept IsFixed = std::is_same_v<T, fixed<T::integer_bits, T::fractional_bits, typename T::data_type>>;
 
 template <class Lhs, class Rhs = Lhs> requires IsFixed<Lhs> && IsFixed<Rhs>
 struct fixed_promote {
 private:
-    using data_type = decltype(typename Lhs::data_type{} + typename Rhs::data_type{});
+    using lhs_packed_type = inttype<Lhs::integer_bits + Lhs::fractional_bits, typename Lhs::sign>;
+    using rhs_packed_type = inttype<Rhs::integer_bits + Rhs::fractional_bits, typename Rhs::sign>;
+    using promoted_type = decltype(lhs_packed_type{} + rhs_packed_type{});
 
-    static constexpr auto is_signed = std::is_signed_v<typename Lhs::data_type> || std::is_signed_v<typename Rhs::data_type>;
-    static constexpr auto integer_bits = std::max(Lhs::integer_bits, Rhs::integer_bits) - is_signed;
-    static constexpr auto fractional_bits = std::max(Lhs::fractional_bits, Rhs::fractional_bits);
-    static constexpr auto data_type_bits = std::numeric_limits<data_type>::digits;
+    // Try to promote to 32-bit word
+    using data_type = std::conditional_t<(binary_digits<promoted_type> > 32),
+            promoted_type,
+            copysign<int32, promoted_type>
+        >;
 
-    static constexpr auto real_integer_bits = ((integer_bits + fractional_bits) > data_type_bits ? integer_bits : (data_type_bits - fractional_bits));
-    static constexpr auto real_fractional_bits = data_type_bits - real_integer_bits;
+    static constexpr auto integer_bits = std::min(
+            std::max(Lhs::integer_bits, Rhs::integer_bits),
+            binary_digits<data_type>
+        );
+
+    static constexpr auto desired_fractional_bits = std::max(Lhs::fractional_bits, Rhs::fractional_bits);
+    static constexpr auto fractional_bits = integer_bits + desired_fractional_bits > binary_digits<data_type> ?
+        binary_digits<data_type> - integer_bits : desired_fractional_bits;
 public:
-    using type = fixed<real_integer_bits + is_signed, real_fractional_bits, data_type>;
+    using type = fixed<integer_bits, fractional_bits, data_type>;
 };
 
 template <class Lhs, class Rhs = Lhs> requires IsFixed<Lhs> && IsFixed<Rhs>
 using fixed_promote_t = typename fixed_promote<Lhs, Rhs>::type;
 
 template <class Lhs, class Rhs = Lhs> requires IsFixed<Lhs> && IsFixed<Rhs>
-using fixed_promote_wider = fixed_promote_t<
-        fixed<Lhs::integer_bits, Lhs::fractional_bits + Rhs::fractional_bits, typename Lhs::sign>,
-        fixed<Rhs::integer_bits, Lhs::fractional_bits + Rhs::fractional_bits, typename Rhs::sign>
-    >;
+struct fixed_promote_wider {
+private:
+    static constexpr auto fractional_bits = Lhs::fractional_bits + Rhs::fractional_bits;
 
-template <std::size_t IntBits, std::size_t FracBits, typename Sign> requires (std::is_unsigned_v<Sign> || IntBits > 0)
+    using lhs_data_type = inttype<Lhs::integer_bits + fractional_bits, typename Lhs::data_type>;
+    using rhs_data_type = inttype<Rhs::integer_bits + fractional_bits, typename Rhs::data_type>;
+public:
+    using type = fixed_promote_t<
+            fixed<Lhs::integer_bits, fractional_bits, lhs_data_type>,
+            fixed<Rhs::integer_bits, fractional_bits, rhs_data_type>
+        >;
+};
+
+template <class Lhs, class Rhs = Lhs>
+using fixed_promote_wider_t = typename fixed_promote_wider<Lhs, Rhs>::type;
+
+template <std::size_t IntBits, std::size_t FracBits, typename DataType> requires (std::is_unsigned_v<DataType> || IntBits > 0) && (IntBits + FracBits <= binary_digits<DataType>)
 class fixed {
 public:
-    using data_type = inttype<IntBits + FracBits, Sign>;
+    using data_type = std::conditional_t<binary_digits<DataType> >= IntBits + FracBits,
+            DataType,
+            inttype<IntBits + FracBits, DataType>
+        >;
 
-    using sign = Sign;
+    using sign = std::conditional_t<std::is_signed_v<DataType>, signed, unsigned>;
     static constexpr auto integer_bits = IntBits;
     static constexpr auto fractional_bits = FracBits;
+    static constexpr auto is_signed = std::is_signed_v<sign>;
+    static constexpr auto is_unsigned = std::is_unsigned_v<sign>;
 
     static constexpr auto from_data(data_type v) noexcept {
         return fixed(v, 0);
@@ -94,7 +119,7 @@ public:
     constexpr explicit operator T() const noexcept {
         constexpr auto spare_bits = std::numeric_limits<std::make_unsigned_t<data_type>>::digits - (IntBits + FracBits);
 
-        if constexpr (std::is_signed_v<Sign> && std::is_signed_v<T>) {
+        if constexpr (is_signed && std::is_signed_v<T>) {
             const auto banged = (m_data << spare_bits) >> spare_bits;
 
             return static_cast<T>(banged / (1LL << FracBits));
@@ -149,7 +174,7 @@ public:
 
     template <class Rhs> requires IsFixed<Rhs>
     constexpr auto& operator*=(Rhs rhs) noexcept {
-        using wider_type = fixed_promote_wider<fixed, Rhs>;
+        using wider_type = fixed_promote_wider_t<fixed, Rhs>;
 
         const auto result = static_cast<typename wider_type::data_type>(m_data) * rhs.data();
         m_data = result >> Rhs::fractional_bits;
@@ -164,7 +189,7 @@ public:
 
     template <class Rhs> requires IsFixed<Rhs>
     constexpr auto& operator/=(Rhs rhs) noexcept {
-        using wider_type = fixed_promote_wider<fixed, Rhs>;
+        using wider_type = fixed_promote_wider_t<fixed, Rhs>;
 
         m_data = wider_type(*this).data() / rhs.data();
         return *this;
@@ -293,7 +318,7 @@ constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
 template <class Lhs, class Rhs> requires gba::IsFixed<Lhs> && gba::IsFixed<Rhs>
 constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
     using promote_type = gba::fixed_promote_t<Lhs, Rhs>;
-    using wider_type = gba::fixed_promote_wider<Lhs, Rhs>;
+    using wider_type = gba::fixed_promote_wider_t<Lhs, Rhs>;
 
     const auto result = static_cast<typename wider_type::data_type>(lhs.data()) * rhs.data();
     return promote_type::from_data(result >> (wider_type::fractional_bits - promote_type::fractional_bits));
@@ -302,14 +327,14 @@ constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
 template <class Lhs, class Rhs> requires gba::IsFixed<Lhs> && gba::IsFixed<Rhs>
 constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
     using promote_type = gba::fixed_promote_t<Lhs, Rhs>;
-    using wider_type = gba::fixed_promote_wider<promote_type, Rhs>;
+    using wider_type = gba::fixed_promote_wider_t<promote_type, Rhs>;
 
     return promote_type::from_data(wider_type(lhs).data() / rhs.data());
 }
 
 template <class Lhs, class Rhs> requires std::is_integral_v<Lhs> && gba::IsFixed<Rhs>
 constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
-    using wider_type = gba::fixed_promote_wider<Rhs>;
+    using wider_type = gba::fixed_promote_wider_t<Rhs>;
 
     return Rhs::from_data(wider_type(lhs).data() / rhs.data());
 }

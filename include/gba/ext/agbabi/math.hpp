@@ -10,8 +10,6 @@
 #ifndef GBAXX_EXT_AGBABI_MATH_HPP
 #define GBAXX_EXT_AGBABI_MATH_HPP
 
-#include <numbers>
-
 #include <agbabi.h>
 
 #include <gba/fixedtype.hpp>
@@ -40,28 +38,12 @@ inline auto modulus(detail::UnsignedIntegral64 auto lhs, detail::UnsignedIntegra
 
 [[nodiscard, gnu::const]]
 inline auto sin(std::integral auto arg) noexcept {
-    return fixed<3, 29>::from_data(__agbabi_sin(arg));
+    return fixed<2, 29>::from_data(__agbabi_sin(arg));
 }
 
 [[nodiscard, gnu::const]]
 inline auto cos(std::integral auto arg) noexcept {
-    return fixed<3, 29>::from_data(__agbabi_sin(arg + 0x2000));
-}
-
-[[nodiscard, gnu::const]]
-inline auto sin(IsFixed auto arg) noexcept {
-    constexpr static auto rad_to_bam16 = decltype(arg)(0x4000 / std::numbers::pi_v<long double>);
-
-    const auto bam16 = arg * rad_to_bam16;
-    return sin(bam16.data());
-}
-
-[[nodiscard, gnu::const]]
-inline auto cos(IsFixed auto arg) noexcept {
-    constexpr static auto rad_to_bam16 = decltype(arg)(0x4000 / std::numbers::pi_v<long double>);
-
-    const auto bam16 = arg * rad_to_bam16;
-    return cos(bam16.data());
+    return fixed<2, 29>::from_data(__agbabi_sin(arg + 0x2000));
 }
 
 } // namespace gba::agbabi

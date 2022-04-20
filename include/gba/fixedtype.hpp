@@ -84,7 +84,7 @@ template <class Lhs, class Rhs = Lhs>
 using fixed_promote_wider_t = typename fixed_promote_wider<Lhs, Rhs>::type;
 
 template <std::size_t IntBits, std::size_t FracBits, typename DataType> requires (std::is_unsigned_v<DataType> || IntBits > 0) && (IntBits + FracBits <= binary_digits<DataType>)
-class fixed {
+class alignas(DataType) fixed {
 public:
     using data_type = std::conditional_t<binary_digits<DataType> >= IntBits + FracBits,
             DataType,

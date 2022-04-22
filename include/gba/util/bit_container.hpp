@@ -13,13 +13,14 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <memory>
 #include <type_traits>
 
 #include <gba/inttype.hpp>
 
 #if __cpp_lib_bit_cast
 #   include <bit>
-#elseif !defined(__has_builtin)
+#elif !defined(__has_builtin)
 #   define __has_builtin(x) 0
 #endif
 
@@ -49,11 +50,17 @@ namespace detail {
         constexpr long_container() noexcept = default;
 
         explicit long_container(const volatile long_container* o) noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(data32, o->data32);
+#pragma GCC diagnostic pop
         }
 
         void copy_longs(volatile long_container* to) const noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(to->data32, data32);
+#pragma GCC diagnostic pop
         }
 
         uint32 data32[Sz];
@@ -72,11 +79,17 @@ namespace detail {
         constexpr short_container() noexcept = default;
 
         explicit short_container(const volatile short_container* o) noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(data16, o->data16);
+#pragma GCC diagnostic pop
         }
 
         void copy_shorts(volatile short_container* to) const noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(to->data16, data16);
+#pragma GCC diagnostic pop
         }
 
         uint16 data16[Sz];
@@ -95,11 +108,17 @@ namespace detail {
         constexpr byte_container() noexcept = default;
 
         explicit byte_container(const volatile byte_container* o) noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(data8, o->data8);
+#pragma GCC diagnostic pop
         }
 
         void copy_bytes(volatile byte_container* to) const noexcept {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
             constexpr_array_copy<0, Sz>(to->data8, data8);
+#pragma GCC diagnostic pop
         }
 
         uint8 data8[Sz];
@@ -120,22 +139,21 @@ struct [[gnu::packed]] bit_container :
     using value_type = Type;
 
     constexpr bit_container() noexcept = default;
-
-    constexpr bit_container(const bit_container&& o) noexcept : longs_type(o), shorts_type(o), bytes_type(o) {}
+    constexpr bit_container(const bit_container& o) noexcept = default;
 
     constexpr explicit bit_container(const value_type& o) noexcept :
 #if __cpp_lib_bit_cast
-        bit_container(std::move(std::bit_cast<const bit_container>(o)))
-#elseif __has_builtin(__builtin_bit_cast)
-        bit_container(std::move(__builtin_bit_cast(const bit_container, o)))
+        bit_container(std::bit_cast<const bit_container>(o))
+#elif __has_builtin(__builtin_bit_cast)
+        bit_container(__builtin_bit_cast(const bit_container, o))
 #else
-        bit_container(std::move(*reinterpret_cast<const bit_container*>(&o)))
+        bit_container(*reinterpret_cast<const bit_container*>(&o))
 #endif
     {}
 
     explicit bit_container(const volatile bit_container* o) noexcept : longs_type(o), shorts_type(o), bytes_type(o) {}
 
-    void operator=(const bit_container& from) volatile noexcept {
+    void copy_from(const bit_container& from) volatile noexcept {
         from.copy_longs(this);
         from.copy_shorts(this);
         from.copy_bytes(this);
@@ -145,7 +163,7 @@ struct [[gnu::packed]] bit_container :
     explicit operator value_type() const volatile noexcept {
 #if __cpp_lib_bit_cast
         return std::bit_cast<const value_type>(*this);
-#elseif __has_builtin(__builtin_bit_cast)
+#elif __has_builtin(__builtin_bit_cast)
         return __builtin_bit_cast(const value_type, *this);
 #else
         const bit_container temp{this};
@@ -160,12 +178,13 @@ struct [[gnu::packed]] bit_container :
     [[nodiscard]]
     static bit_container construct(Args&&... args) noexcept {
 #if __cpp_lib_bit_cast
-        return bit_container(std::move(std::bit_cast<const bit_container>(Type{args...})));
-#elseif __has_builtin(__builtin_bit_cast)
-        return bit_container(std::move(__builtin_bit_cast(const bit_container, Type{args...})));
+        return bit_container(std::bit_cast<const bit_container>(Type{std::forward<Args>(args)...}));
+#elif __has_builtin(__builtin_bit_cast)
+        return bit_container(__builtin_bit_cast(const bit_container, Type{std::forward<Args>(args)...}));
 #else
-        const Type temp{args...};
-        return bit_container(std::move(*reinterpret_cast<const bit_container*>(&temp)));
+        bit_container temp;
+        new(&temp) value_type(std::forward<Args>(args)...);
+        return temp;
 #endif
     }
 };

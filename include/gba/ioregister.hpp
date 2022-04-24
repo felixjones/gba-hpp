@@ -33,7 +33,7 @@ inline void register_write(const Type& value) noexcept {
     if constexpr (std::is_fundamental_v<Type>) {
         *reinterpret_cast<volatile Type*>(Address) = value;
     } else if constexpr (std::is_trivially_copyable_v<Type>) {
-        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>{value});
+        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(value);
     } else {
         static_assert(util::always_false<Type>);
     }
@@ -70,7 +70,7 @@ public:
             if constexpr (std::is_fundamental_v<Type>) {
                 *reinterpret_cast<volatile element_type*>(m_address) = value;
             } else if constexpr (std::is_trivially_copyable_v<Type>) {
-                reinterpret_cast<volatile util::bit_container<element_type>*>(m_address)->copy_from(util::bit_container<Type>{value});
+                reinterpret_cast<volatile util::bit_container<element_type>*>(m_address)->copy_from(value);
             } else {
                 static_assert(util::always_false<element_type>);
             }

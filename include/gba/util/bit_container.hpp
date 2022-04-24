@@ -75,7 +75,7 @@ namespace detail {
     };
 
     template <std::size_t Sz>
-    struct [[gnu::packed]] short_container {
+    struct alignas(short) short_container {
         constexpr short_container() noexcept = default;
 
         explicit short_container(const volatile short_container* o) noexcept {
@@ -104,7 +104,7 @@ namespace detail {
     };
 
     template <std::size_t Sz>
-    struct [[gnu::packed]] byte_container {
+    struct alignas(char) byte_container {
         constexpr byte_container() noexcept = default;
 
         explicit byte_container(const volatile byte_container* o) noexcept {
@@ -127,7 +127,7 @@ namespace detail {
 } // namespace detail
 
 template <typename Type, std::size_t Longs = sizeof(Type) / 4, std::size_t Shorts = (sizeof(Type) - (Longs * 4)) / 2, std::size_t Bytes = sizeof(Type) - (Longs * 4) - (Shorts * 2)>
-struct [[gnu::packed]] bit_container :
+struct alignas(Type) bit_container :
         std::conditional_t<Longs == 0, detail::empty_long_container, detail::long_container<Longs>>,
         std::conditional_t<Shorts == 0, detail::empty_short_container, detail::short_container<Shorts>>,
         std::conditional_t<Bytes == 0, detail::empty_byte_container, detail::byte_container<Bytes>>
@@ -141,17 +141,23 @@ struct [[gnu::packed]] bit_container :
     constexpr bit_container() noexcept = default;
     constexpr bit_container(const bit_container& o) noexcept = default;
 
-    constexpr explicit bit_container(const value_type& o) noexcept :
-#if __cpp_lib_bit_cast
-        bit_container(std::bit_cast<const bit_container>(o))
-#elif __has_builtin(__builtin_bit_cast)
-        bit_container(__builtin_bit_cast(const bit_container, o))
-#else
-        bit_container(*reinterpret_cast<const bit_container*>(&o))
-#endif
-    {}
-
     explicit bit_container(const volatile bit_container* o) noexcept : longs_type(o), shorts_type(o), bytes_type(o) {}
+
+    void copy_from(const value_type& from) volatile noexcept {
+#if __cpp_lib_bit_cast
+        std::bit_cast<const bit_container>(from).copy_longs(this);
+        std::bit_cast<const bit_container>(from).copy_shorts(this);
+        std::bit_cast<const bit_container>(from).copy_bytes(this);
+#elif __has_builtin(__builtin_bit_cast)
+        __builtin_bit_cast(const bit_container, from).copy_longs(this);
+        __builtin_bit_cast(const bit_container, from).copy_shorts(this);
+        __builtin_bit_cast(const bit_container, from).copy_bytes(this);
+#else
+        reinterpret_cast<const bit_container*>(&from)->copy_longs(this);
+        reinterpret_cast<const bit_container*>(&from)->copy_shorts(this);
+        reinterpret_cast<const bit_container*>(&from)->copy_bytes(this);
+#endif
+    }
 
     void copy_from(const bit_container& from) volatile noexcept {
         from.copy_longs(this);

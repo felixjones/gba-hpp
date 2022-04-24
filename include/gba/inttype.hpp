@@ -10,6 +10,7 @@
 #ifndef GBAXX_INTTYPE_HPP
 #define GBAXX_INTTYPE_HPP
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -49,6 +50,12 @@ using uint8 = uinttype<8>;
 using uint16 = uinttype<16>;
 using uint32 = uinttype<32>;
 using uint64 = uinttype<64>;
+
+template <typename Type, typename Sign = signed>
+using intcontainer = inttype<sizeof(Type) * 8, Sign>;
+
+template <typename Type, typename Sign = unsigned>
+using uintcontainer = uinttype<sizeof(Type) * 8, Sign>;
 
 } // namespace gba
 

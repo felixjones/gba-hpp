@@ -57,6 +57,9 @@ using intcontainer = inttype<sizeof(Type) * 8, Sign>;
 template <typename Type, typename Sign = unsigned>
 using uintcontainer = uinttype<sizeof(Type) * 8, Sign>;
 
+template <class T, std::size_t Bits>
+concept BinaryDigits = std::is_same_v<T, inttype<Bits, T>>;
+
 } // namespace gba
 
 #endif // define GBAXX_INTTYPE_HPP

@@ -18,5 +18,7 @@
 #include <gba/ext/agbabi/push_coroutine.hpp>
 #include <gba/ext/agbabi/string.hpp>
 
+#define GBAXX_HAS_AGBABI
+
 #endif // __has_include agbabi.h
 #endif // define GBAXX_EXT_AGBABI_HPP

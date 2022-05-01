@@ -108,7 +108,7 @@ public:
     explicit register_ptr(volatile element_type* pointer) noexcept : m_address{reinterpret_cast<std::uintptr_t>(pointer)} {}
 
     [[nodiscard]]
-    volatile auto* get() const noexcept {
+    volatile auto* to_underlying() const noexcept {
         return reinterpret_cast<volatile element_type*>(m_address);
     }
 
@@ -124,7 +124,7 @@ public:
 
     [[nodiscard]]
     volatile auto* operator->() const noexcept {
-        return get();
+        return to_underlying();
     }
 
     [[nodiscard]]

@@ -49,6 +49,9 @@
 
 #include <gba/ext/agbabi.hpp>
 
+#include <gba/registers/video.hpp>
+#include <gba/registers/video_types.hpp>
+
 #include <gba/util/array_traits.hpp>
 #include <gba/util/bit_container.hpp>
 #include <gba/util/byte_array.hpp>
@@ -56,5 +59,8 @@
 #include <gba/util/huff_compress.hpp>
 #include <gba/util/lz77_compress.hpp>
 #include <gba/util/rle_compress.hpp>
+
+#include <gba/video/modes.hpp>
+#include <gba/video/palettes.hpp>
 
 #endif // define GBAXX_GBA_HPP

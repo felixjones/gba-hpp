@@ -29,6 +29,11 @@ auto array_type_stub(const std::array<T, N>&) -> T;
 template <typename T, std::size_t N>
 auto array_type_stub(T(&)[N]) -> T;
 
+template <std::size_t... Indices>
+consteval auto fill_array(auto value, std::index_sequence<Indices...>) noexcept {
+    return std::array<decltype(value), sizeof...(Indices)>{{(static_cast<void>(Indices), value)...}};
+}
+
 } // namespace detail
 
 template <class T>
@@ -38,9 +43,13 @@ template <class T>
 using array_value_type = decltype(detail::array_type_stub(std::declval<const T&>()));
 
 template <class T>
-concept Array = requires {
-    requires std::is_array_v<T> || std::is_same_v<T, std::array<array_value_type<T>, array_size<T>>>;
-};
+concept Array = std::is_array_v<T> || std::is_same_v<T, std::array<array_value_type<T>, array_size<T>>>;
+
+
+template <std::size_t N>
+consteval auto fill_array(auto value) noexcept {
+    return detail::fill_array(value, std::make_index_sequence<N>());
+}
 
 } // namespace gba::util
 

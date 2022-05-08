@@ -49,6 +49,8 @@
 
 #include <gba/ext/agbabi.hpp>
 
+#include <gba/interrupt/handler.hpp>
+
 #include <gba/registers/video.hpp>
 #include <gba/registers/video_types.hpp>
 

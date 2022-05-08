@@ -11,18 +11,13 @@
 #define GBAXX_UTIL_BIT_CONTAINER_HPP
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstring>
 #include <memory>
 #include <type_traits>
 
 #include <gba/inttype.hpp>
-
-#if __cpp_lib_bit_cast
-#   include <bit>
-#elif !defined(__has_builtin)
-#   define __has_builtin(x) 0
-#endif
 
 namespace gba::util {
 namespace detail {
@@ -144,19 +139,9 @@ struct alignas(Type) bit_container :
     explicit bit_container(const volatile bit_container* o) noexcept : longs_type(o), shorts_type(o), bytes_type(o) {}
 
     void copy_from(const value_type& from) volatile noexcept {
-#if __cpp_lib_bit_cast
         std::bit_cast<const bit_container>(from).copy_longs(this);
         std::bit_cast<const bit_container>(from).copy_shorts(this);
         std::bit_cast<const bit_container>(from).copy_bytes(this);
-#elif __has_builtin(__builtin_bit_cast)
-        __builtin_bit_cast(const bit_container, from).copy_longs(this);
-        __builtin_bit_cast(const bit_container, from).copy_shorts(this);
-        __builtin_bit_cast(const bit_container, from).copy_bytes(this);
-#else
-        reinterpret_cast<const bit_container*>(&from)->copy_longs(this);
-        reinterpret_cast<const bit_container*>(&from)->copy_shorts(this);
-        reinterpret_cast<const bit_container*>(&from)->copy_bytes(this);
-#endif
     }
 
     void copy_from(const bit_container& from) volatile noexcept {
@@ -167,31 +152,13 @@ struct alignas(Type) bit_container :
 
     [[nodiscard]]
     explicit operator value_type() const volatile noexcept {
-#if __cpp_lib_bit_cast
         return std::bit_cast<const value_type>(*this);
-#elif __has_builtin(__builtin_bit_cast)
-        return __builtin_bit_cast(const value_type, *this);
-#else
-        const bit_container temp{this};
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wstrict-aliasing"
-        return *reinterpret_cast<const value_type*>(&temp);
-#   pragma GCC diagnostic pop
-#endif
     }
 
     template <typename... Args>
     [[nodiscard]]
     static bit_container construct(Args&&... args) noexcept {
-#if __cpp_lib_bit_cast
         return bit_container(std::bit_cast<const bit_container>(Type{std::forward<Args>(args)...}));
-#elif __has_builtin(__builtin_bit_cast)
-        return bit_container(__builtin_bit_cast(const bit_container, Type{std::forward<Args>(args)...}));
-#else
-        bit_container temp;
-        new(&temp) value_type(std::forward<Args>(args)...);
-        return temp;
-#endif
     }
 };
 

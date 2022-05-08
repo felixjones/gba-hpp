@@ -11,6 +11,7 @@
 #define GBAXX_EXT_AGBABI_PULL_COROUTINE_HPP
 
 #include <functional>
+#include <optional>
 
 #include <agbabi.h>
 

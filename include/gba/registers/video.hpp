@@ -25,8 +25,8 @@ struct dispcnt : io::register_ptr<dispcnt_type> {
         io::register_emplace<dispcnt_type, address>();
     }
 
-    static void set(dispcnt_type rhs) noexcept {
-        io::register_write<dispcnt_type, address>(rhs);
+    static void set(dispcnt_type value) noexcept {
+        io::register_write<dispcnt_type, address>(value);
     }
 
     static auto get() noexcept {
@@ -55,8 +55,8 @@ namespace undocumented {
             io::register_emplace<bool, address>();
         }
 
-        static void set(bool rhs) noexcept {
-            io::register_write<bool, address>(rhs);
+        static void set(bool value) noexcept {
+            io::register_write<bool, address>(value);
         }
 
         static auto get() noexcept {

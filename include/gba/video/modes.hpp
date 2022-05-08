@@ -94,18 +94,21 @@ struct mode<3> {
 template <>
 struct mode<4> {
     static constexpr auto address = 0x6000000;
+    static constexpr auto offset_frame = 0xA000;
 
-    static void clear(BinaryDigits<8> auto c) noexcept {
+    static void clear(BinaryDigits<8> auto c, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
 #if defined(GBAXX_HAS_AGBABI)
         const auto c16 = (c << 8) | c;
-        __agbabi_wordset4(reinterpret_cast<uint8*>(address), 240 * 160, ((c16 << 16) | c16));
+        __agbabi_wordset4(reinterpret_cast<uint8*>(addr), 240 * 160, ((c16 << 16) | c16));
 #else
-        std::memset(reinterpret_cast<uint16*>(address), c, 240 * 160);
+        std::memset(reinterpret_cast<uint16*>(addr), c, 240 * 160);
 #endif
     }
 
-    static void put(int x, int y, BinaryDigits<8> auto c) noexcept {
-        auto* buffer16 = reinterpret_cast<volatile uint16*>(address);
+    static void put(int x, int y, BinaryDigits<8> auto c, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+        auto* buffer16 = reinterpret_cast<volatile uint16*>(addr);
 
         const auto offset16 = ((y * 240) + x) / 2;
         const auto pair = buffer16[offset16];
@@ -116,8 +119,9 @@ struct mode<4> {
         }
     }
 
-    static auto get(int x, int y) noexcept -> uint8 {
-        auto* buffer16 = reinterpret_cast<const volatile uint16*>(address);
+    static auto get(int x, int y, std::size_t frame) noexcept -> uint8 {
+        const auto addr = address + (offset_frame * frame);
+        auto* buffer16 = reinterpret_cast<const volatile uint16*>(addr);
 
         const auto offset16 = (y * 240) + (x / 2);
         const auto pair = buffer16[offset16];
@@ -128,16 +132,81 @@ struct mode<4> {
         }
     }
 
-    static void put_row(int y, const IsLine<4> auto line) noexcept {
+    static void put_row(int y, const IsLine<4> auto line, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
 #if defined(GBAXX_HAS_AGBABI)
-        __aeabi_memcpy4(reinterpret_cast<uint8*>(address) + (y * 240), &line[0], util::array_size<decltype(line)>);
+        __aeabi_memcpy4(reinterpret_cast<uint8*>(addr) + (y * 240), &line[0], util::array_size<decltype(line)>);
 #else
         auto* src = reinterpret_cast<const uint32*>(&line[0]);
-        auto* dst= reinterpret_cast<volatile uint32*>(address);
+        auto* dst= reinterpret_cast<volatile uint32*>(addr);
         dst += y * 60;
 
         for (int ii = 0; ii < util::array_size<decltype(line)> / 4; ++ii) {
             dst[ii] = src[ii];
+        }
+#endif
+    }
+};
+
+template <>
+struct mode<5> {
+    static constexpr auto address = 0x6000000;
+    static constexpr auto offset_frame = 0xA000;
+
+    static void clear(BinaryDigits<16> auto c, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+#if defined(GBAXX_HAS_AGBABI)
+        __agbabi_wordset4(reinterpret_cast<uint16*>(addr), 240 * 160 * sizeof(uint16), ((c << 16) | c));
+#else
+        constexpr auto end = (240 * 160) / 2;
+        auto* buffer = reinterpret_cast<volatile uint32*>(addr);
+        const auto cc = uint32((c << 16) | c);
+        for (int ii = 0; ii < end; ++ii) {
+            buffer[ii] = cc;
+        }
+#endif
+    }
+
+    static void put(int x, int y, BinaryDigits<16> auto c, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+        using int16_type = decltype(c);
+
+        auto* buffer = reinterpret_cast<volatile int16_type*>(addr);
+        buffer[(y * 240) + x] = c;
+    }
+
+    static auto get(int x, int y, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+        auto* buffer = reinterpret_cast<const volatile uint16*>(addr);
+        return buffer[(y * 240) + x];
+    }
+
+    static void put_row(int y, const IsLine<3> auto line, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+#if defined(GBAXX_HAS_AGBABI)
+        __aeabi_memcpy4(reinterpret_cast<uint16*>(addr) + (y * 240), &line[0], util::array_size<decltype(line)> * sizeof(uint16));
+#else
+        auto* src = reinterpret_cast<const uint32*>(&line[0]);
+        auto* dst= reinterpret_cast<volatile uint32*>(addr);
+        dst += y * 120;
+
+        for (int ii = 0; ii < util::array_size<decltype(line)> / 2; ++ii) {
+            dst[ii] = src[ii];
+        }
+#endif
+    }
+
+    static void put_row(int x, int y, const IsPixelArray<3> auto line, std::size_t frame) noexcept {
+        const auto addr = address + (offset_frame * frame);
+#if defined(GBAXX_HAS_AGBABI)
+        __agbabi_memcpy2(reinterpret_cast<uint16*>(addr) + (y * 240) + x, &line[0], sizeof(line));
+#else
+        using int16_type = util::array_value_type<decltype(line)>;
+
+        auto* buffer = reinterpret_cast<volatile int16_type*>(addr);
+        buffer += (y * 240) + x;
+        for (std::size_t ii = 0; ii < util::array_size<decltype(line)>; ++ii) {
+            buffer[ii] = line[ii];
         }
 #endif
     }

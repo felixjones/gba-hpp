@@ -68,11 +68,11 @@ concept BitField = requires(bitfield<typename T::element_type>& a) {
     {std::is_base_of_v<decltype(a), T>};
 };
 
-} // namespace gba
-
 template <typename Type> requires (!gba::BitField<Type>)
 constexpr auto operator|(const Type& lhs, const gba::BitField auto& rhs) noexcept {
     return std::bit_cast<Type>(rhs | std::bit_cast<const gba::bitfield<Type>>(lhs));
 }
+
+} // namespace gba
 
 #endif // define GBAXX_FIELDTYPE_HPP

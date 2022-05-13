@@ -213,8 +213,6 @@ public:
     data_type m_data;
 };
 
-} // namespace gba
-
 template <class Lhs, class Rhs> requires gba::IsFixed<Lhs> && gba::IsFixed<Rhs>
 constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
     using promote_type = gba::fixed_promote_t<Lhs, Rhs>;
@@ -338,5 +336,7 @@ constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
 
     return Rhs::from_data(wider_type(lhs).data() / rhs.data());
 }
+
+} // namespace gba
 
 #endif // define GBAXX_FIXEDTYPE_HPP

@@ -14,17 +14,17 @@
 #include <cstddef>
 #include <type_traits>
 
+#include <gba/inttype.hpp>
+
 #include <gba/bios/decompress.hpp>
 
+#include <gba/util/constexpr.hpp>
 #include <gba/util/array_traits.hpp>
 
 namespace gba::util {
 
 template <class T>
-concept DiffableArray = requires {
-    requires Array<T>;
-    requires sizeof(array_value_type<T>) == 1 || sizeof(array_value_type<T>) == 2;
-};
+concept DiffableArray = Array<T> && sizeof(array_value_type<T>) <= 2;
 
 consteval auto diff_filter(const DiffableArray auto& data) noexcept {
     using array_type = decltype(data);

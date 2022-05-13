@@ -18,13 +18,15 @@
 
 #include <gba/inttype.hpp>
 
-#include <gba/util/byte_array.hpp>
 #include <gba/bios/decompress.hpp>
 
-namespace gba::util {
-namespace detail {
+#include <gba/util/byte_array.hpp>
+#include <gba/util/constexpr.hpp>
 
-consteval auto rle_compress_32mib(const ByteArray auto& data) noexcept {
+namespace gba::util {
+namespace detail::rle {
+
+consteval auto compress_32mib(const ByteArray auto& data) noexcept {
     struct compressed_type {
         std::array<std::byte, 0x2000000> data;
         std::size_t uncompressed_length;
@@ -88,10 +90,8 @@ consteval auto rle_compress_32mib(const ByteArray auto& data) noexcept {
     return compressed;
 }
 
-} // namespace detail
-
-consteval auto rle_compress(auto callable) noexcept {
-    constexpr auto data_32mib = detail::rle_compress_32mib(callable());
+consteval auto compress(auto callable) noexcept {
+    constexpr auto& data_32mib = make_static<rle::compress_32mib(callable())>;
 
     struct rle_type : bios::uncomp_header {
         std::array<std::byte, data_32mib.compressed_length> data;
@@ -104,6 +104,12 @@ consteval auto rle_compress(auto callable) noexcept {
     std::copy(data_32mib.data.cbegin(), std::next(data_32mib.data.cbegin(), data_32mib.compressed_length), compressed.data.begin());
 
     return compressed;
+}
+
+} // namespace detail::rle
+
+consteval auto& rle_compress(auto callable) noexcept {
+    return make_static<detail::rle::compress(callable)>;
 }
 
 } // namespace gba::util

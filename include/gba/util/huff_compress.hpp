@@ -18,8 +18,10 @@
 
 #include <gba/inttype.hpp>
 
-#include <gba/util/byte_array.hpp>
 #include <gba/bios/decompress.hpp>
+
+#include <gba/util/byte_array.hpp>
+#include <gba/util/constexpr.hpp>
 
 namespace gba::util {
 namespace detail::huff {
@@ -316,10 +318,8 @@ consteval auto compress_32mib(const ByteArray auto& data) noexcept {
     return compressed;
 }
 
-} // namespace detail::huff
-
-consteval auto huffman_compress_8(auto callable) noexcept {
-    constexpr auto data_32mib = detail::huff::compress_32mib<8>(callable());
+consteval auto compress_8(auto callable) noexcept {
+    constexpr auto& data_32mib = make_static<compress_32mib<8>(callable())>;
 
     struct huffman_type : bios::uncomp_header {
         std::array<std::byte, data_32mib.compressed_length> data;
@@ -334,8 +334,8 @@ consteval auto huffman_compress_8(auto callable) noexcept {
     return compressed;
 }
 
-consteval auto huffman_compress_4(auto callable) noexcept {
-    constexpr auto data_32mib = detail::huff::compress_32mib<4>(callable());
+consteval auto compress_4(auto callable) noexcept {
+    constexpr auto& data_32mib = make_static<compress_32mib<4>(callable())>;
 
     struct huffman_type : bios::uncomp_header {
         std::array<std::byte, data_32mib.compressed_length> data;
@@ -348,6 +348,16 @@ consteval auto huffman_compress_4(auto callable) noexcept {
     std::copy(data_32mib.data.cbegin(), std::next(data_32mib.data.cbegin(), data_32mib.compressed_length), compressed.data.begin());
 
     return compressed;
+}
+
+} // namespace detail::huff
+
+consteval auto& huffman_compress_8(auto callable) noexcept {
+    return make_static<detail::huff::compress_8(callable)>;
+}
+
+consteval auto& huffman_compress_4(auto callable) noexcept {
+    return make_static<detail::huff::compress_4(callable)>;
 }
 
 } // namespace gba::util

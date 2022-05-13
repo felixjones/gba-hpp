@@ -60,6 +60,7 @@
 #include <gba/util/array_traits.hpp>
 #include <gba/util/bit_container.hpp>
 #include <gba/util/byte_array.hpp>
+#include <gba/util/constexpr.hpp>
 #include <gba/util/diff_filter.hpp>
 #include <gba/util/huff_compress.hpp>
 #include <gba/util/lz77_compress.hpp>

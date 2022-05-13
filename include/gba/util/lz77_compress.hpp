@@ -17,8 +17,10 @@
 
 #include <gba/inttype.hpp>
 
-#include <gba/util/byte_array.hpp>
 #include <gba/bios/decompress.hpp>
+
+#include <gba/util/byte_array.hpp>
+#include <gba/util/constexpr.hpp>
 
 namespace gba::util {
 namespace detail::lz77 {
@@ -235,10 +237,8 @@ consteval auto compress_32mib(const ByteArray auto& data) noexcept {
     return compressed;
 }
 
-} // namespace detail::lz77
-
-consteval auto lz77_compress(auto callable) noexcept {
-    constexpr auto data_32mib = detail::lz77::compress_32mib(callable());
+consteval auto compress(auto callable) noexcept {
+    constexpr auto data_32mib = compress_32mib(callable());
 
     struct lz77_type : bios::uncomp_header {
         std::array<std::byte, data_32mib.compressed_length> data;
@@ -251,6 +251,12 @@ consteval auto lz77_compress(auto callable) noexcept {
     std::copy(data_32mib.data.cbegin(), std::next(data_32mib.data.cbegin(), data_32mib.compressed_length), compressed.data.begin());
 
     return compressed;
+}
+
+} // namespace detail::lz77
+
+consteval auto& lz77_compress(auto callable) noexcept {
+    return make_static<detail::lz77::compress(callable)>;
 }
 
 } // namespace gba::util

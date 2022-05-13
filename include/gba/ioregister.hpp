@@ -19,7 +19,7 @@ namespace gba::io {
 
 template <class Type, std::uintptr_t Address>
 inline auto register_read() noexcept {
-    if constexpr (std::is_fundamental_v<Type>) {
+    if constexpr (std::is_fundamental_v<Type> || std::is_pointer_v<Type>) {
         return *reinterpret_cast<const volatile Type*>(Address);
     } else if constexpr (std::is_trivially_copyable_v<Type>) {
         return static_cast<Type>(*reinterpret_cast<const volatile util::bit_container<Type>*>(Address));
@@ -30,7 +30,7 @@ inline auto register_read() noexcept {
 
 template <class Type, std::uintptr_t Address>
 inline void register_write(const Type& value) noexcept {
-    if constexpr (std::is_fundamental_v<Type>) {
+    if constexpr (std::is_fundamental_v<Type> || std::is_pointer_v<Type>) {
         *reinterpret_cast<volatile Type*>(Address) = value;
     } else if constexpr (std::is_trivially_copyable_v<Type>) {
         reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(value);
@@ -41,7 +41,7 @@ inline void register_write(const Type& value) noexcept {
 
 template <class Type, std::uintptr_t Address, typename... Args>
 inline void register_emplace(Args&&... args) noexcept {
-    if constexpr (std::is_fundamental_v<Type>) {
+    if constexpr (std::is_fundamental_v<Type> || std::is_pointer_v<Type>) {
         *reinterpret_cast<volatile Type*>(Address) = Type{args...};
     } else if constexpr (std::is_constructible_v<Type, Args...>) {
         reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>::construct(args...));
@@ -67,7 +67,7 @@ public:
             if constexpr (std::is_const_v<element_type>) {
                 static_assert(util::always_false<element_type>);
             }
-            if constexpr (std::is_fundamental_v<Type>) {
+            if constexpr (std::is_fundamental_v<Type> || std::is_pointer_v<Type>) {
                 *reinterpret_cast<volatile element_type*>(m_address) = value;
             } else if constexpr (std::is_trivially_copyable_v<Type>) {
                 reinterpret_cast<volatile util::bit_container<element_type>*>(m_address)->copy_from(value);
@@ -78,7 +78,7 @@ public:
         }
 
         operator element_type() const&& noexcept {
-            if constexpr (std::is_fundamental_v<element_type>) {
+            if constexpr (std::is_fundamental_v<element_type> || std::is_pointer_v<Type>) {
                 return *reinterpret_cast<const volatile element_type*>(m_address);
             } else if constexpr (std::is_trivially_copyable_v<element_type>) {
                 return static_cast<element_type>(*reinterpret_cast<const volatile util::bit_container<element_type>*>(m_address));

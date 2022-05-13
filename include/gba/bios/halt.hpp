@@ -48,7 +48,7 @@ inline void IntrWait(bool resetFlags, intrwait waitFlags) noexcept {
 
 [[gnu::always_inline]]
 inline void VBlankIntrWait() noexcept {
-    swi<0x03, void>();
+    swi<0x05, void>();
 }
 
 } // namespace gba::bios

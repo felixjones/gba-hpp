@@ -26,11 +26,29 @@ struct dispcnt : io::register_ptr<dispcnt_type> {
     }
 
     static void set(dispcnt_type value) noexcept {
-        io::register_write<dispcnt_type, address>(value);
+        io::register_write<decltype(value), address>(value);
     }
 
     static auto get() noexcept {
         return io::register_read<dispcnt_type, address>();
+    }
+};
+
+struct dispstat : io::register_ptr<dispstat_type> {
+    static constexpr auto address = 0x4000004;
+
+    consteval dispstat() noexcept : io::register_ptr<dispstat_type>{address} {}
+
+    static void reset() noexcept {
+        io::register_emplace<dispstat_type, address>();
+    }
+
+    static void set(dispstat_type value) noexcept {
+        io::register_write<decltype(value), address>(value);
+    }
+
+    static auto get() noexcept {
+        return io::register_read<dispstat_type, address>();
     }
 };
 
@@ -56,7 +74,7 @@ namespace undocumented {
         }
 
         static void set(bool value) noexcept {
-            io::register_write<bool, address>(value);
+            io::register_write<decltype(value), address>(value);
         }
 
         static auto get() noexcept {

@@ -43,6 +43,7 @@
 #include <gba/bios/checksum.hpp>
 #include <gba/bios/cpuset.hpp>
 #include <gba/bios/decompress.hpp>
+#include <gba/bios/halt.hpp>
 #include <gba/bios/math.hpp>
 #include <gba/bios/reset.hpp>
 #include <gba/bios/swi_call.hpp>
@@ -51,6 +52,8 @@
 
 #include <gba/interrupt/handler.hpp>
 
+#include <gba/registers/irq.hpp>
+#include <gba/registers/irq_types.hpp>
 #include <gba/registers/video.hpp>
 #include <gba/registers/video_types.hpp>
 

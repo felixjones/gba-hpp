@@ -55,6 +55,29 @@ namespace dispcnt {
     static constexpr auto winobj = field_of::boolean<dispcnt_type, 15>();
 
 } // namespace dispcnt
+
+struct alignas(uint16) dispstat_type {
+    bool in_vbl : 1;
+    bool in_hbl : 1;
+    bool in_vct : 1;
+    bool vbl_irq : 1;
+    bool hbl_irq : 1;
+    bool vct_irq : 1;
+    uint8 : 2;
+    uint8 vct : 8;
+};
+
+namespace dispstat {
+
+    static constexpr auto vbl_irq = field_of::boolean<dispstat_type, 3>();
+    static constexpr auto hbl_irq = field_of::boolean<dispstat_type, 4>();
+    static constexpr auto vct_irq = field_of::boolean<dispstat_type, 5>();
+
+    static constexpr auto vct(std::integral auto i) noexcept {
+        return field_of::integral<dispstat_type, 8, 0xff>(i);
+    }
+
+} // namespace dispstat
 } // namespace gba
 
 #endif // define GBAXX_REGISTERS_VIDEO_TYPES_HPP

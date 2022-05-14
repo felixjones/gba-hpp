@@ -10,6 +10,8 @@
 #ifndef GBAXX_REGISTERS_IRQ_TYPES_HPP
 #define GBAXX_REGISTERS_IRQ_TYPES_HPP
 
+#include <bit>
+
 #include <gba/fieldtype.hpp>
 #include <gba/inttype.hpp>
 
@@ -30,7 +32,19 @@ struct alignas(uint16) irq_type {
     bool dma3 : 1;
     bool keypad : 1;
     bool gamepak : 1;
+
+    auto operator~() const noexcept {
+        return std::bit_cast<irq_type>(static_cast<uint16>(~std::bit_cast<uint16>(*this)));
+    }
 };
+
+inline auto operator&(irq_type lhs, irq_type rhs) noexcept {
+    return std::bit_cast<irq_type>(static_cast<uint16>(std::bit_cast<uint16>(lhs) & std::bit_cast<uint16>(rhs)));
+}
+
+inline auto operator|(irq_type lhs, irq_type rhs) noexcept {
+    return std::bit_cast<irq_type>(static_cast<uint16>(std::bit_cast<uint16>(lhs) | std::bit_cast<uint16>(rhs)));
+}
 
 namespace irq {
 

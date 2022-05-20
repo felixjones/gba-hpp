@@ -63,8 +63,8 @@ struct alignas(uint16) dispstat_type {
     bool vbl_irq : 1;
     bool hbl_irq : 1;
     bool vct_irq : 1;
-    uint8 : 2;
-    uint8 vct : 8;
+    uint16 : 2;
+    uint16 vct : 8;
 };
 
 namespace dispstat {
@@ -78,6 +78,42 @@ namespace dispstat {
     }
 
 } // namespace dispstat
+
+struct alignas(uint16) bgcnt_type {
+    uint16 prio : 2;
+    uint16 cbb : 2;
+    uint16 : 2;
+    bool mosaic : 1;
+    bool _8bpp : 1;
+    uint16 sbb : 5;
+    bool wrap : 1;
+    uint16 size : 2;
+};
+
+namespace bgcnt {
+
+    static constexpr auto mosaic = field_of::boolean<bgcnt_type, 6>();
+    static constexpr auto _8bpp = field_of::boolean<bgcnt_type, 7>();
+    static constexpr auto wrap = field_of::boolean<bgcnt_type, 13>();
+
+    static constexpr auto prio(std::integral auto i) noexcept {
+        return field_of::integral<bgcnt_type, 0, 0x3>(i);
+    }
+
+    static constexpr auto cbb(std::integral auto i) noexcept {
+        return field_of::integral<bgcnt_type, 2, 0x3>(i);
+    }
+
+    static constexpr auto sbb(std::integral auto i) noexcept {
+        return field_of::integral<bgcnt_type, 8, 0x1f>(i);
+    }
+
+    static constexpr auto size(std::integral auto i) noexcept {
+        return field_of::integral<bgcnt_type, 14, 0x3>(i);
+    }
+
+} // namespace bgcnt
+
 } // namespace gba
 
 #endif // define GBAXX_REGISTERS_VIDEO_TYPES_HPP

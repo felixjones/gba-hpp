@@ -122,7 +122,7 @@ namespace detail {
 } // namespace detail
 
 template <typename Type, std::size_t Longs = sizeof(Type) / 4, std::size_t Shorts = (sizeof(Type) - (Longs * 4)) / 2, std::size_t Bytes = sizeof(Type) - (Longs * 4) - (Shorts * 2)>
-struct alignas(Type) bit_container :
+struct alignas(std::conditional_t<sizeof(Type) < sizeof(int), Type, int>) bit_container :
         std::conditional_t<Longs == 0, detail::empty_long_container, detail::long_container<Longs>>,
         std::conditional_t<Shorts == 0, detail::empty_short_container, detail::short_container<Shorts>>,
         std::conditional_t<Bytes == 0, detail::empty_byte_container, detail::byte_container<Bytes>>

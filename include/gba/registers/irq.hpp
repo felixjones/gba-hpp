@@ -12,63 +12,15 @@
 
 #include <gba/ioregister.hpp>
 
+#include <gba/registers/accessors.hpp>
 #include <gba/registers/irq_types.hpp>
 
 namespace gba::reg {
 
-struct ime : io::register_ptr<bool> {
-    static constexpr auto address = 0x4000208;
+using ime = read_write<bool, 0x4000208>;
 
-    consteval ime() noexcept : io::register_ptr<bool>{address} {}
-
-    static void reset() noexcept {
-        io::register_emplace<bool, address>();
-    }
-
-    static void set(bool value) noexcept {
-        io::register_write<decltype(value), address>(value);
-    }
-
-    static auto get() noexcept {
-        return io::register_read<bool, address>();
-    }
-};
-
-struct ie : io::register_ptr<irq_type> {
-    static constexpr auto address = 0x4000200;
-
-    consteval ie() noexcept : io::register_ptr<irq_type>{address} {}
-
-    static void reset() noexcept {
-        io::register_emplace<irq_type, address>();
-    }
-
-    static void set(irq_type value) noexcept {
-        io::register_write<decltype(value), address>(value);
-    }
-
-    static auto get() noexcept {
-        return io::register_read<irq_type, address>();
-    }
-};
-
-struct if_ : io::register_ptr<irq_type> {
-    static constexpr auto address = 0x4000202;
-
-    consteval if_() noexcept : io::register_ptr<irq_type>{address} {}
-
-    static void reset() noexcept {
-        io::register_emplace<uint16, address>(uint16{0xffff});
-    }
-
-    static void set(irq_type value) noexcept {
-        io::register_write<decltype(value), address>(value);
-    }
-
-    static auto get() noexcept {
-        return io::register_read<irq_type, address>();
-    }
-};
+using ie = read_write<irq_type, 0x4000200>;
+using _if = read_write<irq_type, 0x4000202>;
 
 } // namespace gba::reg
 

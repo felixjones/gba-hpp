@@ -52,6 +52,7 @@
 
 #include <gba/interrupt/handler.hpp>
 
+#include <gba/registers/accessors.hpp>
 #include <gba/registers/irq.hpp>
 #include <gba/registers/irq_types.hpp>
 #include <gba/registers/video.hpp>
@@ -65,6 +66,7 @@
 #include <gba/util/huff_compress.hpp>
 #include <gba/util/lz77_compress.hpp>
 #include <gba/util/rle_compress.hpp>
+#include <gba/util/tiles.hpp>
 
 #include <gba/video/modes.hpp>
 #include <gba/video/palettes.hpp>

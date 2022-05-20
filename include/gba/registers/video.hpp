@@ -10,79 +10,50 @@
 #ifndef GBAXX_REGISTERS_VIDEO_HPP
 #define GBAXX_REGISTERS_VIDEO_HPP
 
-#include <gba/ioregister.hpp>
+#include <array>
 
+#include <gba/inttype.hpp>
+#include <gba/ioregister.hpp>
+#include <gba/vectype.hpp>
+
+#include <gba/registers/accessors.hpp>
 #include <gba/registers/video_types.hpp>
 
 namespace gba::reg {
 
-struct dispcnt : io::register_ptr<dispcnt_type> {
-    static constexpr auto address = 0x4000000;
-
-    consteval dispcnt() noexcept : io::register_ptr<dispcnt_type>{address} {}
-
-    static void reset() noexcept {
-        io::register_emplace<dispcnt_type, address>();
-    }
-
-    static void set(dispcnt_type value) noexcept {
-        io::register_write<decltype(value), address>(value);
-    }
-
-    static auto get() noexcept {
-        return io::register_read<dispcnt_type, address>();
-    }
-};
-
-struct dispstat : io::register_ptr<dispstat_type> {
-    static constexpr auto address = 0x4000004;
-
-    consteval dispstat() noexcept : io::register_ptr<dispstat_type>{address} {}
-
-    static void reset() noexcept {
-        io::register_emplace<dispstat_type, address>();
-    }
-
-    static void set(dispstat_type value) noexcept {
-        io::register_write<decltype(value), address>(value);
-    }
-
-    static auto get() noexcept {
-        return io::register_read<dispstat_type, address>();
-    }
-};
-
-struct vcount : io::register_ptr<const uint16> {
-    static constexpr auto address = 0x4000006;
-
-    consteval vcount() noexcept : io::register_ptr<const uint16>{address} {}
-
-    static auto get() noexcept {
-        return io::register_read<uint16, address>();
-    }
-};
+using dispcnt = read_write<dispcnt_type, 0x4000000>;
 
 namespace undocumented {
 
-    struct greenswap : io::register_ptr<bool> {
-        static constexpr auto address = 0x4000002;
-
-        consteval greenswap() noexcept : io::register_ptr<bool>{address} {}
-
-        static void reset() noexcept {
-            io::register_emplace<bool, address>();
-        }
-
-        static void set(bool value) noexcept {
-            io::register_write<decltype(value), address>(value);
-        }
-
-        static auto get() noexcept {
-            return io::register_read<bool, address>();
-        }
-    };
+    using greenswap = read_write<bool, 0x4000002>;
 
 } // namespace undocumented
+
+using dispstat = read_write<dispstat_type, 0x4000004>;
+
+using vcount = read_only<uint16, 0x4000006>;
+
+using bgcnt = read_write<std::array<bgcnt_type, 4>, 0x4000008>;
+using bg0cnt = read_write<bgcnt_type, 0x4000008>;
+using bg1cnt = read_write<bgcnt_type, 0x400000A>;
+using bg2cnt = read_write<bgcnt_type, 0x400000C>;
+using bg3cnt = read_write<bgcnt_type, 0x400000E>;
+
+using bgofs = write_only<std::array<vec2<uint16>, 4>, 0x4000010>;
+using bg0ofs = write_only<vec2<uint16>, 0x4000010>;
+using bg1ofs = write_only<vec2<uint16>, 0x4000014>;
+using bg2ofs = write_only<vec2<uint16>, 0x4000018>;
+using bg3ofs = write_only<vec2<uint16>, 0x400001C>;
+
+using bg0hofs = write_only<uint16, 0x4000010>;
+using bg0vofs = write_only<uint16, 0x4000012>;
+using bg1hofs = write_only<uint16, 0x4000014>;
+using bg1vofs = write_only<uint16, 0x4000016>;
+using bg2hofs = write_only<uint16, 0x4000018>;
+using bg2vofs = write_only<uint16, 0x400001A>;
+using bg3hofs = write_only<uint16, 0x400001C>;
+using bg3vofs = write_only<uint16, 0x400001E>;
+
 } // namespace gba::reg
 
 #endif // define GBAXX_REGISTERS_VIDEO_HPP

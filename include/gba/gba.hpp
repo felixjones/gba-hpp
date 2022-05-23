@@ -67,6 +67,7 @@
 #include <gba/util/lz77_compress.hpp>
 #include <gba/util/rle_compress.hpp>
 #include <gba/util/tiles.hpp>
+#include <gba/util/tuple_traits.hpp>
 
 #include <gba/video/modes.hpp>
 #include <gba/video/palettes.hpp>

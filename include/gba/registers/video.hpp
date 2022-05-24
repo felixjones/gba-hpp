@@ -55,6 +55,11 @@ using bg2vofs = write_only<uint16, 0x400001A>;
 using bg3hofs = write_only<uint16, 0x400001C>;
 using bg3vofs = write_only<uint16, 0x400001E>;
 
+using bg2mat2x2 = write_only<mat<
+        std::array<make_fixed<7, int16>, 2>,
+        std::array<make_fixed<7, int16>, 2>
+    >, 0x4000020>;
+
 using bg2pa = write_only<make_fixed<7, int16>, 0x4000020>;
 using bg2pb = write_only<make_fixed<7, int16>, 0x4000022>;
 using bg2pc = write_only<make_fixed<7, int16>, 0x4000024>;
@@ -62,6 +67,11 @@ using bg2pd = write_only<make_fixed<7, int16>, 0x4000026>;
 
 using bg2x = write_only<fixed<20, 8, int32>, 0x4000028>;
 using bg2y = write_only<fixed<20, 8, int32>, 0x400002C>;
+
+using bg3mat2x2 = write_only<mat<
+        std::array<make_fixed<7, int16>, 2>,
+        std::array<make_fixed<7, int16>, 2>
+    >, 0x4000030>;
 
 using bg3pa = write_only<make_fixed<7, int16>, 0x4000030>;
 using bg3pb = write_only<make_fixed<7, int16>, 0x4000032>;

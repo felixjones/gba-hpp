@@ -113,7 +113,7 @@ public:
     consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits))} {}
 
     template <typename T> requires std::is_integral_v<T>
-    constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v) << FracBits} {}
+    constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v << FracBits)} {}
 
     template <typename T> requires std::is_integral_v<T> && (!std::is_same_v<bool, T>)
     constexpr explicit operator T() const noexcept {

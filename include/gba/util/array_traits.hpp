@@ -130,6 +130,9 @@ constexpr auto array_split(Ts&&... elems) noexcept {
     return result;
 }
 
+template <class T, std::size_t N> requires Array<T>
+using array_slice_type = std::array<array_value_type<T>, N>;
+
 } // namespace gba::util
 
 #endif // define GBAXX_UTIL_ARRAY_TRAITS_HPP

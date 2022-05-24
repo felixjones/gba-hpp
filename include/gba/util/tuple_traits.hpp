@@ -97,6 +97,37 @@ constexpr auto tuple_split(Ts&&... elems) noexcept {
     return result;
 }
 
+template <typename... Ts> requires std::conjunction_v<detail::is_tuple<Ts>...>
+using tuple_cat_type = decltype(std::tuple_cat(std::declval<Ts>()...));
+
+namespace detail {
+
+    template <class T, std::size_t N, std::size_t Begin, class Result = std::tuple<std::tuple_element_t<Begin, T>>, std::size_t Counter = 1u> requires Tuple<T>
+    using tuple_slicer_type = std::conditional_t<Counter < N, tuple_cat_type<Result, std::tuple<std::tuple_element_t<Begin + Counter, T>>>, Result>;
+
+    template <class T, std::size_t Counter = 0u> requires Tuple<T>
+    struct tuple_elements_same {
+        static consteval auto value() noexcept {
+            constexpr auto same_as_first = std::is_same_v<std::tuple_element_t<0, T>, std::tuple_element_t<Counter, T>> ;
+
+            if constexpr (same_as_first == false) {
+                return false;
+            } else if constexpr (Counter + 1u < std::tuple_size_v<T>) {
+                return tuple_elements_same<T, Counter + 1u>::value();
+            } else {
+                return true;
+            }
+        }
+    };
+
+} // namespace detail
+
+template <class T, std::size_t N, std::size_t Begin = 0u> requires Tuple<T> && (Begin + N <= std::tuple_size_v<T>) && (N >= 1)
+using tuple_slice_type = detail::tuple_slicer_type<T, N, Begin>;
+
+template <class T> requires Tuple<T> && (detail::tuple_elements_same<T>::value())
+using tuple_to_array_type = std::array<std::tuple_element_t<0, T>, std::tuple_size_v<T>>;
+
 } // namespace gba::util
 
 #endif // define GBAXX_UTIL_TUPLE_TRAITS_HPP

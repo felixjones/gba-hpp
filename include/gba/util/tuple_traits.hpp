@@ -14,6 +14,8 @@
 #include <tuple>
 #include <type_traits>
 
+#include <gba/tupletype.hpp>
+
 #include <gba/util/array_traits.hpp>
 
 namespace gba::util {
@@ -23,12 +25,34 @@ namespace detail {
     struct is_tuple : std::false_type{};
 
     template <typename... Ts>
+    struct is_tuple<tuple<Ts...>> : std::true_type{};
+
+    template <typename... Ts>
     struct is_tuple<std::tuple<Ts...>> : std::true_type{};
+
+    template <typename>
+    struct tuple_from_std {};
+
+    template <typename... Ts>
+    struct tuple_from_std<std::tuple<Ts...>> {
+        using type = tuple<Ts...>;
+    };
+
+    template <typename... Ts>
+    struct tuple_from_std<tuple<Ts...>> {
+        using type = tuple<Ts...>;
+    };
 
 } // namespace detail
 
 template <typename T>
 concept Tuple = detail::is_tuple<T>::value;
+
+template <typename T> requires Tuple<T>
+using tuple_from_std = typename detail::tuple_from_std<T>::type;
+
+template <typename... Ts> requires std::conjunction_v<detail::is_tuple<Ts>...>
+using tuple_cat_type = tuple_from_std<decltype(std::tuple_cat(std::declval<Ts>()...))>;
 
 namespace detail {
     template <class T, std::size_t ElemIdx = 0u> requires Tuple<T> && Array<std::tuple_element_t<ElemIdx, T>>
@@ -86,24 +110,8 @@ namespace detail {
         }
     }
 
-} // namespace detail
-
-template <typename T, typename... Ts> requires Tuple<T>
-constexpr auto tuple_split(Ts&&... elems) noexcept {
-    static_assert(sizeof...(Ts) <= detail::tuple_elements<T>());
-
-    auto result = T{};
-    detail::tuple_split<0u>(result, elems...);
-    return result;
-}
-
-template <typename... Ts> requires std::conjunction_v<detail::is_tuple<Ts>...>
-using tuple_cat_type = decltype(std::tuple_cat(std::declval<Ts>()...));
-
-namespace detail {
-
-    template <class T, std::size_t N, std::size_t Begin, class Result = std::tuple<std::tuple_element_t<Begin, T>>, std::size_t Counter = 1u> requires Tuple<T>
-    using tuple_slicer_type = std::conditional_t<Counter < N, tuple_cat_type<Result, std::tuple<std::tuple_element_t<Begin + Counter, T>>>, Result>;
+    template <class T, std::size_t N, std::size_t Begin, class Result = tuple<std::tuple_element_t<Begin, T>>, std::size_t Counter = 1u> requires Tuple<T>
+    using tuple_slicer_type = std::conditional_t<Counter < N, tuple_cat_type<Result, tuple<std::tuple_element_t<Begin + Counter, T>>>, Result>;
 
     template <class T, std::size_t Counter = 0u> requires Tuple<T>
     struct tuple_elements_same {
@@ -118,15 +126,40 @@ namespace detail {
                 return true;
             }
         }
+
+        static consteval auto is_array() noexcept {
+            if constexpr (!Array<std::tuple_element_t<Counter, T>>) {
+                return false;
+            } else if constexpr (Counter + 1u < std::tuple_size_v<T>) {
+                return tuple_elements_same<T, Counter + 1u>::is_array();
+            } else {
+                return true;
+            }
+        }
     };
 
 } // namespace detail
+
+template <typename T, typename... Ts> requires Tuple<T>
+constexpr auto tuple_split(Ts&&... elems) noexcept {
+    static_assert(sizeof...(Ts) <= detail::tuple_elements<T>());
+
+    auto result = T{};
+    detail::tuple_split<0u>(result, elems...);
+    return result;
+}
 
 template <class T, std::size_t N, std::size_t Begin = 0u> requires Tuple<T> && (Begin + N <= std::tuple_size_v<T>) && (N >= 1)
 using tuple_slice_type = detail::tuple_slicer_type<T, N, Begin>;
 
 template <class T> requires Tuple<T> && (detail::tuple_elements_same<T>::value())
 using tuple_to_array_type = std::array<std::tuple_element_t<0, T>, std::tuple_size_v<T>>;
+
+template <class T> requires Tuple<T>
+using tuple_normalize_type = std::conditional_t<detail::tuple_elements_same<T>::value(), std::array<std::tuple_element_t<0, T>, std::tuple_size_v<T>>, T>;
+
+template <class T>
+static constexpr auto is_multi_dimensional = Array<T> ? Array<array_value_type<T>> : detail::tuple_elements_same<T>::is_array();
 
 } // namespace gba::util
 

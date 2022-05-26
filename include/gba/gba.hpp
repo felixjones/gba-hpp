@@ -38,6 +38,8 @@
 #include <gba/inttype.hpp>
 #include <gba/ioregister.hpp>
 #include <gba/math.hpp>
+#include <gba/mattype.hpp>
+#include <gba/tupletype.hpp>
 #include <gba/vectype.hpp>
 
 #include <gba/bios/checksum.hpp>

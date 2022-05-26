@@ -22,25 +22,44 @@ namespace gba::util {
 namespace detail {
 
     template <typename>
-    struct is_tuple : std::false_type{};
+    struct is_tuple : std::false_type {};
 
     template <typename... Ts>
-    struct is_tuple<tuple<Ts...>> : std::true_type{};
+    struct is_tuple<tuple<Ts...>> : std::true_type {};
 
     template <typename... Ts>
-    struct is_tuple<std::tuple<Ts...>> : std::true_type{};
+    struct is_tuple<std::tuple<Ts...>> : std::true_type {};
 
-    template <typename>
-    struct tuple_from_std {};
+    template <std::size_t, typename, typename, std::size_t>
+    struct make_tuple_impl;
 
-    template <typename... Ts>
-    struct tuple_from_std<std::tuple<Ts...>> {
+    template <std::size_t Idx, typename T, typename... Ts, std::size_t Num>
+    struct make_tuple_impl<Idx, tuple<Ts...>, T, Num> : make_tuple_impl<Idx + 1, tuple<Ts..., std::tuple_element_t<Idx, T>>, T, Num> {};
+
+    template <std::size_t Num, typename T, typename... Ts>
+    struct make_tuple_impl<Num, tuple<Ts...>, T, Num> {
         using type = tuple<Ts...>;
     };
 
+    template <typename T>
+    struct make_tuple : make_tuple_impl<0, tuple<>, std::remove_cvref_t<T>, std::tuple_size<std::remove_cvref_t<T>>::value> {};
+
+    template <typename...>
+    struct combine_tuples;
+
+    template <>
+    struct combine_tuples<> {
+        using type = tuple<>;
+    };
+
     template <typename... Ts>
-    struct tuple_from_std<tuple<Ts...>> {
+    struct combine_tuples<tuple<Ts...>> {
         using type = tuple<Ts...>;
+    };
+
+    template <typename... T1s, typename... T2s, typename... Rest>
+    struct combine_tuples<tuple<T1s...>, tuple<T2s...>, Rest...> {
+        using type = typename combine_tuples<tuple<T1s..., T2s...>, Rest...>::type;
     };
 
 } // namespace detail
@@ -48,11 +67,8 @@ namespace detail {
 template <typename T>
 concept Tuple = detail::is_tuple<T>::value;
 
-template <typename T> requires Tuple<T>
-using tuple_from_std = typename detail::tuple_from_std<T>::type;
-
 template <typename... Ts> requires std::conjunction_v<detail::is_tuple<Ts>...>
-using tuple_cat_type = tuple_from_std<decltype(std::tuple_cat(std::declval<Ts>()...))>;
+using tuple_cat_type = typename detail::combine_tuples<typename detail::make_tuple<Ts>::type...>::type;
 
 namespace detail {
     template <class T, std::size_t ElemIdx = 0u> requires Tuple<T> && Array<std::tuple_element_t<ElemIdx, T>>
@@ -138,6 +154,45 @@ namespace detail {
         }
     };
 
+    template <class, typename...>
+    struct tuple_from_array_type_impl {};
+
+    template <class T, typename... Ts> requires (std::tuple_size_v<tuple<Ts...>> == array_size<T>)
+    struct tuple_from_array_type_impl<T, tuple<Ts...>> {
+        using type = tuple<Ts...>;
+    };
+
+    template <class T, typename... Ts> requires (std::tuple_size_v<tuple<Ts...>> < array_size<T>)
+    struct tuple_from_array_type_impl<T, tuple<Ts...>> {
+        using type = typename tuple_from_array_type_impl<T, tuple_cat_type<tuple<Ts...>, tuple<array_value_type<T>>>>::type;
+    };
+
+    template <typename>
+    struct tuple_from_array_type {};
+
+    template <typename... Ts> requires Tuple<tuple<Ts...>>
+    struct tuple_from_array_type<tuple<Ts...>> {
+        using type = tuple<Ts...>;
+    };
+
+    template <typename T, std::size_t N> requires Array<std::array<T, N>>
+    struct tuple_from_array_type<std::array<T, N>> {
+        using type = typename tuple_from_array_type_impl<std::array<T, N>, tuple<T>>::type;
+    };
+
+    template <typename>
+    struct is_multi_dimensional {};
+
+    template <typename... Ts> requires Tuple<tuple<Ts...>>
+    struct is_multi_dimensional<tuple<Ts...>> {
+        static constexpr auto value = detail::tuple_elements_same<tuple<Ts...>>::is_array();
+    };
+
+    template <typename T, std::size_t N> requires Array<std::array<T, N>>
+    struct is_multi_dimensional<std::array<T, N>> {
+        static constexpr auto value = Array<T>;
+    };
+
 } // namespace detail
 
 template <typename T, typename... Ts> requires Tuple<T>
@@ -155,11 +210,45 @@ using tuple_slice_type = detail::tuple_slicer_type<T, N, Begin>;
 template <class T> requires Tuple<T> && (detail::tuple_elements_same<T>::value())
 using tuple_to_array_type = std::array<std::tuple_element_t<0, T>, std::tuple_size_v<T>>;
 
+template <class T>
+using tuple_from_array_type = typename detail::tuple_from_array_type<T>::type;
+
 template <class T> requires Tuple<T>
 using tuple_normalize_type = std::conditional_t<detail::tuple_elements_same<T>::value(), std::array<std::tuple_element_t<0, T>, std::tuple_size_v<T>>, T>;
 
 template <class T>
-static constexpr auto is_multi_dimensional = Array<T> ? Array<array_value_type<T>> : detail::tuple_elements_same<T>::is_array();
+static constexpr auto is_multi_dimensional = detail::is_multi_dimensional<T>::value;
+
+namespace detail {
+
+    template <class, std::size_t, std::size_t>
+    struct tuple_or_array_slice_type {};
+
+    template <class T, std::size_t N, std::size_t Begin> requires Array<T>
+    struct tuple_or_array_slice_type<T, N, Begin> {
+        using type = array_slice_type<T, N>;
+    };
+
+    template <class T, std::size_t N, std::size_t Begin> requires Tuple<T>
+    struct tuple_or_array_slice_type<T, N, Begin> {
+        using type = tuple_slice_type<T, N, Begin>;
+    };
+
+    template <std::size_t, class>
+    struct tuple_slice_inner_type {};
+
+    template <std::size_t N, typename... Ts>
+    struct tuple_slice_inner_type<N, tuple<Ts...>> {
+        using type = tuple<array_slice_type<Ts, N>...>;
+    };
+
+} // namespace detail
+
+template <class T, std::size_t N, std::size_t Begin = 0u>
+using tuple_or_array_slice_type = typename detail::tuple_or_array_slice_type<T, N, Begin>::type;
+
+template <class T, std::size_t N, std::size_t Begin = 0u> requires is_multi_dimensional<T>
+using tuple_or_array_slice_inner_type = typename detail::tuple_slice_inner_type<N, tuple_from_array_type<T>>::type;
 
 } // namespace gba::util
 

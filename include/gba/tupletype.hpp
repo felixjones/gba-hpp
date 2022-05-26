@@ -26,13 +26,26 @@ namespace detail {
     struct tuple_base<Idx, Type, true> : Type {};
 
     template <std::size_t Idx, typename Type>
+    [[maybe_unused]]
     constexpr auto& tuple_get(tuple_base<Idx, Type, false>& t) noexcept {
         return t.value;
     }
 
     template <std::size_t Idx, typename Type>
     [[maybe_unused]]
+    constexpr const auto& tuple_get(const tuple_base<Idx, Type, false>& t) noexcept {
+        return t.value;
+    }
+
+    template <std::size_t Idx, typename Type>
+    [[maybe_unused]]
     constexpr auto& tuple_get(tuple_base<Idx, Type, true>& t) noexcept {
+        return t;
+    }
+
+    template <std::size_t Idx, typename Type>
+    [[maybe_unused]]
+    constexpr const auto& tuple_get(const tuple_base<Idx, Type, true>& t) noexcept {
         return t;
     }
 
@@ -91,7 +104,14 @@ namespace std { // NOLINT(cert-dcl58-cpp)
     class [[maybe_unused]] tuple_element<Idx, gba::tuple<Ts...>> : public gba::detail::nth<Idx, Ts...> {};
 
     template <size_t Idx, typename... Ts>
+    [[maybe_unused]]
     constexpr auto& get(gba::tuple<Ts...>& t) noexcept {
+        return gba::detail::tuple_get<Idx>(t);
+    }
+
+    template <size_t Idx, typename... Ts>
+    [[maybe_unused]]
+    constexpr const auto& get(const gba::tuple<Ts...>& t) noexcept {
         return gba::detail::tuple_get<Idx>(t);
     }
 

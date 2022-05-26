@@ -87,17 +87,16 @@ namespace detail {
     template <class T, class... Ts>
     constexpr static bool arrays_same_value_type = arrays_match_value_type<array_value_type<T>, T, Ts...>();
 
-    template <std::size_t Idx, typename T, typename... Ts>
-    constexpr auto array_split(auto& outArray, T&& first, Ts&&... rest) noexcept {
-        using array_type = array_value_type<decltype(outArray)>;
+    template <std::size_t Idx, typename First, typename... Rest>
+    constexpr void array_split(Array auto& result, First&& first, Rest&&... rest) noexcept {
+        using array_type = std::remove_reference_t<decltype(result)>;
 
-        constexpr auto inner_index = Idx % array_size<array_type>;
-        constexpr auto outer_index = Idx / array_size<array_type>;
+        constexpr auto depth = array_size<array_value_type<array_type>>;
 
-        outArray[outer_index][inner_index] = first;
+        std::get<Idx / depth>(result)[Idx % depth] = first;
 
-        if constexpr (Idx + 1 < array_size<decltype(outArray)> && sizeof...(Ts) > 0) {
-            array_split<Idx + 1>(outArray, rest...);
+        if constexpr (Idx + 1u < (depth * array_size<array_type>) && sizeof...(Rest) > 0) {
+            array_split<Idx + 1u>(result, rest...);
         }
     }
 
@@ -126,7 +125,7 @@ concept ArraysSameValueType = detail::arrays_same_value_type<Ts...>;
 template <typename T, std::size_t N, typename... Ts>
 constexpr auto array_split(Ts&&... elems) noexcept {
     auto result = std::array<std::array<T, N>, (sizeof...(Ts) + (N - 1)) / N>{};
-    detail::array_split<0>(result, std::move(elems)...);
+    detail::array_split<0>(result, std::forward<Ts>(elems)...);
     return result;
 }
 

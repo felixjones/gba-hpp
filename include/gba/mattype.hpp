@@ -80,7 +80,7 @@ protected:
 
     data_type m_data;
 
-    using uninitialized_type = std::integral_constant<int, 0>;
+    struct uninitialized_type {};
 public:
     static constexpr auto rows = util::array_size<std::tuple_element_t<0, data_type>>;
     static constexpr auto columns = std::tuple_size_v<data_type>;
@@ -105,7 +105,7 @@ public:
 
     template <typename... Ts>
     explicit constexpr mat(Ts&&... elem) noexcept requires util::Array<data_type> && (sizeof...(Ts) == elements) :
-        m_data{util::array_split<util::array_value_type<util::array_value_type<data_type>>, rows>(std::forward<Ts>(elem)...)} {}
+        m_data{util::array_split<util::array_value_type<util::array_value_type<data_type>>, rows>(static_cast<util::array_value_type<util::array_value_type<data_type>>>(elem)...)} {}
 
     template <typename... Ts>
     explicit constexpr mat(Ts&&... elem) noexcept requires util::Tuple<data_type> && (sizeof...(Ts) == elements) :

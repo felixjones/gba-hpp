@@ -207,7 +207,9 @@ public:
     constexpr static auto convert_from(Rhs rhs) noexcept {
         constexpr auto shift = static_cast<int>(Rhs::fractional_bits) - static_cast<int>(fractional_bits);
 
-        return from_data(signed_shift<shift>(static_cast<data_type>(rhs.data())));
+        using shift_type = typename fixed_promote_t<fixed, Rhs>::data_type;
+
+        return from_data(signed_shift<shift>(static_cast<shift_type>(rhs.data())));
     }
 
     data_type m_data;

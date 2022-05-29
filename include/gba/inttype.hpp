@@ -60,6 +60,29 @@ using uintcontainer = uinttype<sizeof(Type) * 8, Sign>;
 template <class T, std::size_t Bits>
 concept BinaryDigits = std::is_same_v<T, inttype<Bits, T>>;
 
+constexpr auto uint_bit_mask(std::unsigned_integral auto x) noexcept {
+    static_assert(sizeof(x) <= 8);
+    constexpr auto bits = binary_digits<decltype(x)>;
+
+    x |= (x >> 1);
+    x |= (x >> 2);
+    x |= (x >> 4);
+
+    if constexpr (bits >= 16) {
+        x |= (x >> 8);
+    }
+
+    if constexpr (bits >= 32) {
+        x |= (x >> 16);
+    }
+
+    if constexpr (bits >= 64) {
+        x |= (x >> 32);
+    }
+
+    return x;
+}
+
 } // namespace gba
 
 #endif // define GBAXX_INTTYPE_HPP

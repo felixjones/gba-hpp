@@ -11,6 +11,7 @@
 #define GBAXX_FIXEDTYPE_HPP
 
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <type_traits>
 
@@ -109,8 +110,7 @@ public:
     template <std::size_t RI, std::size_t RF, typename RS>
     constexpr explicit fixed(fixed<RI, RF, RS> rhs) noexcept : m_data {convert_from(rhs).data()} {}
 
-    template <typename T> requires std::is_floating_point_v<T>
-    consteval fixed(T v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits))} {}
+    consteval fixed(std::floating_point auto v) noexcept : m_data {static_cast<data_type>(v * (1LL << FracBits))} {}
 
     template <typename T> requires std::is_integral_v<T>
     constexpr fixed(T v) noexcept : m_data {static_cast<data_type>(v << FracBits)} {}

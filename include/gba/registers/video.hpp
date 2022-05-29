@@ -87,6 +87,29 @@ using bg3pd = write_only<make_fixed<8, int16>, 0x4000036>;
 using bg3x = write_only<fixed<20, 8, int32>, 0x4000038>;
 using bg3y = write_only<fixed<20, 8, int32>, 0x400003C>;
 
+using win0h = write_only<uint8, 0x4000040>;
+using win1h = write_only<uint8, 0x4000042>;
+
+using win0v = write_only<uint8, 0x4000044>;
+using win1v = write_only<uint8, 0x4000046>;
+
+using winin = read_write<std::array<win_type, 2>, 0x4000048>;
+using winout = read_write<std::array<win_type, 2>, 0x400004A>;
+
+using win0in = read_write<win_type, 0x4000048>;
+using win1in = read_write<win_type, 0x4000049>;
+using win0out = read_write<win_type, 0x400004A>;
+using win1out = read_write<win_type, 0x400004B>;
+
+using mosaic = write_only<mosaic_type, 0x400004C>;
+
+using bldcnt = read_write<bld_type, 0x4000050>;
+
+using bldalpha = read_write<bldalpha_type, 0x4000052>;
+
+// bldgamma
+using bldy = read_write<ufixed<1, 4, uint8>, 0x4000054>;
+
 } // namespace gba::reg
 
 #endif // define GBAXX_REGISTERS_VIDEO_HPP

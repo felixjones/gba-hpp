@@ -20,7 +20,7 @@ inline void SoftReset() noexcept {
     __builtin_unreachable();
 }
 
-struct reset {
+struct reset_type {
     bool ewram : 1,
         iwram : 1,
         palette : 1,
@@ -31,8 +31,21 @@ struct reset {
         reg : 1;
 };
 
+namespace reset {
+
+    static constexpr auto ewram = field_of::boolean<reset_type, 0>();
+    static constexpr auto iwram = field_of::boolean<reset_type, 1>();
+    static constexpr auto palette = field_of::boolean<reset_type, 2>();
+    static constexpr auto vram = field_of::boolean<reset_type, 3>();
+    static constexpr auto oam = field_of::boolean<reset_type, 4>();
+    static constexpr auto reg_sio = field_of::boolean<reset_type, 5>();
+    static constexpr auto reg_sound = field_of::boolean<reset_type, 6>();
+    static constexpr auto reg = field_of::boolean<reset_type, 7>();
+
+} // namespace reset
+
 [[gnu::always_inline]]
-inline void RegisterRamReset(reset flags) noexcept {
+inline void RegisterRamReset(reset_type flags) noexcept {
     swi<0x01, void>(flags);
 }
 

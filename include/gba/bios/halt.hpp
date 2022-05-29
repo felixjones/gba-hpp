@@ -10,6 +10,8 @@
 #ifndef GBAXX_BIOS_HALT_HPP
 #define GBAXX_BIOS_HALT_HPP
 
+#include <gba/fieldtype.hpp>
+
 #include <gba/bios/swi_call.hpp>
 
 namespace gba::bios {
@@ -24,7 +26,7 @@ inline void Stop() noexcept {
     swi<0x03, void>();
 }
 
-struct intrwait {
+struct intrwait_type {
     bool vblank : 1,
         hblank : 1,
         vcount : 1,
@@ -41,8 +43,27 @@ struct intrwait {
         gamepak : 1;
 };
 
+namespace intrwait {
+
+    static constexpr auto vblank = field_of::boolean<intrwait_type, 0>();
+    static constexpr auto hblank = field_of::boolean<intrwait_type, 1>();
+    static constexpr auto vcount = field_of::boolean<intrwait_type, 2>();
+    static constexpr auto timer_0 = field_of::boolean<intrwait_type, 3>();
+    static constexpr auto timer_1 = field_of::boolean<intrwait_type, 4>();
+    static constexpr auto timer_2 = field_of::boolean<intrwait_type, 5>();
+    static constexpr auto timer_3 = field_of::boolean<intrwait_type, 6>();
+    static constexpr auto serial = field_of::boolean<intrwait_type, 7>();
+    static constexpr auto dma_0 = field_of::boolean<intrwait_type, 8>();
+    static constexpr auto dma_1 = field_of::boolean<intrwait_type, 9>();
+    static constexpr auto dma_2 = field_of::boolean<intrwait_type, 10>();
+    static constexpr auto dma_3 = field_of::boolean<intrwait_type, 11>();
+    static constexpr auto keypad = field_of::boolean<intrwait_type, 12>();
+    static constexpr auto gamepak = field_of::boolean<intrwait_type, 13>();
+
+} // namespace intrwait
+
 [[gnu::always_inline]]
-inline void IntrWait(bool resetFlags, intrwait waitFlags) noexcept {
+inline void IntrWait(bool resetFlags, intrwait_type waitFlags) noexcept {
     swi<0x04, void>(resetFlags, waitFlags);
 }
 

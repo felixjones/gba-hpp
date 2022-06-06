@@ -57,6 +57,8 @@
 #include <gba/registers/accessors.hpp>
 #include <gba/registers/irq.hpp>
 #include <gba/registers/irq_types.hpp>
+#include <gba/registers/key.hpp>
+#include <gba/registers/key_types.hpp>
 #include <gba/registers/video.hpp>
 #include <gba/registers/video_types.hpp>
 

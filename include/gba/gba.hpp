@@ -55,6 +55,8 @@
 #include <gba/interrupt/handler.hpp>
 
 #include <gba/registers/accessors.hpp>
+#include <gba/registers/dma.hpp>
+#include <gba/registers/dma_types.hpp>
 #include <gba/registers/irq.hpp>
 #include <gba/registers/irq_types.hpp>
 #include <gba/registers/key.hpp>

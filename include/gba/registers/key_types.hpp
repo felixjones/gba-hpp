@@ -85,7 +85,6 @@ namespace key {
     static constexpr auto l = field_of::boolean<key_mask, 9>();
 
 } // namespace key
-
 } // namespace gba
 
 #endif // define GBAXX_REGISTERS_KEY_TYPES_HPP

@@ -12,7 +12,6 @@
 
 #include <bit>
 
-#include <gba/ioregister.hpp>
 #include <gba/inttype.hpp>
 
 #include <gba/registers/accessors.hpp>

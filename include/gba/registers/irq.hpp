@@ -10,8 +10,6 @@
 #ifndef GBAXX_REGISTERS_IRQ_HPP
 #define GBAXX_REGISTERS_IRQ_HPP
 
-#include <gba/ioregister.hpp>
-
 #include <gba/registers/accessors.hpp>
 #include <gba/registers/irq_types.hpp>
 

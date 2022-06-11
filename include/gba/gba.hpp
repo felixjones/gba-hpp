@@ -61,6 +61,10 @@
 #include <gba/registers/irq_types.hpp>
 #include <gba/registers/key.hpp>
 #include <gba/registers/key_types.hpp>
+#include <gba/registers/system.hpp>
+#include <gba/registers/system_types.hpp>
+#include <gba/registers/timer.hpp>
+#include <gba/registers/timer_types.hpp>
 #include <gba/registers/video.hpp>
 #include <gba/registers/video_types.hpp>
 

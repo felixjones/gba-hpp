@@ -58,7 +58,7 @@ namespace keycnt {
 
 } // namespace keycnt
 
-struct alignas(uint32) key_mask {
+struct alignas(uint16) key_mask {
     bool a : 1;
     bool b : 1;
     bool select : 1;

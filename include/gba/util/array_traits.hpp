@@ -116,6 +116,24 @@ consteval auto join_array(const Array auto& lhs, const Ts&... rhs) noexcept {
     return result;
 }
 
+consteval auto flatten_array(const Array auto& lhs) noexcept {
+    using array_type = decltype(lhs);
+    using value_type = array_value_type<decltype(lhs)>;
+
+    if constexpr (!Array<value_type>) {
+        return lhs;
+    } else {
+        auto result = std::array<array_value_type<value_type>, array_size<array_type> * array_size<value_type>>{};
+
+        auto iter = result.begin();
+        for (const auto& inner : lhs) {
+            iter = std::copy(std::cbegin(inner), std::cend(inner), iter);
+        }
+
+        return result;
+    }
+}
+
 template <class... Ts>
 concept ArraysSameSize = detail::arrays_same_size<Ts...>;
 

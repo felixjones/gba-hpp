@@ -36,7 +36,7 @@ enum class dma_at : uint8 {
 };
 
 struct alignas(uint16) dmacnt_h_type {
-    uint16 : 5;
+    uint16 : 4;
     dma_dst dst : 2;
     dma_src src : 2;
     bool repeat : 1;

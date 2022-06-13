@@ -62,29 +62,32 @@ struct mode<3> {
         return buffer[(y * 240) + x];
     }
 
-    static void put_row(int y, const IsLine<3> auto line) noexcept {
+    static void put_row(int y, const IsLine<3> auto& line) noexcept {
+        using line_type = std::remove_reference_t<decltype(line)>;
+
 #if defined(GBAXX_HAS_AGBABI)
-        __aeabi_memcpy4(reinterpret_cast<uint16*>(address) + (y * 240), &line[0], util::array_size<decltype(line)> * sizeof(uint16));
+        __aeabi_memcpy4(reinterpret_cast<uint16*>(address) + (y * 240), &line[0], util::array_size<line_type> * sizeof(uint16));
 #else
         auto* src = reinterpret_cast<const uint32*>(&line[0]);
         auto* dst= reinterpret_cast<volatile uint32*>(address);
         dst += y * 120;
 
-        for (int ii = 0; ii < util::array_size<decltype(line)> / 2; ++ii) {
+        for (int ii = 0; ii < util::array_size<line_type> / 2; ++ii) {
             dst[ii] = src[ii];
         }
 #endif
     }
 
-    static void put_row(int x, int y, const IsPixelArray<3> auto line) noexcept {
+    static void put_row(int x, int y, const IsPixelArray<3> auto& line) noexcept {
 #if defined(GBAXX_HAS_AGBABI)
         __agbabi_memcpy2(reinterpret_cast<uint16*>(address) + (y * 240) + x, &line[0], sizeof(line));
 #else
-        using int16_type = util::array_value_type<decltype(line)>;
+        using line_type = std::remove_reference_t<decltype(line)>;
+        using int16_type = util::array_value_type<line_type>;
 
         auto* buffer = reinterpret_cast<volatile int16_type*>(address);
         buffer += (y * 240) + x;
-        for (std::size_t ii = 0; ii < util::array_size<decltype(line)>; ++ii) {
+        for (std::size_t ii = 0; ii < util::array_size<line_type>; ++ii) {
             buffer[ii] = line[ii];
         }
 #endif
@@ -132,16 +135,18 @@ struct mode<4> {
         }
     }
 
-    static void put_row(int y, const IsLine<4> auto line, std::size_t frame) noexcept {
+    static void put_row(int y, const IsLine<4> auto& line, std::size_t frame) noexcept {
+        using line_type = std::remove_reference_t<decltype(line)>;
+
         const auto addr = address + (offset_frame * frame);
 #if defined(GBAXX_HAS_AGBABI)
-        __aeabi_memcpy4(reinterpret_cast<uint8*>(addr) + (y * 240), &line[0], util::array_size<decltype(line)>);
+        __aeabi_memcpy4(reinterpret_cast<uint8*>(addr) + (y * 240), &line[0], util::array_size<line_type>);
 #else
         auto* src = reinterpret_cast<const uint32*>(&line[0]);
         auto* dst= reinterpret_cast<volatile uint32*>(addr);
         dst += y * 60;
 
-        for (int ii = 0; ii < util::array_size<decltype(line)> / 4; ++ii) {
+        for (int ii = 0; ii < util::array_size<line_type> / 4; ++ii) {
             dst[ii] = src[ii];
         }
 #endif
@@ -181,31 +186,34 @@ struct mode<5> {
         return buffer[(y * 240) + x];
     }
 
-    static void put_row(int y, const IsLine<3> auto line, std::size_t frame) noexcept {
+    static void put_row(int y, const IsLine<3> auto& line, std::size_t frame) noexcept {
+        using line_type = std::remove_reference_t<decltype(line)>;
+
         const auto addr = address + (offset_frame * frame);
 #if defined(GBAXX_HAS_AGBABI)
-        __aeabi_memcpy4(reinterpret_cast<uint16*>(addr) + (y * 240), &line[0], util::array_size<decltype(line)> * sizeof(uint16));
+        __aeabi_memcpy4(reinterpret_cast<uint16*>(addr) + (y * 240), &line[0], util::array_size<line_type> * sizeof(uint16));
 #else
         auto* src = reinterpret_cast<const uint32*>(&line[0]);
         auto* dst= reinterpret_cast<volatile uint32*>(addr);
         dst += y * 120;
 
-        for (int ii = 0; ii < util::array_size<decltype(line)> / 2; ++ii) {
+        for (int ii = 0; ii < util::array_size<line_type> / 2; ++ii) {
             dst[ii] = src[ii];
         }
 #endif
     }
 
-    static void put_row(int x, int y, const IsPixelArray<3> auto line, std::size_t frame) noexcept {
+    static void put_row(int x, int y, const IsPixelArray<3> auto& line, std::size_t frame) noexcept {
         const auto addr = address + (offset_frame * frame);
 #if defined(GBAXX_HAS_AGBABI)
         __agbabi_memcpy2(reinterpret_cast<uint16*>(addr) + (y * 240) + x, &line[0], sizeof(line));
 #else
-        using int16_type = util::array_value_type<decltype(line)>;
+        using line_type = std::remove_reference_t<decltype(line)>;
+        using int16_type = util::array_value_type<line_type>;
 
         auto* buffer = reinterpret_cast<volatile int16_type*>(addr);
         buffer += (y * 240) + x;
-        for (std::size_t ii = 0; ii < util::array_size<decltype(line)>; ++ii) {
+        for (std::size_t ii = 0; ii < util::array_size<line_type>; ++ii) {
             buffer[ii] = line[ii];
         }
 #endif

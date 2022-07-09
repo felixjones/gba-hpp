@@ -17,6 +17,12 @@
 #include <gba/bios/swi_call.hpp>
 
 namespace gba::bios {
+namespace detail {
+
+    template <typename T>
+    concept Arithmetic = (IsFixed<T> || std::integral<T>) && sizeof(T) <= 4;
+
+} // namespace detail
 
 [[nodiscard, gnu::const, gnu::always_inline]]
 inline auto Div(int32 x, int32 y) noexcept {
@@ -29,8 +35,8 @@ inline auto DivArm(int32 y, int32 x) noexcept {
 }
 
 [[nodiscard, gnu::const, gnu::always_inline]]
-inline auto Sqrt(uint32 arg) noexcept {
-    return swi<0x08, uint32>(arg);
+inline auto Sqrt(std::integral auto arg) noexcept {
+    return swi<0x08, int32>(arg);
 }
 
 [[nodiscard, gnu::const, gnu::always_inline]]
@@ -39,7 +45,7 @@ inline auto ArcTan(fixed<18, 14> arg) noexcept {
 }
 
 [[nodiscard, gnu::const, gnu::always_inline]]
-inline auto ArcTan2(fixed<18, 14> x, fixed<18, 14> y) noexcept {
+inline auto ArcTan2(detail::Arithmetic auto x, detail::Arithmetic auto y) noexcept {
     return swi<0x0A, int32>(x, y);
 }
 

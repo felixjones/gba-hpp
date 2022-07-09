@@ -19,8 +19,8 @@
 
 namespace gba {
 
-template <int shift, typename T> requires std::is_integral_v<T>
-constexpr auto signed_shift(T v) noexcept {
+template <int shift>
+constexpr auto signed_shift(std::integral auto v) noexcept {
     return shift < 0 ? v << std::abs(shift) : v >> shift;
 }
 

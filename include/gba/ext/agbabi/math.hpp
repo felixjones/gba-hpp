@@ -46,6 +46,21 @@ inline auto cos(std::integral auto arg) noexcept {
     return fixed<2, 29>::from_data(__agbabi_sin(arg + 0x2000));
 }
 
+[[nodiscard, gnu::const, gnu::always_inline]]
+inline auto sqrt(std::integral auto arg) noexcept {
+    return __agbabi_sqrt(arg);
+}
+
+[[nodiscard, gnu::const, gnu::always_inline]]
+inline auto atan2(std::integral auto x, std::integral auto y) noexcept {
+    return __agbabi_atan2(x, y);
+}
+
+[[nodiscard, gnu::const, gnu::always_inline]]
+inline auto atan2(IsFixed auto x, IsFixed auto y) noexcept {
+    return __agbabi_atan2(x.data(), y.data());
+}
+
 } // namespace gba::agbabi
 
 #endif // define GBAXX_EXT_AGBABI_MATH_HPP

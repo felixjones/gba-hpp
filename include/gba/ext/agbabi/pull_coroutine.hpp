@@ -10,123 +10,155 @@
 #ifndef GBAXX_EXT_AGBABI_PULL_COROUTINE_HPP
 #define GBAXX_EXT_AGBABI_PULL_COROUTINE_HPP
 
-#include <functional>
-#include <optional>
+#include <utility>
 
 #include <agbabi.h>
 
-#include <gba/ext/agbabi/fiber.hpp>
+#include <gba/ext/agbabi/push_coroutine.hpp>
+
+#include <gba/ext/agbabi/detail/coro_context.hpp>
+#include <gba/ext/agbabi/detail/stack.hpp>
 
 namespace gba::agbabi {
 
-template <class Type>
-class pull_coroutine : public agbabi_coro_t {
+template <typename T>
+class push_coroutine;
+
+template <typename T>
+class pull_coroutine {
 private:
-    struct sentinel {};
+    using context_type = detail::context_type<T>;
+    using coro_type = detail::coro_type<T>;
+
+    template <typename X>
+    friend class push_coroutine;
+
+    explicit pull_coroutine(context_type* ctx) noexcept : m_ctx{ctx} {}
+
+    template <typename Fn>
+    struct callable_context_type : context_type {
+        explicit callable_context_type(Fn&& fn) noexcept : m_fn{fn} {}
+
+        ~callable_context_type() noexcept override = default;
+
+        void swap() noexcept override {
+            __agbabi_coro_resume(context_type::coro);
+        }
+
+        static detail::coro_proc_type get_invoke() noexcept;
+    private:
+        Fn m_fn;
+    };
+
+    template <typename Fn>
+    auto* make_context(void* sp, Fn&& fn) noexcept {
+        auto* coro = detail::stack_emplace<coro_type>(sp);
+        auto* ctx = detail::stack_emplace<callable_context_type<Fn>>(coro, std::forward<Fn>(fn));
+        auto* value = detail::stack_reserve<T>(ctx);
+        __agbabi_coro_make(coro, value, callable_context_type<Fn>::get_invoke());
+
+        coro->ctx = ctx;
+        coro->value = value;
+        ctx->coro = coro;
+        return ctx;
+    }
+
+    context_type* m_ctx;
 public:
-    using value_type = Type;
+    template <typename Fn>
+    pull_coroutine(detail::PointerEnd auto& stack, Fn&& fn) noexcept : m_ctx{make_context(std::end(stack), std::forward<Fn>(fn))} {
+    }
+
+    pull_coroutine(const pull_coroutine&) = delete;
+    pull_coroutine& operator=(const pull_coroutine&) = delete;
+
+    pull_coroutine(pull_coroutine&& other) noexcept : m_ctx{} {
+        std::swap(m_ctx, other.m_ctx);
+    }
+
+    auto& operator=(pull_coroutine&& other) noexcept {
+        std::swap(m_ctx, other.m_ctx);
+        return *this;
+    }
+
+    T&& operator()() noexcept {
+        m_ctx->swap();
+        return std::move(*m_ctx->coro->value);
+    }
+
+    [[nodiscard]]
+    explicit operator bool() const noexcept {
+        return m_ctx && !m_ctx->coro->joined;
+    }
+
+    [[nodiscard]]
+    bool operator!() const noexcept {
+        return !m_ctx || m_ctx->coro->joined;
+    }
 
     class iterator {
+    private:
+        pull_coroutine* m_coro{};
+
+        void fetch() noexcept {
+            (*m_coro)();
+            if (!(*m_coro)) {
+                m_coro = nullptr;
+            }
+        }
     public:
-        explicit iterator(pull_coroutine& pull) noexcept : m_pull{&pull} {
-            std::invoke(*m_pull);
+        using iterator_category = std::input_iterator_tag;
+        using value_type = std::remove_reference_t<T>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        using pointer_type = pointer;
+        using reference_type = reference;
+
+        iterator() noexcept = default;
+
+        explicit iterator(pull_coroutine* coro) noexcept : m_coro{coro} {
+            fetch();
         }
 
-        [[nodiscard]]
-        auto operator!=(sentinel) const noexcept {
-            return bool{*m_pull};
+        bool operator==(const iterator& other) const noexcept {
+            return other.m_coro == m_coro;
         }
 
-        [[nodiscard]]
-        auto operator*() const noexcept {
-            return m_pull->get();
+        bool operator!=(const iterator& other) const noexcept {
+            return other.m_coro != m_coro;
         }
 
-        auto& operator++() noexcept {
-            std::invoke(*m_pull);
+        auto& operator++() {
+            fetch();
             return *this;
         }
-    private:
-        pull_coroutine* const m_pull{};
+
+        void operator++(int) {
+            fetch();
+        }
+
+        auto& operator*() const noexcept {
+            return *m_coro->m_ctx->coro->value;
+        }
+
+        auto* operator->() const noexcept {
+            return m_coro->m_ctx->coro->value;
+        }
     };
 
-    class push_type {
-        friend pull_coroutine;
-    public:
-        explicit push_type(agbabi_coro_t* owner) noexcept : m_owner{owner} {}
-
-        push_type& operator()(const value_type& value) noexcept {
-            m_value.emplace(value);
-            __agbabi_coro_yield(m_owner, 0);
-            return *this;
-        }
-
-        push_type& operator()(value_type&& value) noexcept {
-            m_value.emplace(std::move(value));
-            __agbabi_coro_yield(m_owner, 0);
-            return *this;
-        }
-    private:
-        push_type(push_type&& other) noexcept : m_owner{other.m_owner}, m_value{other.m_value} {
-            other.m_owner = nullptr;
-        }
-
-        agbabi_coro_t* m_owner{};
-        std::optional<value_type> m_value{};
-    };
-
-    using function_type = std::function<void(push_type&)>;
-
-    template <class Stack> requires detail::PointerEnd<Stack>
-    pull_coroutine(Stack& stack, function_type&& function) noexcept : agbabi_coro_t{} {
-        auto stackEnd = reinterpret_cast<std::ptrdiff_t>(std::end(stack));
-        m_push = detail::stack_emplace<push_type>(stackEnd, this);
-        m_function = detail::stack_put(stackEnd, function);
-        __agbabi_coro_make(this, reinterpret_cast<void*>(stackEnd), invoke);
-    }
-
-    pull_coroutine(pull_coroutine&& other) noexcept : agbabi_coro_t{other.arm_sp, other.joined}, m_push{other.m_push}, m_function{other.m_function} {
-        other.arm_sp = other.joined = 0;
-        other.m_yield = nullptr;
-        other.m_function = nullptr;
-        m_push->m_owner = this;
-    }
-
-    void operator()() noexcept {
-        __agbabi_coro_resume(this);
-    }
-
-    [[nodiscard]]
-    explicit operator auto() const noexcept {
-        return m_push->m_value.has_value();
-    }
-
-    [[nodiscard]]
-    auto& get() const noexcept {
-        return m_push->m_value.value();
-    }
-
-    [[nodiscard]]
     auto begin() noexcept {
-        return iterator(*this);
+        return iterator(this);
     }
 
-    [[nodiscard]]
-    auto end() const noexcept {
-        return sentinel{};
+    auto end() noexcept {
+        return iterator();
     }
-private:
-    static int invoke(agbabi_coro_t* self) noexcept {
-        auto* f = reinterpret_cast<pull_coroutine*>(self);
-        std::invoke(*f->m_function, *f->m_push);
-        f->m_push->m_value.reset();
-        return 0;
-    }
-
-    push_type* m_push{};
-    function_type* m_function{};
 };
 
 } // namespace gba::agbabi
+
+#include <gba/ext/agbabi/detail/pull_coroutine_context.hpp>
 
 #endif // define GBAXX_EXT_AGBABI_PULL_COROUTINE_HPP

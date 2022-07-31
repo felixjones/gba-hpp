@@ -16,10 +16,10 @@
 
 namespace gba::agbabi {
 
-template <typename Type>
+template <typename T>
 struct coroutine {
-    using pull_type = pull_coroutine<Type>;
-    using push_type = push_coroutine<Type>;
+    using pull_type = pull_coroutine<T>;
+    using push_type = push_coroutine<T>;
 };
 
 template <>

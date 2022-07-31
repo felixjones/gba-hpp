@@ -19,17 +19,32 @@
 
 namespace gba::util {
 
-template <class T>
+template <typename T>
 concept IntegerArray = requires {
     requires Array<T>;
     requires std::is_integral_v<array_value_type<T>>;
 };
 
-template <class T>
+template <typename T>
 concept ByteArray = requires {
     requires Array<T>;
     requires std::is_same_v<std::byte, array_value_type<T>>;
 };
+
+template <typename T>
+concept StringLiteral = std::is_same_v<T,
+        std::add_lvalue_reference_t<
+            const char[std::extent_v<std::remove_reference_t<T>>]
+        >
+    >;
+
+consteval auto to_char_array(StringLiteral auto&& data) noexcept {
+    constexpr auto size = array_size<decltype(data)> - 1u;
+
+    std::array<char, size> result{};
+    std::copy_n(std::cbegin(data), size, std::begin(result));
+    return result;
+}
 
 consteval ByteArray auto to_byte_array(const IntegerArray auto& data) noexcept {
     using value_type = array_value_type<decltype(data)>;

@@ -42,11 +42,11 @@ inline void register_write(const Type& value) noexcept {
 template <class Type, std::uintptr_t Address, typename... Args>
 inline void register_emplace(Args&&... args) noexcept {
     if constexpr (std::is_fundamental_v<Type> || std::is_pointer_v<Type>) {
-        *reinterpret_cast<volatile Type*>(Address) = Type{args...};
+        *reinterpret_cast<volatile Type*>(Address) = Type{std::forward<Args>(args)...};
     } else if constexpr (std::is_constructible_v<Type, Args...>) {
-        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>::construct(args...));
+        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>::construct(std::forward<Args>(args)...));
     } else if constexpr (std::is_trivially_copyable_v<Type>) {
-        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>{Type{args...}});
+        reinterpret_cast<volatile util::bit_container<Type>*>(Address)->copy_from(util::bit_container<Type>{Type{std::forward<Args>(args)...}});
     } else {
         static_assert(util::always_false<Type>);
     }

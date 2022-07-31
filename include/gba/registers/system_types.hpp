@@ -67,6 +67,10 @@ namespace waitcnt {
 
     static constexpr auto prefetch = field_of::boolean<waitcnt_type, 14>();
 
+    static constexpr auto phi(phi i) noexcept {
+        return field_of::enum_class<waitcnt_type, 11, gba::phi, phi::div_1>(i);
+    }
+
 } // namespace waitcnt
 
 namespace undocumented {

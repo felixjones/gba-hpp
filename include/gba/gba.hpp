@@ -51,6 +51,7 @@
 #include <gba/bios/swi_call.hpp>
 
 #include <gba/ext/agbabi.hpp>
+#include <gba/ext/log.hpp>
 
 #include <gba/interrupt/handler.hpp>
 

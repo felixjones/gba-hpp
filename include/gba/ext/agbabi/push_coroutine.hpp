@@ -70,6 +70,7 @@ private:
 public:
     template <typename Fn>
     push_coroutine(detail::PointerEnd auto& stack, Fn&& fn) noexcept : m_ctx{make_context(std::end(stack), std::forward<Fn>(fn))} {
+        m_ctx->swap(); // Execute until a push is requested
     }
 
     push_coroutine(const push_coroutine&) = delete;

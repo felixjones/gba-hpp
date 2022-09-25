@@ -51,6 +51,7 @@ public:
         if ((m_previous & bits) == 0) {
             return (m_current & bits) == bits;
         }
+        return false;
     }
 
     [[nodiscard]]
@@ -59,6 +60,7 @@ public:
         if ((m_previous & bits) == bits) {
             return (m_current & bits) == 0;
         }
+        return false;
     }
 
     [[nodiscard]]

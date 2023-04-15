@@ -7,12 +7,17 @@
 ===============================================================================
 */
 
-#ifndef GBAXX_GBA_HPP
-#define GBAXX_GBA_HPP
+#ifndef GBAXX_EXT_AGBABI_AGBABI_HPP
+#define GBAXX_EXT_AGBABI_AGBABI_HPP
+#ifdef __has_include
+    #if __has_include(<agbabi.h>)
+        #include <agbabi.h>
+    #endif
+#endif
 
-#include <gba/mmio.hpp>
-#include <gba/type.hpp>
+#ifdef AGBABI_H
 
-#include <gba/ext/agbabi/agbabi.hpp>
+//TODO
 
-#endif // define GBAXX_GBA_HPP
+#endif
+#endif // define GBAXX_EXT_AGBABI_AGBABI_HPP

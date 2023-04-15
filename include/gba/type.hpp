@@ -1,16 +1,15 @@
 /*
 ===============================================================================
 
- Copyright (C) 2022 gba-hpp contributors
+ Copyright (C) 2022-2023 gba-hpp contributors
  For conditions of distribution and use, see copyright notice in LICENSE.md
 
 ===============================================================================
 */
 
-#include <gba/gba.hpp>
+#ifndef GBAXX_TYPE_HPP
+#define GBAXX_TYPE_HPP
 
-int main() {
-    using namespace gba;
+#include <gba/type/memory.hpp>
 
-    return 0;
-}
+#endif // define GBAXX_TYPE_HPP

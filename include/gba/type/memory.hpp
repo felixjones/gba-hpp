@@ -155,6 +155,16 @@ namespace gba {
             return this->operator*()[i];
         }
 
+        [[gnu::always_inline]]
+        constexpr auto* operator&() const noexcept {
+            return reinterpret_cast<std::remove_volatile_t<std::remove_all_extents_t<T>>*>(m_ptr);
+        }
+
+        [[gnu::always_inline]]
+        constexpr auto size() const noexcept requires std::is_array_v<T> {
+            return sizeof(T);
+        }
+
         std::uintptr_t m_ptr;
     };
 

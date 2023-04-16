@@ -10,12 +10,17 @@
 #ifndef GBAXX_TYPE_HPP
 #define GBAXX_TYPE_HPP
 
-#include <gba/type/fixedpoint.hpp>
+#include <gba/type/fixed.hpp>
+#include <gba/type/int.hpp>
 #include <gba/type/memory.hpp>
+#include <gba/type/vector.hpp>
 
 namespace gba {
 
-    using u8x2 [[gnu::vector_size(sizeof(unsigned char) * 2)]] = unsigned char;
+    using u8 = uinttype<8>;
+    using u8x2 = make_vector<u8, 2>;
+
+    using u16 = uinttype<16>;
 
 } // namespace gba
 

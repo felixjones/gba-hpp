@@ -10,6 +10,7 @@
 #ifndef GBAXX_TYPE_HPP
 #define GBAXX_TYPE_HPP
 
+#include <gba/type/angle.hpp>
 #include <gba/type/fixed.hpp>
 #include <gba/type/int.hpp>
 #include <gba/type/memory.hpp>

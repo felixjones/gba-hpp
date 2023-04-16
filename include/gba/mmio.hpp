@@ -24,6 +24,8 @@ namespace gba::mmio {
 
 namespace {
 
+    // Video
+
     constexpr auto DISPCNT = registral<const_ptr<volatile dispcnt>(0x4000000)>{};
     constexpr auto DISPSTAT = registral<const_ptr<volatile dispstat>(0x4000004)>{};
     constexpr auto VCOUNT = registral<const_ptr<const volatile std::uint16_t>(0x4000006)>{};
@@ -67,6 +69,10 @@ namespace {
     constexpr auto WINOUT = registral<const_ptr<volatile winout>(0x400004A)>{};
 
     constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
+
+    // Video RAM
+
+    constexpr auto VIDEO3_VRAM = const_ptr<volatile std::uint16_t[160][240]>(0x6000000);
 
 }
 

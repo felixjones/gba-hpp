@@ -18,9 +18,8 @@ namespace gba::agbabi {
 
 namespace {
 
-    //TODO: BAM type
-    auto sin(std::integral auto bam) noexcept {
-        return fixed<int, 29>::from_data(__agbabi_sin(bam));
+    auto sin(Angle auto bam) noexcept {
+        return fixed<int, 29>::from_data(__agbabi_sin(angle<int, 15>(bam).data()));
     }
 
 }

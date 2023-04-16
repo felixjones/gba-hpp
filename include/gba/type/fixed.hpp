@@ -10,37 +10,16 @@
 #ifndef GBAXX_TYPE_FIXED_HPP
 #define GBAXX_TYPE_FIXED_HPP
 
-#include <cmath>
 #include <concepts>
 #include <type_traits>
 #include <utility>
 
+#include <gba/type/util.hpp>
 #include <gba/type/vector.hpp>
 
 namespace gba {
 
-    namespace detail {
-
-        template <typename T>
-        concept Primitive = std::is_fundamental_v<T> || Vector<T>;
-
-    } // namespace detail
-
-    template <typename T>
-    consteval auto round(std::floating_point auto x) {
-        return T(x + decltype(x)(0.5));
-    }
-
-    template <std::make_signed_t<std::size_t> Sh>
-    constexpr auto shift_right(detail::Primitive auto x) noexcept {
-        if constexpr (Sh < 0) {
-            return x << -Sh;
-        } else {
-            return x >> Sh;
-        }
-    }
-
-    template <detail::Primitive T, std::size_t F>
+    template <Fundamental T, std::size_t F>
     struct fixed {
         using data_type = T;
         static constexpr auto exp = F;
@@ -57,10 +36,10 @@ namespace gba {
         template <std::integral... Args>
         explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
 
-        template <detail::Primitive U, std::size_t F2>
-        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_right<F - F2>(f.data())} {}
+        template <Fundamental U, std::size_t F2>
+        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_right<int(F) - int(F2)>(f.data())} {}
 
-        template <detail::Primitive U, std::size_t F2>
+        template <Fundamental U, std::size_t F2>
         constexpr fixed& operator=(fixed<U, F2> f) noexcept {
             m_data = shift_right<F - F2>(f.data());
             return *this;

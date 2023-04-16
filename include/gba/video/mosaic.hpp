@@ -7,16 +7,18 @@
 ===============================================================================
 */
 
-#ifndef GBAXX_TYPE_HPP
-#define GBAXX_TYPE_HPP
-
-#include <gba/type/fixedpoint.hpp>
-#include <gba/type/memory.hpp>
+#ifndef GBAXX_VIDEO_MOSAIC_HPP
+#define GBAXX_VIDEO_MOSAIC_HPP
 
 namespace gba {
 
-    using u8x2 [[gnu::vector_size(sizeof(unsigned char) * 2)]] = unsigned char;
+    struct alignas(int) mosaic {
+        unsigned int bg_h_extra : 4 {};
+        unsigned int bg_v_extra : 4 {};
+        unsigned int obj_h_extra : 4 {};
+        unsigned int obj_v_extra : 4 {};
+    };
 
 } // namespace gba
 
-#endif // define GBAXX_TYPE_HPP
+#endif // define GBAXX_VIDEO_MOSAIC_HPP

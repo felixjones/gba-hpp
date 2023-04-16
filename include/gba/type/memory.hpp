@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <utility>
 
 namespace gba {
@@ -163,9 +164,14 @@ namespace gba {
 
         template <typename T = value_type>
         [[gnu::always_inline]]
-        auto& operator=(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
+        constexpr auto& operator=(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
             volatile_store(Ptr.get(), static_cast<value_type&&>(value));
             return *this;
+        }
+
+        [[gnu::always_inline]]
+        constexpr value_type* operator&() const noexcept {
+            return Ptr.get();
         }
 
         [[gnu::always_inline]]
@@ -181,6 +187,18 @@ namespace gba {
         [[gnu::always_inline]]
         constexpr std::remove_cvref_t<value_type> value() const noexcept {
             return volatile_load(Ptr.get());
+        }
+
+        [[gnu::always_inline]]
+        constexpr auto& operator[](std::size_t i) const noexcept requires(!std::is_const_v<value_type>) {
+            using element_type = std::remove_reference_t<decltype(value_type()[0])>;
+            return reinterpret_cast<volatile element_type*>(Ptr.get())[i];
+        }
+
+        [[gnu::always_inline]]
+        constexpr auto operator[](std::size_t i) const noexcept requires(std::is_const_v<value_type>) {
+            using element_type = std::remove_reference_t<decltype(value_type()[0])>;
+            return volatile_load(reinterpret_cast<const volatile element_type*>(Ptr.get()) + i);
         }
 
         template <auto T>

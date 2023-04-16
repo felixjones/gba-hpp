@@ -7,16 +7,21 @@
 ===============================================================================
 */
 
-#ifndef GBAXX_TYPE_HPP
-#define GBAXX_TYPE_HPP
+#ifndef GBAXX_TYPE_FIXEDPOINT_HPP
+#define GBAXX_TYPE_FIXEDPOINT_HPP
 
-#include <gba/type/fixedpoint.hpp>
-#include <gba/type/memory.hpp>
+#include <concepts>
 
 namespace gba {
 
-    using u8x2 [[gnu::vector_size(sizeof(unsigned char) * 2)]] = unsigned char;
+    template <std::size_t Int, std::size_t Frac, std::integral T>
+    struct fixedpoint {
+        T data;
+    };
+
+    template <std::size_t E>
+    using make_fixed = fixedpoint<32 - E, E, int>;
 
 } // namespace gba
 
-#endif // define GBAXX_TYPE_HPP
+#endif // define GBAXX_TYPE_FIXEDPOINT_HPP

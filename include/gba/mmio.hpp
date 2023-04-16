@@ -14,6 +14,8 @@
 
 #include <gba/type.hpp>
 
+#include <gba/input/key.hpp>
+
 #include <gba/video/bgxcnt.hpp>
 #include <gba/video/dispcnt.hpp>
 #include <gba/video/dispstat.hpp>
@@ -69,6 +71,15 @@ namespace {
     constexpr auto WINOUT = registral<const_ptr<volatile winout>(0x400004A)>{};
 
     constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
+
+    // Keys
+
+    constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
+
+    // Palette RAM
+
+    constexpr auto BG_PALETTE = const_ptr<volatile std::uint16_t[256]>(0x5000000);
+    constexpr auto OBJ_PALETTE = const_ptr<volatile std::uint16_t[256]>(0x5000200);
 
     // Video RAM
 

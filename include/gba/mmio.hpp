@@ -73,6 +73,7 @@ namespace {
     // Video RAM
 
     constexpr auto VIDEO3_VRAM = const_ptr<volatile std::uint16_t[160][240]>(0x6000000);
+    constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
 
 }
 

@@ -151,8 +151,8 @@ namespace gba {
         }
 
         [[gnu::always_inline]]
-        constexpr T& operator[](std::size_t i) const noexcept requires std::is_array_v<T> {
-            return get()[i];
+        constexpr std::remove_extent_t<T>& operator[](std::size_t i) const noexcept requires std::is_array_v<T> {
+            return this->operator*()[i];
         }
 
         std::uintptr_t m_ptr;

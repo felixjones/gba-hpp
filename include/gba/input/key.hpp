@@ -15,16 +15,16 @@
 namespace gba {
 
     struct alignas(short) keyinput {
-        bool a : 1 {true};
-        bool b : 1 {true};
-        bool select : 1 {true};
-        bool start : 1 {true};
-        bool right : 1 {true};
-        bool left : 1 {true};
-        bool up : 1 {true};
-        bool down : 1 {true};
-        bool r : 1 {true};
-        bool l : 1 {true};
+        bool i_a : 1 {true};
+        bool i_b : 1 {true};
+        bool i_select : 1 {true};
+        bool i_start : 1 {true};
+        bool i_right : 1 {true};
+        bool i_left : 1 {true};
+        bool i_up : 1 {true};
+        bool i_down : 1 {true};
+        bool i_r : 1 {true};
+        bool i_l : 1 {true};
 
         [[nodiscard]]
         constexpr int xaxis() const noexcept {
@@ -49,7 +49,7 @@ namespace gba {
         }
 
         [[nodiscard]]
-        constexpr int r_xaxis() const noexcept {
+        constexpr int i_xaxis() const noexcept {
             int keys = __builtin_bit_cast(short, *this);
             keys = (keys << 26) >> 30; // Sign extend
 #if defined(__thumb__)
@@ -60,7 +60,7 @@ namespace gba {
         }
 
         [[nodiscard]]
-        constexpr int r_yaxis() const noexcept {
+        constexpr int i_yaxis() const noexcept {
             int keys = __builtin_bit_cast(short, *this);
             keys = (keys << 24) >> 30; // Sign extend
 #if defined(__thumb__)

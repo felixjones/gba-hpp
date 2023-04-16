@@ -12,6 +12,8 @@
 
 #include <cmath>
 #include <concepts>
+#include <type_traits>
+#include <utility>
 
 #include <gba/type/vector.hpp>
 
@@ -40,6 +42,9 @@ namespace gba {
 
     template <detail::Primitive T, std::size_t F>
     struct fixed {
+        using data_type = T;
+        static constexpr auto exp = F;
+
         explicit consteval fixed(std::floating_point auto f) requires (!Vector<T>) : m_data{round<T>(f * (1 << F))} {}
 
         template <std::floating_point... Args>
@@ -51,6 +56,9 @@ namespace gba {
 
         template <std::integral... Args>
         explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
+
+        template <detail::Primitive U, std::size_t F2>
+        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_right<F - F2>(f.data())} {}
 
         template <detail::Primitive U, std::size_t F2>
         constexpr fixed& operator=(fixed<U, F2> f) noexcept {
@@ -65,6 +73,15 @@ namespace gba {
 
         constexpr T data() const noexcept {
             return m_data;
+        }
+
+        constexpr auto operator[](std::integral auto i) const noexcept requires Vector<T> {
+            return fixed<typename vector_traits<T>::value_type, F>::from_data(m_data[i]);
+        }
+
+        template <std::size_t Index>
+        constexpr std::tuple_element_t<Index, fixed> get() const noexcept requires Vector<T> {
+            return fixed<typename vector_traits<T>::value_type, F>::from_data(m_data[Index]);
         }
 
         T m_data{};
@@ -85,12 +102,22 @@ namespace gba {
         }
     };
 
-    template <std::size_t F>
-    using make_fixed = fixed<int, F>;
-
-    template <std::size_t F, std::size_t N>
-    using make_fixed_vector = fixed<make_vector<int, N>, F>;
+    template <typename T>
+    concept Fixed = std::same_as<fixed<typename T::data_type, T::exp>, T>;
 
 } // namespace gba
+
+namespace std {
+
+    template <gba::Fixed F> requires gba::Vector<typename F::data_type>
+    struct tuple_size<F> : integral_constant<std::size_t, gba::vector_traits<typename F::data_type>::size> {};
+
+    template <size_t Index, gba::Fixed F> requires gba::Vector<typename F::data_type>
+    struct tuple_element<Index, F> {
+        static_assert(Index < gba::vector_traits<typename F::data_type>::size, "Index out of bounds for vector");
+        using type = gba::fixed<typename gba::vector_traits<typename F::data_type>::value_type, F::exp>;
+    };
+
+} // namespace std
 
 #endif // define GBAXX_TYPE_FIXED_HPP

@@ -16,6 +16,8 @@
 
 #include <gba/input/key.hpp>
 
+#include <gba/interrupt/irq.hpp>
+
 #include <gba/video/bgxcnt.hpp>
 #include <gba/video/dispcnt.hpp>
 #include <gba/video/dispstat.hpp>
@@ -25,6 +27,10 @@
 namespace gba::mmio {
 
 namespace {
+
+    // IRQ Handler
+
+    constexpr auto IRQ_HANDLER = registral<const_ptr<void(* volatile)()>(0x03FFFFFC)>{};
 
     // Video
 
@@ -75,6 +81,12 @@ namespace {
     // Keys
 
     constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
+
+    // Interrupts
+
+    constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
+    constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
+    constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
 
     // Palette RAM
 

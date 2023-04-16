@@ -18,7 +18,6 @@
 namespace gba {
 
     template <typename T>
-    [[gnu::always_inline]]
     constexpr auto volatile_load(const T* ptr) noexcept -> std::remove_cvref_t<T> {
         using value_type = std::remove_cvref_t<T>;
         static_assert(std::is_trivially_copyable_v<value_type>, "Volatile load can only be used with trivially copyable types");
@@ -27,7 +26,6 @@ namespace gba {
     }
 
     template <typename T, typename U = std::remove_cvref_t<T>>
-    [[gnu::always_inline]]
     constexpr void volatile_store(T* ptr, U&& value) noexcept {
         using value_type = std::remove_cvref_t<T>;
         static_assert(std::is_trivially_copyable_v<value_type>, "Volatile store can only be used with trivially copyable types");
@@ -54,7 +52,6 @@ namespace gba {
     }
 
     template <typename T>
-    [[gnu::always_inline]]
     constexpr void volatile_swap(T* a, T* b) noexcept {
         using value_type = std::remove_cvref_t<T>;
         static_assert(std::is_trivially_copyable_v<value_type>, "Volatile swap can only be used with trivially copyable types");
@@ -95,7 +92,6 @@ namespace gba {
     }
 
     template <typename T, typename... Args>
-    [[gnu::always_inline]]
     constexpr T volatile_emplace(T* ptr, Args&&... args) noexcept {
         using value_type = std::remove_cvref_t<T>;
         static_assert(std::is_trivially_copyable_v<value_type>, "Volatile emplace can only be used with trivially copyable types");
@@ -135,32 +131,26 @@ namespace gba {
 
         constexpr explicit const_ptr(std::uintptr_t p) noexcept : m_ptr{p} {}
 
-        [[gnu::always_inline]]
         constexpr pointer get() const noexcept {
             return reinterpret_cast<pointer>(m_ptr);
         }
 
-        [[gnu::always_inline]]
         constexpr std::add_lvalue_reference_t<T> operator*() const noexcept {
             return *get();
         }
 
-        [[gnu::always_inline]]
         constexpr pointer operator->() const noexcept {
             return get();
         }
 
-        [[gnu::always_inline]]
-        constexpr std::remove_extent_t<T>& operator[](std::size_t i) const noexcept requires std::is_array_v<T> {
+        constexpr std::remove_extent_t<T>& operator[](std::integral auto i) const noexcept requires std::is_array_v<T> {
             return this->operator*()[i];
         }
 
-        [[gnu::always_inline]]
         constexpr auto* operator&() const noexcept {
             return reinterpret_cast<std::remove_volatile_t<std::remove_all_extents_t<T>>*>(m_ptr);
         }
 
-        [[gnu::always_inline]]
         constexpr auto size() const noexcept requires std::is_array_v<T> {
             return sizeof(T);
         }
@@ -173,65 +163,54 @@ namespace gba {
         using value_type = std::remove_reference_t<typename decltype(Ptr)::element_type>;
 
         template <typename T = value_type>
-        [[gnu::always_inline]]
         constexpr auto& operator=(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
             volatile_store(Ptr.get(), static_cast<value_type&&>(value));
             return *this;
         }
 
-        [[gnu::always_inline]]
         constexpr value_type* operator&() const noexcept {
             return Ptr.get();
         }
 
-        [[gnu::always_inline]]
         constexpr value_type* operator->() const noexcept {
             return Ptr.get();
         }
 
-        [[gnu::always_inline]]
         constexpr std::remove_cvref_t<value_type> operator*() const noexcept {
             return value();
         }
 
-        [[gnu::always_inline]]
         constexpr std::remove_cvref_t<value_type> value() const noexcept {
             return volatile_load(Ptr.get());
         }
 
-        [[gnu::always_inline]]
-        constexpr auto& operator[](std::size_t i) const noexcept requires(!std::is_const_v<value_type>) {
+        constexpr auto& operator[](std::integral auto i) const noexcept requires(!std::is_const_v<value_type>) {
             using element_type = std::remove_reference_t<decltype(value_type()[0])>;
             return reinterpret_cast<volatile element_type*>(Ptr.get())[i];
         }
 
-        [[gnu::always_inline]]
-        constexpr auto operator[](std::size_t i) const noexcept requires(std::is_const_v<value_type>) {
+        constexpr auto operator[](std::integral auto i) const noexcept requires(std::is_const_v<value_type>) {
             using element_type = std::remove_reference_t<decltype(value_type()[0])>;
             return volatile_load(reinterpret_cast<const volatile element_type*>(Ptr.get()) + i);
         }
 
         template <auto T>
-        [[gnu::always_inline]]
         constexpr void swap(const registral<T>&) const noexcept requires(!std::is_const_v<value_type>) {
             volatile_swap(Ptr.get(), T.get());
         }
 
         template <typename T = value_type>
-        [[gnu::always_inline]]
         constexpr void swap(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
             auto prev = volatile_load(Ptr.get());
             volatile_store(Ptr.get(), static_cast<value_type&&>(value));
             value = static_cast<value_type&&>(prev);
         }
 
-        [[gnu::always_inline]]
         constexpr void reset() const noexcept requires(!std::is_const_v<value_type>) {
             volatile_emplace(Ptr.get());
         }
 
         template <typename... Args>
-        [[gnu::always_inline]]
         constexpr std::remove_cvref_t<value_type> emplace(Args&&... args) const noexcept requires(!std::is_const_v<value_type>) {
             return volatile_emplace(Ptr.get(), std::forward<Args>(args)...);
         }

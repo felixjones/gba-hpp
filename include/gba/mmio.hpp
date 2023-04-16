@@ -17,6 +17,8 @@
 #include <gba/video/bgxcnt.hpp>
 #include <gba/video/dispcnt.hpp>
 #include <gba/video/dispstat.hpp>
+#include <gba/video/mosaic.hpp>
+#include <gba/video/win.hpp>
 
 namespace gba::mmio {
 
@@ -42,6 +44,29 @@ namespace {
 
     constexpr auto BG3HOFS = registral<const_ptr<volatile std::uint16_t>(0x400001C)>{};
     constexpr auto BG3VOFS = registral<const_ptr<volatile std::uint16_t>(0x400001E)>{};
+
+    constexpr auto BG2PA = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000020)>{};
+    constexpr auto BG2PB = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000022)>{};
+    constexpr auto BG2PC = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000024)>{};
+    constexpr auto BG2PD = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000026)>{};
+    constexpr auto BG2X = registral<const_ptr<volatile fixedpoint<19, 8, int>>(0x4000028)>{};
+    constexpr auto BG2Y = registral<const_ptr<volatile fixedpoint<19, 8, int>>(0x400002C)>{};
+
+    constexpr auto BG3PA = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000030)>{};
+    constexpr auto BG3PB = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000032)>{};
+    constexpr auto BG3PC = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000034)>{};
+    constexpr auto BG3PD = registral<const_ptr<volatile fixedpoint<7, 8, short>>(0x4000036)>{};
+    constexpr auto BG3X = registral<const_ptr<volatile fixedpoint<19, 8, int>>(0x4000038)>{};
+    constexpr auto BG3Y = registral<const_ptr<volatile fixedpoint<19, 8, int>>(0x400003C)>{};
+
+    constexpr auto WIN0H = registral<const_ptr<volatile u8x2>(0x4000040)>{};
+    constexpr auto WIN1H = registral<const_ptr<volatile u8x2>(0x4000042)>{};
+    constexpr auto WIN0V = registral<const_ptr<volatile u8x2>(0x4000044)>{};
+    constexpr auto WIN1V = registral<const_ptr<volatile u8x2>(0x4000046)>{};
+    constexpr auto WININ = registral<const_ptr<volatile winin>(0x4000048)>{};
+    constexpr auto WINOUT = registral<const_ptr<volatile winout>(0x400004A)>{};
+
+    constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
 
 }
 

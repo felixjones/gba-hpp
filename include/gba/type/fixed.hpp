@@ -20,6 +20,12 @@
 namespace gba {
 
     template <Fundamental T, std::size_t F>
+    struct fixed;
+
+    template <typename T>
+    concept Fixed = std::same_as<fixed<typename T::data_type, T::exp>, T>;
+
+    template <Fundamental T, std::size_t F>
     struct fixed {
         using data_type = T;
         static constexpr auto exp = F;
@@ -36,13 +42,20 @@ namespace gba {
         template <std::integral... Args>
         explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
 
-        template <Fundamental U, std::size_t F2>
-        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_right<int(F) - int(F2)>(f.data())} {}
+        template <Fixed... Args>
+        explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{(shift_to<Args::exp, F>(args.data()))...} {}
 
         template <Fundamental U, std::size_t F2>
-        constexpr fixed& operator=(fixed<U, F2> f) noexcept {
-            m_data = shift_right<F - F2>(f.data());
+        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_to<F2, F>(f.data())} {}
+
+        template <Fundamental U, std::size_t F2>
+        constexpr fixed& operator=(fixed<U, F2>&& f) noexcept {
+            m_data = shift_to<F2, F>(f.data());
             return *this;
+        }
+
+        constexpr fixed operator-() const noexcept {
+            return fixed::from_data(-m_data);
         }
 
         template <std::integral U>
@@ -66,13 +79,17 @@ namespace gba {
         T m_data{};
 
     protected:
-        constexpr fixed(T x, std::nullptr_t) noexcept requires (!Vector<T>) : m_data{x} {}
+        constexpr fixed(T x, std::nullptr_t) noexcept : m_data{x} {}
 
         template <std::integral... Args>
         explicit constexpr fixed(std::nullptr_t, Args... args) noexcept requires Vector<T> : m_data{args...} {}
     public:
-        static constexpr auto from_data(std::integral auto x) noexcept requires (!Vector<T>) {
-            return fixed(x, nullptr);
+        static constexpr auto from_data(Fundamental auto x) noexcept {
+            if constexpr (Vector<decltype(x)>) {
+                return fixed(__builtin_convertvector(x, data_type), nullptr);
+            } else {
+                return fixed(x, nullptr);
+            }
         }
 
         template <std::integral... Args>
@@ -81,15 +98,58 @@ namespace gba {
         }
     };
 
-    template <typename T>
-    concept Fixed = std::same_as<fixed<typename T::data_type, T::exp>, T>;
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
+
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+
+        return fixed<data_type, exp>::from_data(shift_to<Lhs::exp, exp>(lhs.data()) + shift_to<Rhs::exp, exp>(rhs.data()));
+    }
+
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() - typename Rhs::data_type());
+
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+
+        return fixed<data_type, exp>::from_data(shift_to<Lhs::exp, exp>(lhs.data()) - shift_to<Rhs::exp, exp>(rhs.data()));
+    }
+
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
+        using bigger_type = typename make_bigger<data_type>::type;
+
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+        constexpr auto rsh = (Lhs::exp + Rhs::exp) - exp;
+
+        if constexpr (Vector<data_type>) {
+            const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
+            const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
+            return fixed<data_type, exp>::from_data((biglhs * bigrhs) >> rsh);
+        } else {
+            const auto data = bigger_type(lhs.data()) * rhs.data();
+            return fixed<data_type, exp>::from_data(data >> rsh);
+        }
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs::from_data(lhs.data() * rhs);
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs::from_data(lhs.data() / rhs);
+    }
 
 } // namespace gba
 
 namespace std {
 
     template <gba::Fixed F> requires gba::Vector<typename F::data_type>
-    struct tuple_size<F> : integral_constant<std::size_t, gba::vector_traits<typename F::data_type>::size> {};
+    struct tuple_size<F> : integral_constant<size_t, gba::vector_traits<typename F::data_type>::size> {};
 
     template <size_t Index, gba::Fixed F> requires gba::Vector<typename F::data_type>
     struct tuple_element<Index, F> {

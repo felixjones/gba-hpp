@@ -24,7 +24,7 @@ namespace gba {
         return T(x + decltype(x)(0.5));
     }
 
-    template <std::make_signed_t<std::size_t> Sh>
+    template <std::int64_t Sh>
     constexpr auto shift_right(Fundamental auto x) noexcept {
         if constexpr (Sh < 0) {
             return x << -Sh;
@@ -32,6 +32,35 @@ namespace gba {
             return x >> Sh;
         }
     }
+
+    template <std::int64_t From, std::int64_t To>
+    constexpr auto shift_to(Fundamental auto x) noexcept {
+        return shift_right<From - To>(x);
+    }
+
+    template <typename Sign, typename Target>
+    using copy_sign = std::conditional_t<std::is_signed_v<Sign>,
+                std::make_signed_t<Target>,
+                std::make_unsigned_t<Target>
+            >;
+
+    template <typename T>
+    struct make_bigger;
+
+    template <std::integral T>
+    struct make_bigger<T> {
+        using type = copy_sign<T, std::conditional_t<std::is_same_v<std::make_signed_t<T>, char>,
+                short,
+                std::conditional_t<std::is_same_v<std::make_signed_t<T>, short>,
+                        int,
+                        long long // No larger integer type
+                >>>;
+    };
+
+    template <Vector T>
+    struct make_bigger<T> {
+        using type = make_vector<typename make_bigger<typename vector_traits<T>::value_type>::type, vector_traits<T>::size>;
+    };
 
 } // namespace gba
 

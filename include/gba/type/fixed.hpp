@@ -94,7 +94,7 @@ namespace gba {
             if constexpr (Vector<decltype(x)>) {
                 return fixed(__builtin_convertvector(x, data_type), nullptr);
             } else {
-                return fixed(x, nullptr);
+                return fixed(fixed::data_type(x), nullptr);
             }
         }
 
@@ -140,6 +140,24 @@ namespace gba {
         }
     }
 
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
+        using bigger_type = typename make_bigger<data_type>::type;
+
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+        constexpr auto rsh = (Lhs::exp + Rhs::exp) - exp;
+
+        if constexpr (Vector<data_type>) {
+            const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
+            const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
+            return fixed<data_type, exp>::from_data((biglhs << rhs) / bigrhs);
+        } else {
+            const auto data = (bigger_type(lhs.data()) << rsh) / rhs.data();
+            return fixed<data_type, exp>::from_data(data);
+        }
+    }
+
     template <Fixed Lhs, Fundamental Rhs>
     constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() * rhs);
@@ -148,6 +166,17 @@ namespace gba {
     template <Fixed Lhs, Fundamental Rhs>
     constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() / rhs);
+    }
+
+    template <Fundamental Lhs, Fixed Rhs>
+    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+        return fixed<Lhs, Rhs::exp>(lhs) / rhs;
+    }
+
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+        return shift_to<Lhs::exp, exp>(lhs.data()) <=> shift_to<Rhs::exp, exp>(rhs.data());
     }
 
 } // namespace gba

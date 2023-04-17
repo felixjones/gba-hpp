@@ -49,6 +49,10 @@ namespace gba {
             return *this;
         }
 
+        constexpr angle operator-() const noexcept {
+            return angle(-m_data);
+        }
+
         constexpr T data() const noexcept {
             return m_data;
         }
@@ -70,6 +74,23 @@ namespace gba {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
 
         return angle<data_type, bits>(shift_to<Lhs::bits, bits>(lhs.data()) + shift_to<Rhs::bits, bits>(rhs.data()));
+    }
+
+    template <Angle Lhs, Angle Rhs>
+    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() - typename Rhs::data_type());
+
+        constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
+
+        return angle<data_type, bits>(shift_to<Lhs::bits, bits>(lhs.data()) - shift_to<Rhs::bits, bits>(rhs.data()));
+    }
+
+    template <Angle Lhs, Angle Rhs>
+    constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+        constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
+        constexpr auto mask = (1 << bits) - 1;
+
+        return (shift_to<Lhs::bits, bits>(lhs.data()) & mask) <=> (shift_to<Rhs::bits, bits>(rhs.data()) & mask);
     }
 
 } // namespace gba

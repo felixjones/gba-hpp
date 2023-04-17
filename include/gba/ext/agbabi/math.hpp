@@ -18,8 +18,14 @@ namespace gba::agbabi {
 
 namespace {
 
+    [[gnu::const]]
     auto sin(Angle auto bam) noexcept {
         return fixed<int, 29>::from_data(__agbabi_sin(angle<int, 15>(bam).data()));
+    }
+
+    [[gnu::const]]
+    auto cos(Angle auto bam) noexcept {
+        return fixed<int, 29>::from_data(__agbabi_sin(angle<int, 15>(bam).data() + 0x2000));
     }
 
 }

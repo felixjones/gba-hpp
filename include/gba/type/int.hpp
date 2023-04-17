@@ -16,13 +16,20 @@
 namespace gba {
 
     template <std::size_t N>
-    using inttype = typename std::conditional<N <= 64 && N % 8 == 0,
-            typename std::conditional<N == 8, std::int8_t,
-                    typename std::conditional<N == 16, std::int16_t,
-                            typename std::conditional<N == 32, std::int32_t,
-                                    typename std::conditional<N == 64, std::int64_t,
-                                            void>::type>::type>::type>::type,
-            void>::type;
+    using inttype = std::conditional_t<N <= 64 && N % 8 == 0,
+                std::conditional_t<N == 8,
+                    std::int8_t,
+                    std::conditional_t<N == 16,
+                        std::int16_t,
+                        std::conditional_t<N == 32,
+                            std::int32_t,
+                            std::conditional_t<N == 64,
+                                std::int64_t,
+                                void
+                            >
+                        >
+                    >
+                >, void>;
 
     template <std::size_t N>
     using uinttype = std::make_unsigned_t<inttype<N>>;

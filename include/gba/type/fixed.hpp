@@ -58,6 +58,12 @@ namespace gba {
             return fixed::from_data(-m_data);
         }
 
+        template <Fundamental U, std::size_t F2>
+        constexpr fixed& operator+=(fixed<U, F2>&& rhs) noexcept {
+            m_data += shift_to<F2, F>(rhs.data());
+            return *this;
+        }
+
         template <std::integral U>
         explicit constexpr operator U() const noexcept {
             return U(m_data >> F);
@@ -134,12 +140,12 @@ namespace gba {
         }
     }
 
-    template <Fixed Lhs, std::integral Rhs>
+    template <Fixed Lhs, Fundamental Rhs>
     constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() * rhs);
     }
 
-    template <Fixed Lhs, std::integral Rhs>
+    template <Fixed Lhs, Fundamental Rhs>
     constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() / rhs);
     }

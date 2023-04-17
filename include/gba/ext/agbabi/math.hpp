@@ -28,6 +28,11 @@ namespace {
         return fixed<int, 29>::from_data(__agbabi_sin(angle<int, 15>(bam).data() + 0x2000));
     }
 
+    [[gnu::const]]
+    auto atan2(Fixed auto x, Fixed auto y) noexcept {
+        return angle<int, 15>(__agbabi_atan2(fixed<int, 12>(x).data(), fixed<int, 12>(y).data()));
+    }
+
 }
 
 } // namespace gba::agbabi

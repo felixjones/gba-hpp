@@ -17,4 +17,15 @@
 
 #include <gba/ext/agbabi/agbabi.hpp>
 
+namespace gba {
+
+namespace {
+
+    constexpr auto screen_width = 240;
+    constexpr auto screen_height = 160;
+
+}
+
+} // namespace gba
+
 #endif // define GBAXX_GBA_HPP

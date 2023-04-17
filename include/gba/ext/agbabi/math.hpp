@@ -33,6 +33,14 @@ namespace {
         return angle<int, 15>(__agbabi_atan2(fixed<int, 12>(x).data(), fixed<int, 12>(y).data()));
     }
 
+    [[gnu::const]]
+    auto sqrt(Fixed auto x) noexcept {
+        using fixed_type = decltype(x);
+        static constexpr auto odd_bit = fixed_type::exp % 2;
+
+        return fixed<typename fixed_type::data_type, (fixed_type::exp + odd_bit) / 2>::from_data(__agbabi_sqrt(x.data() << odd_bit));
+    }
+
 }
 
 } // namespace gba::agbabi

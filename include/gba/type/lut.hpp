@@ -32,7 +32,7 @@ namespace gba::lut {
         constexpr T operator[](V i) const noexcept {
             constexpr auto mask = (1 << U::bits) - 1;
 
-            return this->at(U(i).data() & mask);
+            return this->data()[shift_to<V::bits, U::bits>(i.data()) & mask];
         }
     };
 

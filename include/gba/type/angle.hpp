@@ -31,18 +31,29 @@ namespace gba {
 
         angle() = default;
 
-        explicit constexpr angle(T&& data) noexcept : m_data{data} {}
+        template <std::integral U>
+        explicit constexpr angle(U data) noexcept : m_data{T(data)} {}
 
         template <std::integral U, std::size_t B2>
         explicit constexpr angle(angle<U, B2> a) noexcept : m_data(shift_to<B2, B>(a.data())) {}
 
         template <std::integral U, std::size_t B2>
-        angle& operator=(angle<U, B2>&& rhs) noexcept {
+        constexpr angle& operator=(angle<U, B2>&& rhs) noexcept {
             m_data = shift_to<B2, B>(rhs.data());
             return *this;
         }
 
+        template <std::integral U, std::size_t B2>
+        constexpr angle& operator+=(angle<U, B2>&& rhs) noexcept {
+            m_data += shift_to<B2, B>(rhs.data());
+            return *this;
+        }
+
         constexpr T data() const noexcept {
+            return m_data;
+        }
+
+        constexpr T& data() noexcept {
             return m_data;
         }
 

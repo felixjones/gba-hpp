@@ -18,8 +18,8 @@
 namespace gba {
 
     consteval auto radians_to_turns(std::floating_point auto radian) {
-        constexpr auto pi = std::numbers::pi_v<decltype(radian)>;
-        return radian / (2 * pi);
+        constexpr auto two_pi = 2 * std::numbers::pi_v<decltype(radian)>;
+        return radian / two_pi;
     }
 
     template <std::integral T, std::size_t B>
@@ -37,15 +37,30 @@ namespace gba {
         template <std::integral U, std::size_t B2>
         explicit constexpr angle(angle<U, B2> a) noexcept : m_data(shift_to<B2, B>(a.data())) {}
 
+#ifdef _DEBUG
+        template <std::floating_point U>
+        explicit constexpr operator U() const noexcept {
+            constexpr auto two_pi = 2 * std::numbers::pi_v<U>;
+            constexpr auto mask = (1 << B) - 1;
+            return (two_pi * (m_data & mask)) / U(1 << B);
+        }
+#endif
+
         template <std::integral U, std::size_t B2>
-        constexpr angle& operator=(angle<U, B2>&& rhs) noexcept {
+        constexpr angle& operator=(angle<U, B2> rhs) noexcept {
             m_data = shift_to<B2, B>(rhs.data());
             return *this;
         }
 
         template <std::integral U, std::size_t B2>
-        constexpr angle& operator+=(angle<U, B2>&& rhs) noexcept {
+        constexpr angle& operator+=(angle<U, B2> rhs) noexcept {
             m_data += shift_to<B2, B>(rhs.data());
+            return *this;
+        }
+
+        template <std::integral U, std::size_t B2>
+        constexpr angle& operator-=(angle<U, B2> rhs) noexcept {
+            m_data -= shift_to<B2, B>(rhs.data());
             return *this;
         }
 
@@ -85,12 +100,25 @@ namespace gba {
         return angle<data_type, bits>(shift_to<Lhs::bits, bits>(lhs.data()) - shift_to<Rhs::bits, bits>(rhs.data()));
     }
 
+    template <Angle Lhs, std::integral Rhs>
+    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs(lhs.data() / rhs);
+    }
+
     template <Angle Lhs, Angle Rhs>
     constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
         constexpr auto mask = (1 << bits) - 1;
 
         return (shift_to<Lhs::bits, bits>(lhs.data()) & mask) <=> (shift_to<Rhs::bits, bits>(rhs.data()) & mask);
+    }
+
+    template <Angle Lhs, Angle Rhs>
+    constexpr bool operator==(Lhs lhs, Rhs rhs) noexcept {
+        constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
+        constexpr auto mask = (1 << bits) - 1;
+
+        return (shift_to<Lhs::bits, bits>(lhs.data()) & mask) == (shift_to<Rhs::bits, bits>(rhs.data()) & mask);
     }
 
 } // namespace gba

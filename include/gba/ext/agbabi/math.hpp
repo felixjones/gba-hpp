@@ -36,9 +36,11 @@ namespace {
     [[gnu::const]]
     auto sqrt(Fixed auto x) noexcept {
         using fixed_type = decltype(x);
+        using unsigned_type = std::make_unsigned_t<typename fixed_type::data_type>;
+
         static constexpr auto odd_bit = fixed_type::exp % 2;
 
-        return fixed<typename fixed_type::data_type, (fixed_type::exp + odd_bit) / 2>::from_data(__agbabi_sqrt(x.data() << odd_bit));
+        return fixed<typename fixed_type::data_type, (fixed_type::exp + odd_bit) / 2>::from_data(__agbabi_sqrt(unsigned_type(x.data() << odd_bit)));
     }
 
 }

@@ -49,6 +49,11 @@ namespace gba {
         explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_to<F2, F>(f.data())} {}
 
         template <Fundamental U, std::size_t F2>
+        constexpr operator fixed<U, F2>() const noexcept {
+            return fixed<U, F2>(*this);
+        }
+
+        template <Fundamental U, std::size_t F2>
         constexpr fixed& operator=(fixed<U, F2>&& f) noexcept {
             m_data = shift_to<F2, F>(f.data());
             return *this;
@@ -83,6 +88,10 @@ namespace gba {
 #endif
 
         constexpr T data() const noexcept {
+            return m_data;
+        }
+
+        constexpr T& data() noexcept {
             return m_data;
         }
 
@@ -145,6 +154,16 @@ namespace gba {
         return Rhs(lhs) + rhs;
     }
 
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+        return lhs - Lhs(rhs);
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+        return lhs + Lhs(rhs);
+    }
+
     template <Fixed Lhs, Fixed Rhs>
     constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
         using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
@@ -202,6 +221,11 @@ namespace gba {
     constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
         constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
         return shift_to<Lhs::exp, exp>(lhs.data()) <=> shift_to<Rhs::exp, exp>(rhs.data());
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+        return lhs <=> Lhs(rhs);
     }
 
 } // namespace gba

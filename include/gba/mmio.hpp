@@ -86,6 +86,7 @@ namespace {
 
     constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
     constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
+    constexpr auto WAITCNT = registral<const_ptr<volatile u32>(0x4000204)>{};
     constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
 
     // Palette RAM
@@ -97,6 +98,7 @@ namespace {
 
     constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
+    constexpr auto VIDEO4_VRAM_FRAME1 = const_ptr<volatile u8x2[160][120]>(0x600a000);
 
 }
 

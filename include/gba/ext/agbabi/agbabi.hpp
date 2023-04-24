@@ -18,6 +18,7 @@
 #ifdef AGBABI_H
 
 #include <gba/ext/agbabi/math.hpp>
+#include <gba/ext/agbabi/string.hpp>
 
 #endif
 #endif // define GBAXX_EXT_AGBABI_AGBABI_HPP

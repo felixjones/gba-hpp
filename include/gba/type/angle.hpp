@@ -46,6 +46,11 @@ namespace gba {
         }
 #endif
 
+        constexpr angle& operator=(std::integral auto rhs) noexcept {
+            m_data = rhs << B;
+            return *this;
+        }
+
         template <std::integral U, std::size_t B2>
         constexpr angle& operator=(angle<U, B2> rhs) noexcept {
             m_data = shift_to<B2, B>(rhs.data());

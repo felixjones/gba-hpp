@@ -24,6 +24,8 @@ namespace gba {
 
     using u16 = uinttype<16>;
 
+    using u32 = uinttype<32>;
+
 } // namespace gba
 
 #endif // define GBAXX_TYPE_HPP

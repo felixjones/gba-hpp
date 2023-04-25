@@ -11,6 +11,7 @@
 #define GBAXX_TYPE_UTIL_HPP
 
 #include <concepts>
+#include <cstdint>
 
 #include <gba/type/vector.hpp>
 
@@ -28,8 +29,10 @@ namespace gba {
     constexpr auto shift_right(Fundamental auto x) noexcept {
         if constexpr (Sh < 0) {
             return x << -Sh;
-        } else {
+        } else if constexpr (Sh > 0) {
             return x >> Sh;
+        } else {
+            return x;
         }
     }
 

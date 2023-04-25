@@ -22,12 +22,13 @@ namespace gba {
         return radian / two_pi;
     }
 
-    template <std::integral T, std::size_t B>
+    template <std::integral T, std::size_t B = sizeof(T) * 8>
     struct angle {
         using data_type = T;
         static constexpr auto bits = B;
+        static constexpr auto mask = B == sizeof(T) * 8 ? T(std::make_signed_t<T>(-1)) : T{1} << B;
 
-        explicit consteval angle(std::floating_point auto radian) : m_data{round<T>(radians_to_turns(radian) * (1 << B))} {}
+        explicit consteval angle(std::floating_point auto radian) : m_data{round<std::int64_t>(radians_to_turns(radian) * (1LL << B)) & mask} {}
 
         angle() = default;
 
@@ -41,15 +42,10 @@ namespace gba {
         template <std::floating_point U>
         explicit constexpr operator U() const noexcept {
             constexpr auto two_pi = 2 * std::numbers::pi_v<U>;
-            constexpr auto mask = (1 << B) - 1;
+
             return (two_pi * (m_data & mask)) / U(1 << B);
         }
 #endif
-
-        constexpr angle& operator=(std::integral auto rhs) noexcept {
-            m_data = rhs << B;
-            return *this;
-        }
 
         template <std::integral U, std::size_t B2>
         constexpr angle& operator=(angle<U, B2> rhs) noexcept {
@@ -113,17 +109,15 @@ namespace gba {
     template <Angle Lhs, Angle Rhs>
     constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
-        constexpr auto mask = (1 << bits) - 1;
 
-        return (shift_to<Lhs::bits, bits>(lhs.data()) & mask) <=> (shift_to<Rhs::bits, bits>(rhs.data()) & mask);
+        return shift_to<Lhs::bits, bits>(lhs.data()) <=> shift_to<Rhs::bits, bits>(rhs.data());
     }
 
     template <Angle Lhs, Angle Rhs>
     constexpr bool operator==(Lhs lhs, Rhs rhs) noexcept {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
-        constexpr auto mask = (1 << bits) - 1;
 
-        return (shift_to<Lhs::bits, bits>(lhs.data()) & mask) == (shift_to<Rhs::bits, bits>(rhs.data()) & mask);
+        return shift_to<Lhs::bits, bits>(lhs.data()) == shift_to<Rhs::bits, bits>(rhs.data());
     }
 
 } // namespace gba

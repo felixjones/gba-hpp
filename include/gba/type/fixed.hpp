@@ -170,15 +170,22 @@ namespace gba {
         using bigger_type = typename make_bigger<data_type>::type;
 
         constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-        constexpr auto rsh = (Lhs::exp + Rhs::exp) - exp;
+        constexpr auto rightShift = (Lhs::exp + Rhs::exp) - exp;
 
         if constexpr (Vector<data_type>) {
             const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
-            const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
-            return fixed<data_type, exp>::from_data((biglhs * bigrhs) >> rsh);
+
+            if constexpr (Vector<Rhs>) {
+                const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
+                return fixed<data_type, exp>::from_data((biglhs * bigrhs) >> rightShift);
+            } else {
+                using bigger_rhs_type = vector_traits<bigger_type>::value_type;
+
+                return fixed<data_type, exp>::from_data((biglhs * bigger_rhs_type(rhs.data())) >> rightShift);
+            }
         } else {
             const auto data = bigger_type(lhs.data()) * rhs.data();
-            return fixed<data_type, exp>::from_data(data >> rsh);
+            return fixed<data_type, exp>::from_data(data >> rightShift);
         }
     }
 

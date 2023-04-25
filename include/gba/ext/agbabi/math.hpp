@@ -33,14 +33,16 @@ namespace {
         return angle<int, 15>(__agbabi_atan2(fixed<int, 12>(x).data(), fixed<int, 12>(y).data()));
     }
 
+    template <std::size_t Exp = 0>
     [[gnu::const]]
     auto sqrt(Fixed auto x) noexcept {
         using fixed_type = decltype(x);
         using unsigned_type = std::make_unsigned_t<typename fixed_type::data_type>;
 
+        static constexpr auto half_exp = (fixed_type::exp + 1) / 2;
         static constexpr auto odd_bit = fixed_type::exp % 2;
 
-        return fixed<typename fixed_type::data_type, (fixed_type::exp + odd_bit) / 2>::from_data(__agbabi_sqrt(unsigned_type(x.data() << odd_bit)));
+        return fixed<typename fixed_type::data_type, half_exp + Exp>::from_data(__agbabi_sqrt(unsigned_type(x.data() << ((Exp * 2) + odd_bit))));
     }
 
 }

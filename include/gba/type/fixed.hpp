@@ -40,10 +40,10 @@ namespace gba {
         explicit constexpr fixed(std::integral auto x) noexcept requires (!Vector<T>) : m_data(x << F) {}
 
         template <std::integral... Args>
-        explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
+        explicit constexpr fixed(Args... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
 
         template <Fixed... Args>
-        explicit constexpr fixed(Args&&... args) noexcept requires Vector<T> : m_data{(shift_to<Args::exp, F>(args.data()))...} {}
+        explicit constexpr fixed(Args... args) noexcept requires Vector<T> : m_data{(shift_to<Args::exp, F>(args.data()))...} {}
 
         template <Fundamental U, std::size_t F2>
         explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_to<F2, F>(f.data())} {}
@@ -233,6 +233,11 @@ namespace gba {
     template <Fixed Lhs, std::integral Rhs>
     constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
         return lhs <=> Lhs(rhs);
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator>>(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs::from_data(lhs.data() >> rhs);
     }
 
 } // namespace gba

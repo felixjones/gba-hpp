@@ -21,6 +21,7 @@ namespace gba {
 
     using u8 = uinttype<8>;
     using u8x2 = make_vector<u8, 2>;
+    using u8x4 = make_vector<u8, 4>;
 
     using u16 = uinttype<16>;
 

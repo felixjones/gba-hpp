@@ -59,6 +59,11 @@ namespace gba {
             return *this;
         }
 
+        [[nodiscard]]
+        constexpr bool operator!() const noexcept {
+            return !m_data;
+        }
+
         constexpr fixed operator-() const noexcept {
             return fixed::from_data(-m_data);
         }
@@ -238,6 +243,11 @@ namespace gba {
     template <Fixed Lhs, std::integral Rhs>
     constexpr auto operator>>(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() >> rhs);
+    }
+
+    template <Fixed Lhs, std::integral Rhs>
+    constexpr auto operator<<(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs::from_data(lhs.data() << rhs);
     }
 
 } // namespace gba

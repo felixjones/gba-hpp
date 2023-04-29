@@ -26,6 +26,7 @@ namespace gba {
     using u16 = uinttype<16>;
 
     using u32 = uinttype<32>;
+    using u32x2 = make_vector<u32, 2>;
 
 } // namespace gba
 

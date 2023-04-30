@@ -85,6 +85,10 @@ namespace gba {
             return U(m_data >> F);
         }
 
+        constexpr bool operator==(fixed rhs) noexcept {
+            return data() == rhs.data();
+        }
+
 #ifdef _DEBUG
         template <std::floating_point U>
         explicit constexpr operator U() const noexcept {

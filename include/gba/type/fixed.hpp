@@ -85,6 +85,20 @@ namespace gba {
             return U(m_data >> F);
         }
 
+        constexpr bool operator!=(fixed rhs) noexcept {
+            if constexpr (Vector<T>) {
+                using size_type = vector_traits<T>::size_type;
+                for (auto ii = size_type{}; ii < vector_traits<T>::size; ++ii) {
+                    if (data()[ii] != rhs.data()[ii]) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                return data() != rhs.data();
+            }
+        }
+
         constexpr bool operator==(fixed rhs) noexcept {
             return data() == rhs.data();
         }

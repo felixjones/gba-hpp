@@ -26,7 +26,7 @@ namespace gba {
     template <Vector T>
     struct vector_traits {
         using value_type = typename std::remove_cvref_t<decltype(T{}[0])>;
-        using size_type = std::size_t;
+        using size_type = typename std::size_t;
 
         static constexpr auto size = size_type(sizeof(T) / sizeof(value_type));
     };

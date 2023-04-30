@@ -26,7 +26,7 @@ namespace gba {
     struct angle {
         using data_type = T;
         static constexpr auto bits = B;
-        static constexpr auto mask = B == sizeof(T) * 8 ? T(std::make_signed_t<T>(-1)) : T{1} << B;
+        static constexpr auto mask = B == sizeof(T) * 8 ? T(std::make_signed_t<T>(-1)) : (T{1} << B) - 1;
 
         explicit consteval angle(std::floating_point auto radian) : m_data{round<std::int64_t>(radians_to_turns(radian) * (1LL << B)) & mask} {}
 
@@ -43,7 +43,7 @@ namespace gba {
         explicit constexpr operator U() const noexcept {
             constexpr auto two_pi = 2 * std::numbers::pi_v<U>;
 
-            return (two_pi * (m_data & mask)) / U(1 << B);
+            return (two_pi * (m_data & mask)) / U(1LLU << B);
         }
 #endif
 
@@ -109,8 +109,9 @@ namespace gba {
     template <Angle Lhs, Angle Rhs>
     constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
+        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
 
-        return shift_to<Lhs::bits, bits>(lhs.data()) <=> shift_to<Rhs::bits, bits>(rhs.data());
+        return shift_to<Lhs::bits, bits>(data_type(lhs.data())) <=> shift_to<Rhs::bits, bits>(data_type(rhs.data()));
     }
 
     template <Angle Lhs, Angle Rhs>

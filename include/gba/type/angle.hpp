@@ -121,6 +121,16 @@ namespace gba {
         return shift_to<Lhs::bits, bits>(lhs.data()) == shift_to<Rhs::bits, bits>(rhs.data());
     }
 
+    template <Angle Lhs, std::integral Rhs>
+    constexpr auto operator>>(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs(lhs.data() >> rhs);
+    }
+
+    template <Angle Lhs, std::integral Rhs>
+    constexpr auto operator<<(Lhs lhs, Rhs rhs) noexcept {
+        return Lhs(lhs.data() << rhs);
+    }
+
 } // namespace gba
 
 #endif // define GBAXX_TYPE_ANGLE_HPP

@@ -30,10 +30,10 @@ namespace gba {
         using data_type = T;
         static constexpr auto exp = F;
 
-        explicit consteval fixed(std::floating_point auto f) requires (!Vector<T>) : m_data{round<T>(f * (1 << F))} {}
+        explicit consteval fixed(std::floating_point auto f) requires (!Vector<T>) : m_data{round_float<T>(f * (1 << F))} {}
 
         template <std::floating_point... Args>
-        explicit consteval fixed(Args&&... args) requires Vector<T> : m_data{round<typename vector_traits<T>::value_type>(std::forward<Args>(args) * (1 << F))...} {}
+        explicit consteval fixed(Args&&... args) requires Vector<T> : m_data{round_float<typename vector_traits<T>::value_type>(std::forward<Args>(args) * (1 << F))...} {}
 
         fixed() = default;
 
@@ -83,6 +83,18 @@ namespace gba {
         template <std::integral U>
         explicit constexpr operator U() const noexcept {
             return U(m_data >> F);
+        }
+
+        constexpr auto floor() const noexcept {
+            return T(m_data >> F);
+        }
+
+        constexpr auto ceil() const noexcept {
+            return T((m_data + ((1 << F) - 1)) >> F);
+        }
+
+        constexpr auto round() const noexcept {
+            return T((m_data + ((1 << F) >> 1)) >> F);
         }
 
         constexpr bool operator!=(fixed rhs) noexcept {

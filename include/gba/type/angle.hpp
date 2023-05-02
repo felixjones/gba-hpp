@@ -28,7 +28,7 @@ namespace gba {
         static constexpr auto bits = B;
         static constexpr auto mask = B == sizeof(T) * 8 ? T(std::make_signed_t<T>(-1)) : (T{1} << B) - 1;
 
-        explicit consteval angle(std::floating_point auto radian) : m_data{round<T>(radians_to_turns(radian) * (1LL << B)) & mask} {}
+        explicit consteval angle(std::floating_point auto radian) : m_data{round_float<T>(radians_to_turns(radian) * (1LL << B)) & mask} {}
 
         angle() = default;
 

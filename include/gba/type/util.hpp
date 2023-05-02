@@ -21,7 +21,7 @@ namespace gba {
     concept Fundamental = std::is_fundamental_v<T> || Vector<T>;
 
     template <typename T>
-    consteval auto round(std::floating_point auto x) {
+    consteval auto round_float(std::floating_point auto x) {
         return T(x + decltype(x)(0.5));
     }
 

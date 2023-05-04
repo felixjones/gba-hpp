@@ -231,8 +231,15 @@ namespace gba {
 
         if constexpr (Vector<data_type>) {
             const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
-            const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
-            return fixed<data_type, Lhs::exp>::from_data((biglhs << Rhs::exp) / bigrhs);
+
+            if constexpr (Vector<Rhs>) {
+                const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
+                return fixed<data_type, Lhs::exp>::from_data((biglhs << Rhs::exp) / bigrhs);
+            } else {
+                using bigger_rhs_type = vector_traits<bigger_type>::value_type;
+
+                return fixed<data_type, Lhs::exp>::from_data((biglhs << Rhs::exp) / bigger_rhs_type(rhs.data()));
+            }
         } else {
             const auto data = (bigger_type(lhs.data()) << Rhs::exp) / rhs.data();
             return fixed<data_type, Lhs::exp>::from_data(data);

@@ -33,17 +33,17 @@ namespace gba {
         if constexpr (sizeof(value_type) == sizeof(char)) {
             asm volatile (
                 "strb %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else if constexpr (sizeof(value_type) == sizeof(short)) {
             asm volatile (
                 "strh %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else if constexpr (sizeof(value_type) == sizeof(int)) {
             asm volatile (
                 "str %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else {
             asm volatile ("" ::: "memory"); // Prevent optimizing out
@@ -62,7 +62,7 @@ namespace gba {
                 "ldrb r2, [%[b]]\n"
                 "strb r2, [%[a]]\n"
                 "strb r3, [%[b]]"
-                :: [a]"r"(a), [b]"r"(b) : "r2", "r3"
+                :: [a]"l"(a), [b]"l"(b) : "r2", "r3"
             );
         } else if constexpr (sizeof(value_type) == sizeof(short)) {
             asm volatile (
@@ -70,7 +70,7 @@ namespace gba {
                 "ldrh r2, [%[b]]\n"
                 "strh r2, [%[a]]\n"
                 "strh r3, [%[b]]"
-                :: [a]"r"(a), [b]"r"(b) : "r2", "r3"
+                :: [a]"l"(a), [b]"l"(b) : "r2", "r3"
             );
         } else if constexpr (sizeof(value_type) == sizeof(int)) {
             asm volatile (
@@ -78,7 +78,7 @@ namespace gba {
                 "ldr r2, [%[b]]\n"
                 "str r2, [%[a]]\n"
                 "str r3, [%[b]]"
-                :: [a]"r"(a), [b]"r"(b) : "r2", "r3"
+                :: [a]"l"(a), [b]"l"(b) : "r2", "r3"
             );
         } else {
             const auto av = __builtin_bit_cast(value_type, *const_cast<std::add_cv_t<T>*>(a));
@@ -104,17 +104,17 @@ namespace gba {
         if constexpr (sizeof(value_type) == sizeof(char)) {
             asm volatile (
                 "strb %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else if constexpr (sizeof(value_type) == sizeof(short)) {
             asm volatile (
                 "strh %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else if constexpr (sizeof(value_type) == sizeof(int)) {
             asm volatile (
                 "str %[val], [%[ptr]]"
-                :: [val]"r"(value), [ptr]"r"(ptr)
+                :: [val]"l"(value), [ptr]"l"(ptr)
             );
         } else {
             asm volatile ("" ::: "memory"); // Prevent optimizing out
@@ -164,7 +164,7 @@ namespace gba {
 
         template <typename T = value_type>
         constexpr auto& operator=(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
-            volatile_store(Ptr.get(), static_cast<value_type&&>(value));
+            volatile_store(Ptr.get(), std::forward<T>(value));
             return *this;
         }
 

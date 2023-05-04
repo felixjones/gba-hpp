@@ -17,6 +17,7 @@
 
 #ifdef AGBABI_H
 
+#include <gba/ext/agbabi/irq.hpp>
 #include <gba/ext/agbabi/math.hpp>
 #include <gba/ext/agbabi/string.hpp>
 

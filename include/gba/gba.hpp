@@ -17,6 +17,8 @@
 
 #include <gba/ext/agbabi/agbabi.hpp>
 
+#include <gba/input/keyhelper.hpp>
+
 namespace gba {
 
 namespace {

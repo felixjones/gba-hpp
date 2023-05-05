@@ -214,6 +214,38 @@ namespace gba {
         constexpr std::remove_cvref_t<value_type> emplace(Args&&... args) const noexcept requires(!std::is_const_v<value_type>) {
             return volatile_emplace(Ptr.get(), std::forward<Args>(args)...);
         }
+
+        struct scoped_ref : std::remove_cvref_t<value_type> {
+            scoped_ref() noexcept = default;
+
+            constexpr ~scoped_ref() noexcept {
+                if (!m_owner) {
+                    return;
+                }
+                *m_owner = *(std::remove_cvref_t<value_type>*) this;
+            }
+
+            constexpr scoped_ref& operator=(scoped_ref&& other) noexcept {
+                m_owner = other.m_owner;
+                *(std::remove_cvref_t<value_type>*) this = other;
+                other.m_owner = nullptr;
+                return *this;
+            }
+
+            constexpr explicit operator bool() const noexcept {
+                return !std::is_const_v<value_type> && m_owner;
+            }
+
+        private:
+            friend registral;
+            constexpr explicit scoped_ref(const registral* owner) noexcept : m_owner{owner}, std::remove_cvref_t<value_type>{owner->value()} {}
+
+            const registral* m_owner;
+        };
+
+        constexpr auto acquire() const noexcept {
+            return scoped_ref{this};
+        }
     };
 
     template <auto Ptr, typename T>

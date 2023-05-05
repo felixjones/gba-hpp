@@ -22,6 +22,7 @@ namespace gba {
     namespace key {
 
         struct alignas(int) constant {
+            [[nodiscard]]
             constexpr constant with(constant rhs) const noexcept {
                 return constant{mask | rhs.mask};
             }
@@ -57,6 +58,18 @@ namespace gba {
                 std::same_as<T, std::logical_or<void>> ||
                 std::same_as<T, std::logical_not<void>>;
 
+        template <detail::LogicalOp Op>
+        [[nodiscard]]
+        constexpr bool apply_keyop(short value, int compare) noexcept {
+            if constexpr (std::same_as<Op, std::logical_and<void>>) {
+                return (compare & value) == 0;
+            } else if constexpr (std::same_as<Op, std::logical_or<void>>) {
+                return (compare & value) != compare;
+            } else if constexpr (std::same_as<Op, std::logical_not<void>>) {
+                return (compare & value) == compare;
+            }
+        }
+
     } // namespace detail
 
     struct keystate : keyinput {
@@ -70,20 +83,30 @@ namespace gba {
             return *this;
         }
 
-        template <detail::LogicalOp Op, std::same_as<key::constant>... Keys>
-        constexpr bool held(Op, Keys... keys) const noexcept {
-            const auto curr = std::bit_cast<short>(*(keyinput*) this);
-            const auto mask = (... | keys);
+        template <template<typename> typename T = std::logical_and, typename... Args>
+        [[nodiscard]]
+        constexpr bool held(Args... keys) const noexcept {
+            return detail::apply_keyop<T<void>>(std::bit_cast<short>(*(keyinput*) this), (... | keys.mask));
+        }
 
-            if constexpr (std::same_as<Op, std::logical_and<void>>) {
-                return (mask.mask & curr) == 0;
-            } else if constexpr (std::same_as<Op, std::logical_or<void>>) {
-                return (mask.mask & curr) != mask.mask;
-            } else if constexpr (std::same_as<Op, std::logical_not<void>>) {
-                return (mask.mask & curr) == mask.mask;
-            } else {
-                return false; //TODO
-            }
+        template <template<typename> typename T = std::logical_and, typename... Args>
+        [[nodiscard]]
+        constexpr bool pressed(Args... keys) const noexcept {
+            const auto compare = (... | keys.mask);
+            const auto previous = detail::apply_keyop<T<void>>(std::bit_cast<short>(this->prev), compare);
+            const auto current = detail::apply_keyop<T<void>>(std::bit_cast<short>(*(keyinput*) this), compare);
+
+            return !previous && current;
+        }
+
+        template <template<typename> typename T = std::logical_and, typename... Args>
+        [[nodiscard]]
+        constexpr bool released(Args... keys) const noexcept {
+            const auto compare = (... | keys.mask);
+            const auto previous = detail::apply_keyop<T<void>>(std::bit_cast<short>(this->prev), compare);
+            const auto current = detail::apply_keyop<T<void>>(std::bit_cast<short>(*(keyinput*) this), compare);
+
+            return previous && !current;
         }
 
         keyinput prev;

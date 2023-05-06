@@ -158,13 +158,17 @@ namespace gba {
         std::uintptr_t m_ptr;
     };
 
+    template <typename T>
+    constexpr auto operator+(const_ptr<T> reg, std::integral auto offset) noexcept -> const_ptr<T> {
+        return const_ptr<T>(reg.m_ptr + offset);
+    }
+
     template <auto Ptr> requires std::is_same_v<std::remove_cvref_t<decltype(Ptr)>, const_ptr<typename decltype(Ptr)::element_type>>
     struct registral {
         using value_type = std::remove_reference_t<typename decltype(Ptr)::element_type>;
 
-        template <typename T = value_type>
-        constexpr auto& operator=(T&& value) const noexcept requires(!std::is_const_v<value_type>) {
-            volatile_store(Ptr.get(), std::forward<T>(value));
+        constexpr auto& operator=(const std::remove_cvref_t<value_type>& value) const noexcept requires(!std::is_const_v<value_type>) {
+            volatile_store(Ptr.get(), std::remove_cvref_t<value_type>(value));
             return *this;
         }
 

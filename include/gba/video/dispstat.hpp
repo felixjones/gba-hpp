@@ -13,9 +13,9 @@
 namespace gba {
 
     struct alignas(short) dispstat {
-        const bool currently_vblank : 1 {};
-        const bool currently_hblank : 1 {};
-        const bool currently_vcount : 1 {};
+        bool currently_vblank : 1 {};
+        bool currently_hblank : 1 {};
+        bool currently_vcount : 1 {};
         bool irq_vblank : 1 {};
         bool irq_hblank : 1 {};
         bool irq_vcount : 1 {};

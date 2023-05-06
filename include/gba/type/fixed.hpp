@@ -10,6 +10,7 @@
 #ifndef GBAXX_TYPE_FIXED_HPP
 #define GBAXX_TYPE_FIXED_HPP
 
+#include <cmath>
 #include <concepts>
 #include <type_traits>
 #include <utility>
@@ -285,6 +286,14 @@ namespace gba {
     template <Fixed Lhs, std::integral Rhs>
     constexpr auto operator<<(Lhs lhs, Rhs rhs) noexcept {
         return Lhs::from_data(lhs.data() << rhs);
+    }
+
+    constexpr auto abs(Fixed auto x) noexcept {
+        if constexpr (std::is_signed_v<typename decltype(x)::data_type>) {
+            return decltype(x)::from_data(std::abs(x.data()));
+        } else {
+            return x;
+        }
     }
 
 } // namespace gba

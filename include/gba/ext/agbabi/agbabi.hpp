@@ -17,8 +17,12 @@
 
 #ifdef AGBABI_H
 
+#include <gba/ext/agbabi/coroutine.hpp>
+#include <gba/ext/agbabi/fiber.hpp>
 #include <gba/ext/agbabi/irq.hpp>
 #include <gba/ext/agbabi/math.hpp>
+#include <gba/ext/agbabi/pull_coroutine.hpp>
+#include <gba/ext/agbabi/push_coroutine.hpp>
 #include <gba/ext/agbabi/string.hpp>
 
 #endif

@@ -45,6 +45,11 @@ namespace {
         return fixed<typename fixed_type::data_type, half_exp + Exp>::from_data(__agbabi_sqrt(unsigned_type(x.data() << ((Exp * 2) + odd_bit))));
     }
 
+    [[gnu::const]]
+    auto sqrt(std::integral auto x) noexcept {
+        return __agbabi_sqrt(x);
+    }
+
 }
 
 } // namespace gba::agbabi

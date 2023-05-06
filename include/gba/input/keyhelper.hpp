@@ -47,6 +47,8 @@ namespace gba {
             constexpr auto r = constant{0x0100};
             constexpr auto l = constant{0x0200};
 
+            constexpr auto reset_combo = a | b | select | start;
+
         }
 
     } // namespace key

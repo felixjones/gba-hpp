@@ -19,6 +19,7 @@
 #include <gba/interrupt/irq.hpp>
 
 #include <gba/video/bgxcnt.hpp>
+#include <gba/video/bld.hpp>
 #include <gba/video/dispcnt.hpp>
 #include <gba/video/dispstat.hpp>
 #include <gba/video/mosaic.hpp>
@@ -77,6 +78,9 @@ namespace {
     constexpr auto WINOUT = registral<const_ptr<volatile winout>(0x400004A)>{};
 
     constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
+    constexpr auto BLDCNT = registral<const_ptr<volatile bldcnt>(0x4000050)>{};
+    constexpr auto BLDALPHA = registral<const_ptr<volatile fixed<make_vector<u8, 2>, 5>>(0x4000052)>{};
+    constexpr auto BLDY = registral<const_ptr<volatile fixed<u32, 4>>(0x4000054)>{};
 
     // Keys
 
@@ -98,7 +102,7 @@ namespace {
 
     constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
-    constexpr auto VIDEO4_VRAM_FRAME1 = const_ptr<volatile u8x2[160][120]>(0x600a000);
+    constexpr auto VIDEO4_VRAM_FRAME1 = VIDEO4_VRAM + 0xa000;
 
 }
 

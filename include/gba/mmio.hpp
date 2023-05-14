@@ -80,7 +80,7 @@ namespace {
     constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
     constexpr auto BLDCNT = registral<const_ptr<volatile bldcnt>(0x4000050)>{};
     constexpr auto BLDALPHA = registral<const_ptr<volatile fixed<make_vector<u8, 2>, 5>>(0x4000052)>{};
-    constexpr auto BLDY = registral<const_ptr<volatile fixed<u32, 4>>(0x4000054)>{};
+    constexpr auto BLDY = registral<const_ptr<volatile fixed<u16, 4>>(0x4000054)>{};
 
     // Keys
 

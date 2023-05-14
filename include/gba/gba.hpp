@@ -19,6 +19,8 @@
 
 #include <gba/input/keyhelper.hpp>
 
+#include <gba/log/logger.hpp>
+
 namespace gba {
 
 namespace {

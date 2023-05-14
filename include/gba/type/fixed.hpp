@@ -62,7 +62,15 @@ namespace gba {
 
         [[nodiscard]]
         constexpr bool operator!() const noexcept {
-            return !m_data;
+            if constexpr (Vector<T>) {
+                bool r = false;
+                for (typename vector_traits<T>::size_type i = 0; i < vector_traits<T>::size; ++i) {
+                    r |= bool(m_data[i]);
+                }
+                return !r;
+            } else {
+                return !m_data;
+            }
         }
 
         constexpr fixed operator-() const noexcept {
@@ -81,9 +89,21 @@ namespace gba {
             return *this;
         }
 
-        template <std::integral U>
+        template <std::integral U> requires (!std::is_same_v<bool, U>)
         explicit constexpr operator U() const noexcept {
             return U(m_data >> F);
+        }
+
+        explicit constexpr operator bool() const noexcept {
+            if constexpr (Vector<T>) {
+                bool r = false;
+                for (typename vector_traits<T>::size_type i = 0; i < vector_traits<T>::size; ++i) {
+                    r |= bool(m_data[i]);
+                }
+                return r;
+            } else {
+                return bool(m_data);
+            }
         }
 
         constexpr auto floor() const noexcept {
@@ -294,6 +314,28 @@ namespace gba {
         } else {
             return x;
         }
+    }
+
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto min(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+
+        if (lhs < rhs) {
+            return fixed<data_type, exp>{lhs};
+        }
+        return fixed<data_type, exp>{rhs};
+    }
+
+    template <Fixed Lhs, Fixed Rhs>
+    constexpr auto max(Lhs lhs, Rhs rhs) noexcept {
+        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
+        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
+
+        if (lhs > rhs) {
+            return fixed<data_type, exp>{lhs};
+        }
+        return fixed<data_type, exp>{rhs};
     }
 
 } // namespace gba

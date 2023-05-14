@@ -111,6 +111,28 @@ namespace gba {
             return previous && !current;
         }
 
+        [[nodiscard]]
+        constexpr int lraxis() const noexcept {
+            int keys = std::bit_cast<short>(*(keyinput*) this);
+            keys = (keys << 22) >> 30; // Sign extend
+#if defined(__thumb__)
+            return (0 - keys) >> 1; // Optimize for register pressure
+#else
+            return (keys >> 1) - keys; // Optimize for code density
+#endif
+        }
+
+        [[nodiscard]]
+        constexpr int i_lraxis() const noexcept {
+            int keys = std::bit_cast<short>(*(keyinput*) this);
+            keys = (keys << 22) >> 30; // Sign extend
+#if defined(__thumb__)
+            return (keys + 1) >> 1; // Optimize for register pressure
+#else
+            return keys - (keys >> 1); // Optimize for code density
+#endif
+        }
+
         keyinput prev;
     };
 

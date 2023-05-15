@@ -70,19 +70,23 @@ namespace gba {
 
 #ifdef _PSPRINTF_HEADER_
             void posprintf(int level, const char* fmt, std::size_t argn, ...) noexcept override {
+                // Pointer to register arguments on stack
                 auto* stack = static_cast<const void**>(__builtin_apply_args());
 
+                // Pointer to variadic arguments
+                void** vargsptr;
                 va_list vargs;
                 va_start(vargs, argn);
-                void** vargsptr;
                 __builtin_memcpy(&vargsptr, &vargs, sizeof(vargsptr));
                 va_end(vargs);
 
+                // Set register arguments on stack
                 stack[1] = static_cast<const void*>(&LOG_OUT);
                 stack[2] = static_cast<const void*>(fmt);
 
                 if (argn > 2) {
                     __builtin_memcpy(&stack[3], vargsptr, sizeof(int) * 2);
+                    // Set variadics arguments on stack
                     __builtin_memcpy(vargsptr, &vargsptr[2], sizeof(int) * (argn - 2));
                 } else {
                     __builtin_memcpy(&stack[3], vargsptr, sizeof(int) * argn);

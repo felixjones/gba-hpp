@@ -15,13 +15,26 @@
 
 #include <gba/type.hpp>
 
+#if defined __has_include
+#if __has_include(<posprintf.h>)
+extern "C" {
+#include <posprintf.h>
+}
+
+#include <cstdarg>
+#endif
+#endif
+
 namespace gba {
 
     namespace log_detail {
 
         struct interface {
-            virtual ~interface() noexcept {}
+            virtual ~interface() noexcept = default;
             virtual void output(int level, const char* message) noexcept = 0;
+#ifdef _PSPRINTF_HEADER_
+            virtual void posprintf(int level, const char* fmt, std::size_t argn, ...) noexcept = 0;
+#endif
         };
 
         struct noop : interface {
@@ -30,6 +43,10 @@ namespace gba {
             }
 
             void output(int, const char*) noexcept override {}
+
+#ifdef _PSPRINTF_HEADER_
+            void posprintf(int, const char*, std::size_t, ...) noexcept override {}
+#endif
         };
 
         struct mgba : interface {
@@ -48,8 +65,35 @@ namespace gba {
                 for (int ii = 0; message[ii] && ii < 256; ++ii) {
                     LOG_OUT[ii] = message[ii];
                 }
-                FLAGS = u8(level - 1) | 0x100;
+                FLAGS = u8(level) | 0x100;
             }
+
+#ifdef _PSPRINTF_HEADER_
+            void posprintf(int level, const char* fmt, std::size_t argn, ...) noexcept override {
+                auto* stack = static_cast<const void**>(__builtin_apply_args());
+
+                va_list vargs;
+                va_start(vargs, argn);
+                void** vargsptr;
+                __builtin_memcpy(&vargsptr, &vargs, sizeof(vargsptr));
+                va_end(vargs);
+
+                stack[1] = static_cast<const void*>(&LOG_OUT);
+                stack[2] = static_cast<const void*>(fmt);
+
+                if (argn > 2) {
+                    __builtin_memcpy(&stack[3], vargsptr, sizeof(int) * 2);
+                    __builtin_memcpy(vargsptr, &vargsptr[2], sizeof(int) * (argn - 2));
+                } else {
+                    __builtin_memcpy(&stack[3], vargsptr, sizeof(int) * argn);
+                }
+
+                auto* ret = __builtin_apply(reinterpret_cast<void(*)(...)>(::posprintf), stack, sizeof(int) * argn);
+
+                FLAGS = u8(level) | 0x100;
+                __builtin_return(ret);
+            }
+#endif
         };
 
     } // namespace log_detail
@@ -67,8 +111,8 @@ namespace gba {
                 log_detail::noop::try_create
             };
 
-            for (auto ii = 0u; ii < interfaces.size(); ++ii) {
-                interface = std::invoke(interfaces[ii]);
+            for (auto createInterface : interfaces) {
+                interface = std::invoke(createInterface);
                 if (interface) {
                     return true;
                 }
@@ -79,6 +123,13 @@ namespace gba {
         static void output(int level, const char* message) noexcept {
             interface->output(level, message);
         }
+
+#ifdef _PSPRINTF_HEADER_
+        [[gnu::always_inline]]
+        static void posprintf(int level, const char* fmt, ...) noexcept {
+            interface->posprintf(level, fmt, __builtin_va_arg_pack_len(), __builtin_va_arg_pack());
+        }
+#endif
     };
 
 } // namespace gba

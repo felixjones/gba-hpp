@@ -269,7 +269,11 @@ namespace gba {
 
     template <Fixed Lhs, Fundamental Rhs>
     constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-        return Lhs::from_data(lhs.data() * rhs);
+        if constexpr (Vector<typename Lhs::data_type>) {
+            return Lhs::from_data(lhs.data() * typename vector_traits<typename Lhs::data_type>::value_type(rhs));
+        } else {
+            return Lhs::from_data(lhs.data() * rhs);
+        }
     }
 
     template <Fundamental Lhs, Fixed Rhs>

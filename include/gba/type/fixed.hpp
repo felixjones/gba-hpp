@@ -320,6 +320,11 @@ namespace gba {
         }
     }
 
+    constexpr auto frac(Fixed auto x) noexcept {
+        const auto mask = (1 << decltype(x)::exp) - 1;
+        return decltype(x)::from_data(x.data() & mask);
+    }
+
     template <Fixed Lhs, Fixed Rhs>
     constexpr auto min(Lhs lhs, Rhs rhs) noexcept {
         using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());

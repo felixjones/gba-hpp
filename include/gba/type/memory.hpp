@@ -45,6 +45,26 @@ namespace gba {
                 "str %[val], [%[ptr]]"
                 :: [val]"l"(value), [ptr]"l"(ptr)
             );
+        } else if constexpr (sizeof(value_type) == 6) {
+            asm volatile (
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]\n"
+                "add %[src], #4\n"
+                "add %[dst], #4\n"
+                "ldrh r3, [%[src]]\n"
+                "strh r3, [%[dst]]"
+                :: [src]"l"(&value), [dst]"l"(ptr) : "r3"
+            );
+        } else if constexpr (sizeof(value_type) == 8) {
+            asm volatile (
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]\n"
+                "add %[src], #4\n"
+                "add %[dst], #4\n"
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]"
+                :: [src]"l"(&value), [dst]"l"(ptr) : "r3"
+            );
         } else {
             asm volatile ("" ::: "memory"); // Prevent optimizing out
             __builtin_memcpy(const_cast<value_type*>(ptr), &value, sizeof(value_type));
@@ -116,6 +136,26 @@ namespace gba {
                 "str %[val], [%[ptr]]"
                 :: [val]"l"(value), [ptr]"l"(ptr)
             );
+        } else if constexpr (sizeof(value_type) == 6) {
+            asm volatile (
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]\n"
+                "add %[src], #4\n"
+                "add %[dst], #4\n"
+                "ldrh r3, [%[src]]\n"
+                "strh r3, [%[dst]]"
+                :: [src]"l"(&value), [dst]"l"(ptr) : "r3"
+            );
+        } else if constexpr (sizeof(value_type) == 8) {
+            asm volatile (
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]\n"
+                "add %[src], #4\n"
+                "add %[dst], #4\n"
+                "ldr r3, [%[src]]\n"
+                "str r3, [%[dst]]"
+                :: [src]"l"(&value), [dst]"l"(ptr) : "r3"
+            );
         } else {
             asm volatile ("" ::: "memory"); // Prevent optimizing out
             __builtin_memcpy(const_cast<value_type*>(ptr), &value, sizeof(value_type));
@@ -163,7 +203,10 @@ namespace gba {
         return const_ptr<T>(reg.m_ptr + offset);
     }
 
-    template <auto Ptr> requires std::is_same_v<std::remove_cvref_t<decltype(Ptr)>, const_ptr<typename decltype(Ptr)::element_type>>
+    template <typename T>
+    concept ConstPtr = std::is_same_v<std::remove_cvref_t<T>, const_ptr<typename T::element_type>>;
+
+    template <auto Ptr> requires ConstPtr<decltype(Ptr)>
     struct registral {
         using value_type = std::remove_reference_t<typename decltype(Ptr)::element_type>;
 
@@ -316,6 +359,83 @@ namespace gba {
     constexpr auto operator<=>(const registral<Ptr>& reg, const T& value) noexcept {
         return reg.value() <=> value;
     }
+
+    template <auto Ptr, std::ptrdiff_t Stride> requires ConstPtr<decltype(Ptr)> && std::is_array_v<typename decltype(Ptr)::element_type>
+    struct registral_series {
+        using element_type = std::remove_extent_t<std::remove_reference_t<typename decltype(Ptr)::element_type>>;
+
+        constexpr auto& operator=(const std::remove_cvref_t<typename decltype(Ptr)::element_type>& value) const noexcept requires(!std::is_const_v<typename decltype(Ptr)::element_type>) {
+            volatile_store(Ptr.get(), std::remove_cvref_t<typename decltype(Ptr)::element_type>(value));
+            return *this;
+        }
+
+        constexpr auto operator&() const noexcept -> typename decltype(Ptr)::element_type* {
+            return Ptr.get();
+        }
+
+        constexpr auto& operator[](std::integral auto i) const noexcept requires(!std::is_const_v<element_type>) {
+            return *reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * Stride);
+        }
+
+        constexpr auto operator[](std::integral auto i) const noexcept requires(std::is_const_v<element_type>) {
+            return volatile_load(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride));
+        }
+
+        constexpr auto get(std::size_t i) const noexcept {
+            return volatile_load(reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * Stride));
+        }
+
+        template <typename T = std::remove_volatile_t<element_type>>
+        constexpr void set(std::size_t i, T&& value) const noexcept {
+            volatile_store(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), value);
+        }
+
+        constexpr void reset(std::size_t i) const noexcept requires(!std::is_const_v<element_type>) {
+            volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride));
+        }
+
+        template <typename... Args>
+        constexpr auto emplace(std::size_t i, Args&&... args) const noexcept -> std::remove_cvref_t<element_type> requires(!std::is_const_v<element_type>) {
+            return volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), std::forward<Args>(args)...);
+        }
+
+        struct scoped_ref : std::remove_cvref_t<element_type> {
+            scoped_ref() noexcept = default;
+
+            constexpr ~scoped_ref() noexcept {
+                if (!m_address) {
+                    return;
+                }
+                volatile_store(
+                    reinterpret_cast<element_type*>(m_address),
+                    *(std::remove_cvref_t<element_type>*) this
+                );
+            }
+
+            constexpr scoped_ref& operator=(scoped_ref&& other) noexcept {
+                m_address = other.m_address;
+                *(std::remove_cvref_t<element_type>*) this = other;
+                other.m_address = 0;
+                return *this;
+            }
+
+            constexpr explicit operator bool() const noexcept {
+                return !std::is_const_v<element_type> && m_address;
+            }
+
+        private:
+            friend registral_series;
+
+            constexpr explicit scoped_ref(const std::uintptr_t address) noexcept : m_address{address},
+                std::remove_cvref_t<element_type>{volatile_load(reinterpret_cast<element_type*>(address))} {}
+
+            std::uintptr_t m_address;
+        };
+
+        constexpr auto acquire(std::size_t i) const noexcept {
+            return scoped_ref{Ptr.m_ptr + i * Stride};
+        }
+    };
 
 } // namespace gba
 

@@ -34,6 +34,11 @@ namespace gba {
     template <std::size_t N>
     using uinttype = std::make_unsigned_t<inttype<N>>;
 
+    struct alignas(uinttype<8>) u4x2 {
+        uinttype<8> lo : 4{};
+        uinttype<8> hi : 4{};
+    };
+
 } // namespace gba
 
 #endif // define GBAXX_TYPE_INT_HPP

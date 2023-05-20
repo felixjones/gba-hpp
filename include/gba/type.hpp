@@ -15,6 +15,7 @@
 #include <gba/type/int.hpp>
 #include <gba/type/lut.hpp>
 #include <gba/type/memory.hpp>
+#include <gba/type/tile.hpp>
 #include <gba/type/vector.hpp>
 
 namespace gba {

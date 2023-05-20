@@ -23,6 +23,7 @@
 #include <gba/video/dispcnt.hpp>
 #include <gba/video/dispstat.hpp>
 #include <gba/video/mosaic.hpp>
+#include <gba/video/objattr.hpp>
 #include <gba/video/win.hpp>
 
 namespace gba::mmio {
@@ -103,6 +104,23 @@ namespace {
     constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
     constexpr auto VIDEO4_VRAM_FRAME1 = VIDEO4_VRAM + 0xa000;
+
+    constexpr auto OBJ_TILES = const_ptr<volatile tile4bpp[1024]>(0x6010000);
+
+    // Object Attribute Memory
+
+    constexpr auto OBJ_ATTR0 = registral_series<const_ptr<volatile objattr0[128]>(0x7000000), 8>{};
+    constexpr auto OBJ_ATTR1 = registral_series<const_ptr<volatile objattr1[128]>(0x7000002), 8>{};
+    constexpr auto OBJ_ATTR2 = registral_series<const_ptr<volatile objattr2[128]>(0x7000004), 8>{};
+    constexpr auto OBJ_ATTR = registral_series<const_ptr<volatile objattr[128]>(0x7000000), 8>{};
+
+    constexpr auto OBJ_ATTR1_AFFINE = registral_series<const_ptr<volatile objattr1_affine[128]>(0x7000002), 8>{};
+    constexpr auto OBJ_ATTR_AFFINE = registral_series<const_ptr<volatile objattr_affine[128]>(0x7000000), 8>{};
+
+    constexpr auto AFFINE_PARAM_A = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x7000006), 32>{};
+    constexpr auto AFFINE_PARAM_B = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700000E), 32>{};
+    constexpr auto AFFINE_PARAM_C = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x7000016), 32>{};
+    constexpr auto AFFINE_PARAM_D = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700001E), 32>{};
 
 }
 

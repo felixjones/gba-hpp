@@ -347,6 +347,14 @@ namespace gba {
         return fixed<data_type, exp>{rhs};
     }
 
+    constexpr auto ceil(Fixed auto x) noexcept {
+        if (frac(x)) {
+            return typename decltype(x)::data_type(x + 1);
+        } else {
+            return typename decltype(x)::data_type(x);
+        }
+    }
+
 } // namespace gba
 
 namespace std {

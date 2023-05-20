@@ -387,7 +387,7 @@ namespace gba {
 
         template <typename T = std::remove_volatile_t<element_type>>
         constexpr void set(std::size_t i, T&& value) const noexcept {
-            volatile_store(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), value);
+            volatile_store(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), static_cast<element_type&&>(value));
         }
 
         constexpr void reset(std::size_t i) const noexcept requires(!std::is_const_v<element_type>) {

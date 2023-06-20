@@ -285,7 +285,7 @@ namespace gba {
 
         private:
             friend registral;
-            constexpr explicit scoped_ref(const registral* owner) noexcept : m_owner{owner}, std::remove_cvref_t<value_type>{owner->value()} {}
+            constexpr explicit scoped_ref(const registral* owner) noexcept : std::remove_cvref_t<value_type>{owner->value()}, m_owner{owner} {}
 
             const registral* m_owner;
         };

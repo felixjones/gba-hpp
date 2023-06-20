@@ -15,6 +15,7 @@ namespace gba {
     struct alignas(short) bgcnt {
         unsigned short priority : 2 {};
         unsigned short charblock : 2 {};
+        short : 2;
         bool mosaic : 1 {};
         bool bpp8 : 1 {};
         unsigned short screenblock : 5 {};

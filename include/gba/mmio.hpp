@@ -24,6 +24,7 @@
 #include <gba/video/dispstat.hpp>
 #include <gba/video/mosaic.hpp>
 #include <gba/video/objattr.hpp>
+#include <gba/video/textscreen.hpp>
 #include <gba/video/win.hpp>
 
 namespace gba::mmio {
@@ -100,6 +101,13 @@ namespace {
     constexpr auto OBJ_PALETTE = const_ptr<volatile u16[256]>(0x5000200);
 
     // Video RAM
+
+    constexpr auto CHARBLOCK0_4BPP = const_ptr<volatile tile4bpp[512]>(0x6000000);
+    constexpr auto CHARBLOCK1_4BPP = const_ptr<volatile tile4bpp[512]>(0x6004000);
+    constexpr auto CHARBLOCK2_4BPP = const_ptr<volatile tile4bpp[512]>(0x6009000);
+    constexpr auto CHARBLOCK3_4BPP = const_ptr<volatile tile4bpp[512]>(0x600C000);
+
+    constexpr auto TEXT_SCREENBLOCKS = const_ptr<volatile textscreen[1024]>(0x6000000);
 
     constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);

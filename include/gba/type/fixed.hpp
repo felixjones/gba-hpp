@@ -60,6 +60,11 @@ namespace gba {
             return *this;
         }
 
+        constexpr fixed& operator=(std::integral auto f) noexcept {
+            m_data = f << F;
+            return *this;
+        }
+
         [[nodiscard]]
         constexpr bool operator!() const noexcept {
             if constexpr (Vector<T>) {
@@ -80,6 +85,11 @@ namespace gba {
         template <Fundamental U, std::size_t F2>
         constexpr fixed& operator+=(fixed<U, F2> rhs) noexcept {
             m_data += shift_to<F2, F>(rhs.data());
+            return *this;
+        }
+
+        constexpr fixed& operator+=(std::integral auto rhs) noexcept {
+            m_data += (rhs << F);
             return *this;
         }
 

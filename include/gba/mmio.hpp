@@ -18,6 +18,9 @@
 
 #include <gba/interrupt/irq.hpp>
 
+#include <gba/sound/noise.hpp>
+#include <gba/sound/soundcnt.hpp>
+
 #include <gba/video/bgxcnt.hpp>
 #include <gba/video/bld.hpp>
 #include <gba/video/dispcnt.hpp>
@@ -94,6 +97,15 @@ namespace {
     constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
     constexpr auto WAITCNT = registral<const_ptr<volatile u32>(0x4000204)>{};
     constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
+
+    // Sound
+
+    constexpr auto NOISE_LEN_ENV = registral<const_ptr<volatile sound4cnt_l>(0x4000078)>{};
+    constexpr auto NOISE_FREQ = registral<const_ptr<volatile sound4cnt_h>(0x400007C)>{};
+
+    constexpr auto LEFT_RIGHT_VOLUME = registral<const_ptr<volatile soundcnt_l>(0x4000080)>{};
+    constexpr auto SOUND_MIX = registral<const_ptr<volatile soundcnt_h>(0x4000082)>{};
+    constexpr auto SOUND_ENABLED = registral<const_ptr<volatile soundcnt_x>(0x4000084)>{};
 
     // Palette RAM
 

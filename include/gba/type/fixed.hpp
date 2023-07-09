@@ -75,7 +75,8 @@ struct fixed {
 
     // Fixed point conversion
     template <Fixed Rhs>
-    explicit constexpr fixed(Rhs rhs) noexcept : m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data())} {}
+    explicit constexpr fixed(Rhs rhs) noexcept requires (Vector<data_type> == Vector<typename Rhs::data_type>) :
+            m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data())} {}
 
     template <Fixed Rhs>
     constexpr fixed& operator=(Rhs rhs) noexcept {
@@ -100,7 +101,7 @@ struct fixed {
 
     // Integral conversion
     template <std::integral Rhs>
-    explicit consteval fixed(Rhs rhs) : m_data{rhs << fractional_bits} {}
+    explicit constexpr fixed(Rhs rhs) : m_data{rhs << fractional_bits} {}
 
     template <std::integral Rhs>
     constexpr fixed& operator=(Rhs rhs) noexcept {
@@ -108,7 +109,7 @@ struct fixed {
         return *this;
     }
 
-    template <std::integral Lhs>
+    template <std::integral Lhs> requires (!std::same_as<Lhs, bool>)
     explicit constexpr operator Lhs() const noexcept {
         return m_data >> fractional_bits;
     }
@@ -182,7 +183,142 @@ struct fixed {
         return value_type::from_data(m_data[idx]);
     }
 
+    constexpr fixed& set(size_type idx, Fixed auto value) noexcept requires Vector<data_type> && (value.size == 1) {
+        m_data[idx] = fixed(value).m_data;
+        return *this;
+    }
+
     data_type m_data{};
+
+    // Unary operators
+    [[nodiscard]]
+    explicit constexpr operator bool() const noexcept {
+        if constexpr (Vector<data_type>) {
+            bool r = false;
+            for (size_type ii = 0; ii < size; ++ii) {
+                r |= bool(m_data[ii]);
+            }
+            return r;
+        } else {
+            return m_data;
+        }
+    }
+
+    [[nodiscard]]
+    constexpr bool operator!() const noexcept {
+        return !this->operator bool();
+    }
+
+    constexpr auto operator-() const noexcept {
+        return fixed<decltype(-m_data), fractional_bits>::from_data(-m_data);
+    }
+
+    // Comparison operators
+    constexpr auto operator<=>(Fixed auto rhs) const noexcept requires (!Vector<data_type>) {
+        return m_data <=> fixed(rhs).m_data;
+    }
+
+    constexpr auto operator==(Fixed auto rhs) const noexcept {
+        const auto other = fixed(rhs);
+
+        if constexpr (Vector<data_type>) {
+            bool r = true;
+            for (size_type ii = 0; ii < size; ++ii) {
+                r &= m_data[ii] == other.m_data[ii];
+            }
+            return r;
+        } else {
+            return m_data == other.m_data;
+        }
+    }
+
+    constexpr auto operator!=(Fixed auto rhs) const noexcept {
+        return !this->operator ==(rhs);
+    }
+
+    constexpr auto operator<=>(Fundamental auto rhs) const noexcept requires (!Vector<data_type>) {
+        return this->operator <=>(fixed(rhs));
+    }
+
+    constexpr auto operator==(Fundamental auto rhs) const noexcept {
+        return this->operator ==(fixed(rhs));
+    }
+
+    constexpr auto operator!=(Fundamental auto rhs) const noexcept {
+        return this->operator !=(fixed(rhs));
+    }
+
+    // Simple arithmetic
+    constexpr fixed& operator+=(Fixed auto rhs) noexcept {
+        m_data += shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
+        return *this;
+    }
+
+    constexpr fixed& operator-=(Fixed auto rhs) noexcept {
+        m_data -= shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
+        return *this;
+    }
+
+    constexpr fixed& operator+=(Fundamental auto rhs) noexcept {
+        m_data += (rhs << fractional_bits);
+        return *this;
+    }
+
+    constexpr fixed& operator-=(Fundamental auto rhs) noexcept {
+        m_data -= (rhs << fractional_bits);
+        return *this;
+    }
+
+    // Integer arithmetic
+    constexpr fixed& operator*=(Fundamental auto rhs) noexcept {
+        m_data *= rhs;
+        return *this;
+    }
+
+    constexpr fixed& operator/=(Fundamental auto rhs) noexcept {
+        m_data /= rhs;
+        return *this;
+    }
+
+    constexpr fixed& operator<<=(size_type rhs) noexcept {
+        m_data <<= rhs;
+        return *this;
+    }
+
+    constexpr fixed& operator>>=(size_type rhs) noexcept {
+        m_data >>= rhs;
+        return *this;
+    }
+
+    // Fixed multiply
+    constexpr fixed& operator*=(Fixed auto rhs) noexcept {
+        using bigger_type = typename make_bigger<decltype(data_type() * typename decltype(rhs)::data_type())>::type;
+
+        if constexpr (Vector<data_type>) {
+            const auto data = __builtin_convertvector(m_data, bigger_type) * rhs.m_data;
+            m_data = __builtin_convertvector(data >> decltype(rhs)::fractional_bits, data_type);
+        } else {
+            const auto data = bigger_type(m_data) * rhs.m_data;
+            m_data = data >> decltype(rhs)::fractional_bits;
+        }
+
+        return *this;
+    }
+
+    // Fixed divide
+    constexpr fixed& operator/=(Fixed auto rhs) noexcept {
+        using bigger_type = typename make_bigger<decltype(data_type() / typename decltype(rhs)::data_type())>::type;
+
+        if constexpr (Vector<data_type>) {
+            const auto data = __builtin_convertvector(m_data, bigger_type) << decltype(rhs)::fractional_bits;
+            m_data = __builtin_convertvector(data / rhs.m_data, data_type);
+        } else {
+            const auto data = bigger_type(m_data) << decltype(rhs)::fractional_bits;
+            m_data = data / rhs.m_data;
+        }
+
+        return *this;
+    }
 };
 
 template <typename T>

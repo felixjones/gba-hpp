@@ -172,6 +172,11 @@ struct fixed {
         return scoped_ref(this);
     }
 
+    constexpr auto tie() volatile noexcept requires Vector<data_type> {
+        // Cast away volatile to allow registers to call ->tie()
+        return scoped_ref(const_cast<std::remove_volatile_t<fixed>*>(this));
+    }
+
     // Returns const value to prevent []= pattern
     constexpr const value_type operator[](size_type idx) const noexcept requires Vector<data_type> {
         return value_type::from_data(m_data[idx]);

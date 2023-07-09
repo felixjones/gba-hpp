@@ -106,6 +106,10 @@ namespace {
     constexpr auto LEFT_RIGHT_VOLUME = registral<const_ptr<volatile soundcnt_l>(0x4000080)>{};
     constexpr auto SOUND_MIX = registral<const_ptr<volatile soundcnt_h>(0x4000082)>{};
     constexpr auto SOUND_ENABLED = registral<const_ptr<volatile soundcnt_x>(0x4000084)>{};
+    constexpr auto SOUNDBIAS = registral<const_ptr<volatile soundbias>(0x4000088)>{};
+
+    constexpr auto FIFO_A = registral<const_ptr<volatile u32>(0x40000A0)>{};
+    constexpr auto FIFO_B = registral<const_ptr<volatile u32>(0x40000A4)>{};
 
     // Palette RAM
 

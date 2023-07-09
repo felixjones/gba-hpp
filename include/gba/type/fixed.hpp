@@ -10,374 +10,189 @@
 #ifndef GBAXX_TYPE_FIXED_HPP
 #define GBAXX_TYPE_FIXED_HPP
 
-#include <cmath>
-#include <concepts>
+#include <array>
+#include <cstddef>
 #include <type_traits>
-#include <utility>
 
 #include <gba/type/util.hpp>
 #include <gba/type/vector.hpp>
 
 namespace gba {
 
-    template <Fundamental T, std::size_t F>
-    struct fixed;
+template <typename T> requires std::integral<T> || Vector<T>
+struct value_traits;
 
-    template <typename T>
-    concept Fixed = std::same_as<fixed<typename T::data_type, T::exp>, T>;
+template <typename T> requires std::integral<T>
+struct value_traits<T> {
+    using size_type = std::size_t;
+    using value_type = T;
+    static constexpr size_type size = 1;
+};
 
-    template <Fundamental T, std::size_t F>
-    struct fixed {
-        using data_type = T;
-        static constexpr auto exp = F;
+template <typename T> requires Vector<T>
+struct value_traits<T> : vector_traits<T> {};
 
-        explicit consteval fixed(std::floating_point auto f) requires (!Vector<T>) : m_data{round_float<T>(f * (1 << F))} {}
+template <Fundamental DataType, std::size_t FractionalBits>
+struct fixed;
 
-        template <std::floating_point... Args>
-        explicit consteval fixed(Args&&... args) requires Vector<T> : m_data{round_float<typename vector_traits<T>::value_type>(std::forward<Args>(args) * (1 << F))...} {}
+template <typename T>
+concept Fixed = std::same_as<T, fixed<typename T::data_type, T::fractional_bits>>;
 
-        fixed() = default;
+template <Fundamental DataType, std::size_t FractionalBits>
+struct fixed {
+    using data_type = DataType;
+    static constexpr auto fractional_bits = FractionalBits;
 
-        explicit constexpr fixed(std::integral auto x) noexcept requires (!Vector<T>) : m_data(x << F) {}
+    constexpr data_type& data() noexcept {
+        return m_data;
+    }
 
-        template <std::integral... Args>
-        explicit constexpr fixed(Args... args) noexcept requires Vector<T> : m_data{typename vector_traits<T>::value_type(std::forward<Args>(args) << F)...} {}
+    constexpr data_type data() const noexcept {
+        return m_data;
+    }
 
-        template <Fixed... Args>
-        explicit constexpr fixed(Args... args) noexcept requires Vector<T> : m_data{(shift_to<Args::exp, F>(args.data()))...} {}
+    // Vector related detail
+    using size_type = typename value_traits<data_type>::size_type;
+    using value_type = fixed<typename value_traits<data_type>::value_type, fractional_bits>;
+    static constexpr auto size = value_traits<data_type>::size;
 
-        template <Fundamental U, std::size_t F2>
-        explicit constexpr fixed(fixed<U, F2> f) noexcept : m_data{shift_to<F2, F>(f.data())} {}
+    // Helper details
+    static constexpr typename value_traits<data_type>::value_type data_unit = 1 << fractional_bits;
 
-        template <Fundamental U, std::size_t F2>
-        constexpr operator fixed<U, F2>() const noexcept {
-            return fixed<U, F2>(*this);
+    // default functions
+    constexpr fixed() noexcept = default;
+    constexpr fixed(const fixed&) noexcept = default;
+    constexpr fixed(fixed&&) noexcept = default;
+    constexpr fixed& operator=(const fixed&) noexcept = default;
+    constexpr fixed& operator=(fixed&&) noexcept = default;
+
+    // raw data
+    constexpr fixed(data_type data, std::nullptr_t) noexcept : m_data{data} {}
+
+    static constexpr fixed from_data(data_type data) noexcept {
+        return fixed(data, nullptr);
+    }
+
+    // Fixed point conversion
+    template <Fixed Rhs>
+    explicit constexpr fixed(Rhs rhs) noexcept : m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data())} {}
+
+    template <Fixed Rhs>
+    constexpr fixed& operator=(Rhs rhs) noexcept {
+        m_data = shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data());
+        return *this;
+    }
+
+    // Floating point conversion
+    template <std::floating_point Rhs>
+    explicit consteval fixed(Rhs rhs) : m_data{round_float<data_type>(rhs * data_unit)} {}
+
+    template <std::floating_point Rhs>
+    consteval fixed& operator=(Rhs rhs) {
+        m_data = round_float<data_type>(rhs * data_unit);
+        return *this;
+    }
+
+    template <std::floating_point Lhs>
+    explicit consteval operator Lhs() const {
+        return m_data / Lhs{data_unit};
+    }
+
+    // Integral conversion
+    template <std::integral Rhs>
+    explicit consteval fixed(Rhs rhs) : m_data{rhs << fractional_bits} {}
+
+    template <std::integral Rhs>
+    constexpr fixed& operator=(Rhs rhs) noexcept {
+        m_data = rhs << fractional_bits;
+        return *this;
+    }
+
+    template <std::integral Lhs>
+    explicit constexpr operator Lhs() const noexcept {
+        return m_data >> fractional_bits;
+    }
+
+    // Vector conversion
+    template <Fundamental... Args>
+    explicit consteval fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
+        static_assert(sizeof...(Args) == size);
+    }
+
+    constexpr std::array<value_type, size> to_array() const noexcept requires Vector<data_type> {
+        std::array<value_type, size> r;
+        for (size_type ii = 0; ii < size; ++ii) {
+            r[ii].m_data = m_data[ii];
         }
+        return r;
+    }
 
-        template <Fundamental U, std::size_t F2>
-        constexpr fixed& operator=(fixed<U, F2>&& f) noexcept {
-            m_data = shift_to<F2, F>(f.data());
-            return *this;
-        }
+    explicit constexpr operator std::array<value_type, size>() const noexcept requires Vector<data_type> {
+        return to_array();
+    }
 
-        constexpr fixed& operator=(std::integral auto f) noexcept {
-            m_data = f << F;
-            return *this;
-        }
+    // Vector access
+    struct scoped_ref : std::array<value_type, size> {
+        using owner_type = fixed;
 
-        [[nodiscard]]
-        constexpr bool operator!() const noexcept {
-            if constexpr (Vector<T>) {
-                bool r = false;
-                for (typename vector_traits<T>::size_type i = 0; i < vector_traits<T>::size; ++i) {
-                    r |= bool(m_data[i]);
-                }
-                return !r;
-            } else {
-                return !m_data;
+        scoped_ref() noexcept = default;
+
+        constexpr ~scoped_ref() noexcept {
+            if (!m_owner) {
+                return;
+            }
+
+            for (size_type ii = 0; ii < size; ++ii) {
+                m_owner->m_data[ii] = this->at(ii).m_data;
             }
         }
 
-        constexpr fixed operator-() const noexcept {
-            return fixed::from_data(-m_data);
-        }
-
-        template <Fundamental U, std::size_t F2>
-        constexpr fixed& operator+=(fixed<U, F2> rhs) noexcept {
-            m_data += shift_to<F2, F>(rhs.data());
+        constexpr scoped_ref& operator=(scoped_ref&& other) noexcept {
+            m_owner = other.m_owner;
+            for (size_type ii = 0; ii < size; ++ii) {
+                m_data[ii] = other.m_data[ii];
+            }
+            other.m_owner = nullptr;
             return *this;
         }
 
-        constexpr fixed& operator+=(std::integral auto rhs) noexcept {
-            m_data += (rhs << F);
-            return *this;
+        constexpr explicit operator bool() const noexcept {
+            return m_owner != nullptr;
         }
 
-        template <Fundamental U, std::size_t F2>
-        constexpr fixed& operator-=(fixed<U, F2> rhs) noexcept {
-            m_data -= shift_to<F2, F>(rhs.data());
-            return *this;
-        }
+    private:
+        friend fixed;
+        constexpr explicit scoped_ref(fixed* owner) noexcept :
+            std::array<value_type, size>{owner->to_array()}, m_owner{owner} {}
 
-        template <std::integral U> requires (!std::is_same_v<bool, U>)
-        explicit constexpr operator U() const noexcept {
-            return U(m_data >> F);
-        }
-
-        explicit constexpr operator bool() const noexcept {
-            if constexpr (Vector<T>) {
-                bool r = false;
-                for (typename vector_traits<T>::size_type i = 0; i < vector_traits<T>::size; ++i) {
-                    r |= bool(m_data[i]);
-                }
-                return r;
-            } else {
-                return bool(m_data);
-            }
-        }
-
-        constexpr auto floor() const noexcept {
-            return T(m_data >> F);
-        }
-
-        constexpr auto ceil() const noexcept {
-            return T((m_data + ((1 << F) - 1)) >> F);
-        }
-
-        constexpr auto round() const noexcept {
-            return T((m_data + ((1 << F) >> 1)) >> F);
-        }
-
-        constexpr bool operator!=(fixed rhs) noexcept {
-            if constexpr (Vector<T>) {
-                using size_type = vector_traits<T>::size_type;
-                for (auto ii = size_type{}; ii < vector_traits<T>::size; ++ii) {
-                    if (data()[ii] != rhs.data()[ii]) {
-                        return true;
-                    }
-                }
-                return false;
-            } else {
-                return data() != rhs.data();
-            }
-        }
-
-        constexpr bool operator==(fixed rhs) noexcept {
-            return data() == rhs.data();
-        }
-
-#ifdef _DEBUG
-        template <std::floating_point U>
-        explicit constexpr operator U() const noexcept {
-            return m_data / U(1 << F);
-        }
-#endif
-
-        constexpr T data() const noexcept {
-            return m_data;
-        }
-
-        constexpr T& data() noexcept {
-            return m_data;
-        }
-
-        constexpr auto operator[](std::integral auto i) const noexcept requires Vector<T> {
-            return fixed<typename vector_traits<T>::value_type, F>::from_data(m_data[i]);
-        }
-
-        template <std::size_t Index>
-        constexpr std::tuple_element_t<Index, fixed> get() const noexcept requires Vector<T> {
-            return fixed<typename vector_traits<T>::value_type, F>::from_data(m_data[Index]);
-        }
-
-        T m_data{};
-
-    protected:
-        constexpr fixed(T x, std::nullptr_t) noexcept : m_data{x} {}
-
-        template <std::integral... Args>
-        explicit constexpr fixed(std::nullptr_t, Args... args) noexcept requires Vector<T> : m_data{args...} {}
-    public:
-        static constexpr auto from_data(Fundamental auto x) noexcept {
-            if constexpr (Vector<decltype(x)>) {
-                return fixed(__builtin_convertvector(x, data_type), nullptr);
-            } else {
-                return fixed(fixed::data_type(x), nullptr);
-            }
-        }
-
-        template <std::integral... Args>
-        static constexpr auto from_data(Args... args) noexcept requires Vector<T> {
-            return fixed(nullptr, args...);
-        }
+        fixed* m_owner;
     };
 
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
-
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-
-        return fixed<data_type, exp>::from_data(shift_to<Lhs::exp, exp>(lhs.data()) + shift_to<Rhs::exp, exp>(rhs.data()));
+    constexpr auto tie() noexcept requires Vector<data_type> {
+        return scoped_ref(this);
     }
 
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() - typename Rhs::data_type());
-
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-
-        return fixed<data_type, exp>::from_data(shift_to<Lhs::exp, exp>(lhs.data()) - shift_to<Rhs::exp, exp>(rhs.data()));
+    // Returns const value to prevent []= pattern
+    constexpr const value_type operator[](size_type idx) const noexcept requires Vector<data_type> {
+        return value_type::from_data(m_data[idx]);
     }
 
-    template <std::integral Lhs, Fixed Rhs>
-    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
-        return Rhs(lhs) - rhs;
-    }
+    data_type m_data{};
+};
 
-    template <std::integral Lhs, Fixed Rhs>
-    constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
-        return Rhs(lhs) + rhs;
-    }
-
-    template <Fixed Lhs, std::integral Rhs>
-    constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
-        return lhs - Lhs(rhs);
-    }
-
-    template <Fixed Lhs, std::integral Rhs>
-    constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
-        return lhs + Lhs(rhs);
-    }
-
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
-        using bigger_type = typename make_bigger<data_type>::type;
-
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-        constexpr auto rightShift = (Lhs::exp + Rhs::exp) - exp;
-
-        if constexpr (Vector<data_type>) {
-            const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
-
-            if constexpr (Vector<Rhs>) {
-                const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
-                return fixed<data_type, exp>::from_data((biglhs * bigrhs) >> rightShift);
-            } else {
-                using bigger_rhs_type = vector_traits<bigger_type>::value_type;
-
-                return fixed<data_type, exp>::from_data((biglhs * bigger_rhs_type(rhs.data())) >> rightShift);
-            }
-        } else {
-            const auto data = bigger_type(lhs.data()) * rhs.data();
-            return fixed<data_type, exp>::from_data(data >> rightShift);
-        }
-    }
-
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
-        using bigger_type = typename make_bigger<data_type>::type;
-
-        if constexpr (Vector<data_type>) {
-            const auto biglhs = __builtin_convertvector(lhs.data(), bigger_type);
-
-            if constexpr (Vector<Rhs>) {
-                const auto bigrhs = __builtin_convertvector(rhs.data(), bigger_type);
-                return fixed<data_type, Lhs::exp>::from_data((biglhs << Rhs::exp) / bigrhs);
-            } else {
-                using bigger_rhs_type = vector_traits<bigger_type>::value_type;
-
-                return fixed<data_type, Lhs::exp>::from_data((biglhs << Rhs::exp) / bigger_rhs_type(rhs.data()));
-            }
-        } else {
-            const auto data = (bigger_type(lhs.data()) << Rhs::exp) / rhs.data();
-            return fixed<data_type, Lhs::exp>::from_data(data);
-        }
-    }
-
-    template <Fixed Lhs, Fundamental Rhs>
-    constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-        if constexpr (Vector<typename Lhs::data_type>) {
-            return Lhs::from_data(lhs.data() * typename vector_traits<typename Lhs::data_type>::value_type(rhs));
-        } else {
-            return Lhs::from_data(lhs.data() * rhs);
-        }
-    }
-
-    template <Fundamental Lhs, Fixed Rhs>
-    constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-        return Rhs::from_data(lhs * rhs.data());
-    }
-
-    template <Fixed Lhs, Fundamental Rhs>
-    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
-        return Lhs::from_data(lhs.data() / rhs);
-    }
-
-    template <Fundamental Lhs, Fixed Rhs>
-    constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
-        return fixed<Lhs, Rhs::exp>(lhs) / rhs;
-    }
-
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-        return shift_to<Lhs::exp, exp>(lhs.data()) <=> shift_to<Rhs::exp, exp>(rhs.data());
-    }
-
-    template <Fixed Lhs, std::integral Rhs>
-    constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
-        return lhs <=> Lhs(rhs);
-    }
-
-    template <Fixed Lhs, std::integral Rhs>
-    constexpr auto operator>>(Lhs lhs, Rhs rhs) noexcept {
-        return Lhs::from_data(lhs.data() >> rhs);
-    }
-
-    template <Fixed Lhs, std::integral Rhs>
-    constexpr auto operator<<(Lhs lhs, Rhs rhs) noexcept {
-        return Lhs::from_data(lhs.data() << rhs);
-    }
-
-    constexpr auto abs(Fixed auto x) noexcept {
-        if constexpr (std::is_signed_v<typename decltype(x)::data_type>) {
-            return decltype(x)::from_data(std::abs(x.data()));
-        } else {
-            return x;
-        }
-    }
-
-    constexpr auto frac(Fixed auto x) noexcept {
-        const auto mask = (1 << decltype(x)::exp) - 1;
-        return decltype(x)::from_data(x.data() & mask);
-    }
-
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto min(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-
-        if (lhs < rhs) {
-            return fixed<data_type, exp>{lhs};
-        }
-        return fixed<data_type, exp>{rhs};
-    }
-
-    template <Fixed Lhs, Fixed Rhs>
-    constexpr auto max(Lhs lhs, Rhs rhs) noexcept {
-        using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
-        constexpr auto exp = (Lhs::exp + Rhs::exp) / 2;
-
-        if (lhs > rhs) {
-            return fixed<data_type, exp>{lhs};
-        }
-        return fixed<data_type, exp>{rhs};
-    }
-
-    constexpr auto ceil(Fixed auto x) noexcept {
-        if (frac(x)) {
-            return typename decltype(x)::data_type(x + 1);
-        } else {
-            return typename decltype(x)::data_type(x);
-        }
-    }
+template <typename T>
+concept FixedScopedRef = std::same_as<T, typename T::owner_type::scoped_ref> && Fixed<typename T::owner_type>;
 
 } // namespace gba
 
 namespace std {
+    template <gba::FixedScopedRef T>
+    struct tuple_size<T> : std::integral_constant<typename T::owner_type::size_type, T::owner_type::size> {};
 
-    template <gba::Fixed F> requires gba::Vector<typename F::data_type>
-    struct tuple_size<F> : integral_constant<size_t, gba::vector_traits<typename F::data_type>::size> {};
+    template <std::size_t Index, gba::FixedScopedRef T>
+    struct tuple_element<Index, T>
+            : tuple_element<Index, gba::n_tuple<typename T::owner_type::value_type, T::owner_type::size>> {};
 
-    template <size_t Index, gba::Fixed F> requires gba::Vector<typename F::data_type>
-    struct tuple_element<Index, F> {
-        static_assert(Index < gba::vector_traits<typename F::data_type>::size, "Index out of bounds for vector");
-        using type = gba::fixed<typename gba::vector_traits<typename F::data_type>::value_type, F::exp>;
-    };
-
-} // namespace std
+}
 
 #endif // define GBAXX_TYPE_FIXED_HPP

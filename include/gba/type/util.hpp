@@ -65,6 +65,17 @@ namespace gba {
         using type = make_vector<typename make_bigger<typename vector_traits<T>::value_type>::type, vector_traits<T>::size>;
     };
 
+    template <typename T, typename I>
+    struct n_tuple_helper {};
+
+    template <typename T, std::size_t... I>
+    struct n_tuple_helper<T, std::index_sequence<I...>> {
+        using type = std::tuple<std::enable_if_t<I || true, T>...>;
+    };
+
+    template <typename T, std::size_t N>
+    using n_tuple = typename n_tuple_helper<T, std::make_index_sequence<N>>::type;
+
 } // namespace gba
 
 #endif // define GBAXX_TYPE_UTIL_HPP

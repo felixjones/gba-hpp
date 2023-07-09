@@ -44,15 +44,29 @@ namespace gba {
         bool sound_b_reset : 1{};
     };
 
-    struct alignas(int) soundcnt_x {
+    struct alignas(char) soundcnt_x {
         bool tone1_playing : 1{};
         bool tone2_playing : 1{};
         bool wave_playing : 1{};
         bool noise_playing : 1{};
-        int : 3;
+        char : 3;
         bool enabled : 1{};
+    };
+
+    enum class sample_cycle : u16 {
+        _9bit = 0,
+        _8bit = 1,
+        _7bit = 2,
+        _6bit = 3,
+    };
+
+    struct alignas(short) soundbias {
+        short : 1;
+        u16 bias_level : 9{};
+        short : 4;
+        gba::sample_cycle sample_cycle : 2{};
     };
 
 } // namespace gba
 
-#endif // define GBAXX_SOUND_NOISE_HPP
+#endif // define GBAXX_SOUND_SOUNDCNT_HPP

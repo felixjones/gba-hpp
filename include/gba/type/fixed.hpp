@@ -76,11 +76,11 @@ struct fixed {
     // Fixed point conversion
     template <Fixed Rhs>
     explicit constexpr fixed(Rhs rhs) noexcept requires (Vector<data_type> == Vector<typename Rhs::data_type>) :
-            m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data())} {}
+            m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.m_data)} {}
 
     template <Fixed Rhs>
     constexpr fixed& operator=(Rhs rhs) noexcept {
-        m_data = shift_to<Rhs::fractional_bits, fractional_bits>(rhs.data());
+        m_data = shift_to<Rhs::fractional_bits, fractional_bits>(rhs.m_data);
         return *this;
     }
 
@@ -299,7 +299,7 @@ struct fixed {
             m_data = __builtin_convertvector(data >> decltype(rhs)::fractional_bits, data_type);
         } else {
             const auto data = bigger_type(m_data) * rhs.m_data;
-            m_data = data >> decltype(rhs)::fractional_bits;
+            m_data = data_type(data >> decltype(rhs)::fractional_bits);
         }
 
         return *this;
@@ -314,7 +314,7 @@ struct fixed {
             m_data = __builtin_convertvector(data / rhs.m_data, data_type);
         } else {
             const auto data = bigger_type(m_data) << decltype(rhs)::fractional_bits;
-            m_data = data / rhs.m_data;
+            m_data = data_type(data / rhs.m_data);
         }
 
         return *this;

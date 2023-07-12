@@ -221,6 +221,10 @@ struct fixed {
         return fixed<decltype(-m_data), fractional_bits>::from_data(-m_data);
     }
 
+    constexpr fixed operator+() const noexcept {
+        return *this;
+    }
+
     // Comparison operators
     constexpr auto operator<=>(Fixed auto rhs) const noexcept requires (!Vector<data_type>) {
         return m_data <=> fixed(rhs).m_data;

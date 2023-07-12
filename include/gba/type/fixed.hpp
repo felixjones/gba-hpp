@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <type_traits>
 
+#include <gba/type/memory.hpp>
 #include <gba/type/util.hpp>
 #include <gba/type/vector.hpp>
 
@@ -86,7 +87,7 @@ struct fixed {
     // Floating point conversion
     explicit consteval fixed(std::floating_point auto rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
 
-    explicit constexpr fixed(std::floating_point auto rhs) requires Vector<data_type> {
+    explicit consteval fixed(std::floating_point auto rhs) requires Vector<data_type> {
         const auto val = round_float<data_type>(rhs * data_unit);
         for (size_type ii = 0; ii < size; ++ii) {
             m_data[ii] = val;
@@ -104,12 +105,12 @@ struct fixed {
     }
 
     // Integral conversion
-    explicit constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{rhs << fractional_bits} {}
+    explicit constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{typename value_type::data_type(rhs << fractional_bits)} {}
 
     explicit constexpr fixed(std::integral auto rhs) requires Vector<data_type> {
         const auto val = rhs << fractional_bits;
         for (size_type ii = 0; ii < size; ++ii) {
-            m_data[ii] = val;
+            m_data[ii] = typename value_type::data_type(val);
         }
     }
 
@@ -125,21 +126,20 @@ struct fixed {
 
     // Vector conversion
     template <Fundamental... Args>
-    explicit consteval fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
+    explicit constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
         static_assert(sizeof...(Args) == size);
     }
 
     constexpr std::array<value_type, size> to_array() const noexcept requires Vector<data_type> {
-        std::array<value_type, size> r;
-        for (size_type ii = 0; ii < size; ++ii) {
-            r[ii].m_data = m_data[ii];
-        }
-        return r;
+        return __builtin_bit_cast(std::array<value_type, size>, m_data);
     }
 
     explicit constexpr operator std::array<value_type, size>() const noexcept requires Vector<data_type> {
         return to_array();
     }
+
+    explicit constexpr fixed(const std::array<value_type, size>& data) requires Vector<data_type> :
+            m_data{__builtin_bit_cast(data_type, data)} {}
 
     // Vector access
     struct scoped_ref : std::array<value_type, size> {
@@ -152,15 +152,13 @@ struct fixed {
                 return;
             }
 
-            for (size_type ii = 0; ii < size; ++ii) {
-                m_owner->m_data[ii] = this->at(ii).m_data;
-            }
+            volatile_store(m_owner, fixed(*this));
         }
 
         constexpr scoped_ref& operator=(scoped_ref&& other) noexcept {
             m_owner = other.m_owner;
             for (size_type ii = 0; ii < size; ++ii) {
-                m_data[ii] = other.m_data[ii];
+                this->at(ii) = other[ii];
             }
             other.m_owner = nullptr;
             return *this;
@@ -172,10 +170,10 @@ struct fixed {
 
     private:
         friend fixed;
-        constexpr explicit scoped_ref(fixed* owner) noexcept :
-            std::array<value_type, size>{owner->to_array()}, m_owner{owner} {}
+        constexpr explicit scoped_ref(volatile fixed* owner) noexcept :
+            std::array<value_type, size>{volatile_load(owner).to_array()}, m_owner{owner} {}
 
-        fixed* m_owner;
+        volatile fixed* m_owner{};
     };
 
     constexpr auto tie() noexcept requires Vector<data_type> {
@@ -183,8 +181,7 @@ struct fixed {
     }
 
     constexpr auto tie() volatile noexcept requires Vector<data_type> {
-        // Cast away volatile to allow registers to call ->tie()
-        return scoped_ref(const_cast<std::remove_volatile_t<fixed>*>(this));
+        return scoped_ref(this);
     }
 
     // Returns const value to prevent []= pattern

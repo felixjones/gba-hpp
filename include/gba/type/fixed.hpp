@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdlib>
 #include <type_traits>
 
 #include <gba/type/util.hpp>
@@ -482,6 +483,20 @@ constexpr auto operator<<(Lhs lhs, std::integral auto rhs) noexcept {
 template <Fixed Lhs>
 constexpr auto operator>>(Lhs lhs, std::integral auto rhs) noexcept {
     return Lhs::from_data(lhs.data() >> rhs);
+}
+
+// Mathematical functions
+constexpr auto abs(Fixed auto x) noexcept {
+    if constexpr (std::is_signed_v<typename decltype(x)::data_type>) {
+        return decltype(x)::from_data(std::abs(x.data()));
+    } else {
+        return x;
+    }
+}
+
+constexpr auto frac(Fixed auto x) noexcept {
+    const auto mask = decltype(x)::data_unit - 1;
+    return decltype(x)::from_data(x.data() & mask);
 }
 
 } // namespace gba

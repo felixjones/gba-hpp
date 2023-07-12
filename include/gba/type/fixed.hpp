@@ -74,30 +74,25 @@ struct fixed {
     }
 
     // Fixed point conversion
-    template <Fixed Rhs>
-    explicit constexpr fixed(Rhs rhs) noexcept requires (Vector<data_type> == Vector<typename Rhs::data_type>) :
-            m_data{shift_to<Rhs::fractional_bits, fractional_bits>(rhs.m_data)} {}
+    explicit constexpr fixed(Fixed auto rhs) noexcept requires (Vector<data_type> == Vector<typename decltype(rhs)::data_type>) :
+            m_data{shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data)} {}
 
-    template <Fixed Rhs>
-    constexpr fixed& operator=(Rhs rhs) noexcept {
-        m_data = shift_to<Rhs::fractional_bits, fractional_bits>(rhs.m_data);
+    constexpr fixed& operator=(Fixed auto rhs) noexcept {
+        m_data = shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
         return *this;
     }
 
     // Floating point conversion
-    template <std::floating_point Rhs>
-    explicit consteval fixed(Rhs rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
+    explicit consteval fixed(std::floating_point auto rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
 
-    template <std::floating_point Rhs>
-    explicit constexpr fixed(Rhs rhs) requires Vector<data_type> {
+    explicit constexpr fixed(std::floating_point auto rhs) requires Vector<data_type> {
         const auto val = round_float<data_type>(rhs * data_unit);
         for (size_type ii = 0; ii < size; ++ii) {
             m_data[ii] = val;
         }
     }
 
-    template <std::floating_point Rhs>
-    consteval fixed& operator=(Rhs rhs) {
+    consteval fixed& operator=(std::floating_point auto rhs) {
         m_data = round_float<data_type>(rhs * data_unit);
         return *this;
     }
@@ -108,19 +103,16 @@ struct fixed {
     }
 
     // Integral conversion
-    template <std::integral Rhs>
-    explicit constexpr fixed(Rhs rhs) requires (!Vector<data_type>) : m_data{rhs << fractional_bits} {}
+    explicit constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{rhs << fractional_bits} {}
 
-    template <std::integral Rhs>
-    explicit constexpr fixed(Rhs rhs) requires Vector<data_type> {
+    explicit constexpr fixed(std::integral auto rhs) requires Vector<data_type> {
         const auto val = rhs << fractional_bits;
         for (size_type ii = 0; ii < size; ++ii) {
             m_data[ii] = val;
         }
     }
 
-    template <std::integral Rhs>
-    constexpr fixed& operator=(Rhs rhs) noexcept {
+    constexpr fixed& operator=(std::integral auto rhs) noexcept {
         m_data = rhs << fractional_bits;
         return *this;
     }
@@ -426,14 +418,12 @@ constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
     }
 }
 
-template <Fixed Lhs, Fundamental Rhs>
-constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-    return Lhs::from_data(lhs.data() * rhs);
+constexpr auto operator*(Fixed auto lhs, Fundamental auto rhs) noexcept {
+    return decltype(lhs)::from_data(lhs.data() * rhs);
 }
 
-template <Fundamental Lhs, Fixed Rhs>
-constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
-    return Rhs::from_data(lhs * rhs.data());
+constexpr auto operator*(Fundamental auto lhs, Fixed auto rhs) noexcept {
+    return decltype(rhs)::from_data(lhs * rhs.data());
 }
 
 // operator/
@@ -454,41 +444,40 @@ constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
     }
 }
 
-template <Fixed Lhs, Fundamental Rhs>
-constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
-    return Lhs::from_data(lhs.data() / rhs);
+constexpr auto operator/(Fixed auto lhs, Fundamental auto rhs) noexcept {
+    return decltype(lhs)::from_data(lhs.data() / rhs);
 }
 
-template <Fundamental Lhs, Fixed Rhs>
-constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+template <Fixed Rhs>
+constexpr auto operator/(Fundamental auto lhs, Fixed auto rhs) noexcept {
     return Rhs(lhs) / rhs;
 }
 
 // Lhs equality operators
-template <Fundamental Lhs, Fixed Rhs>
-constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+template <Fixed Rhs>
+constexpr auto operator<=>(Fundamental auto lhs, Rhs rhs) noexcept {
     return Rhs(lhs) <=> rhs;
 }
 
-template <Fundamental Lhs, Fixed Rhs>
-constexpr auto operator==(Lhs lhs, Rhs rhs) noexcept {
+template <Fixed Rhs>
+constexpr auto operator==(Fundamental auto lhs, Rhs rhs) noexcept {
     return Rhs(lhs) == rhs;
 }
 
-template <Fundamental Lhs, Fixed Rhs>
-constexpr auto operator!=(Lhs lhs, Rhs rhs) noexcept {
+template <Fixed Rhs>
+constexpr auto operator!=(Fundamental auto lhs, Rhs rhs) noexcept {
     return Rhs(lhs) != rhs;
 }
 
 // Shifting
-constexpr auto operator<<(Fixed auto lhs, std::integral auto rhs) noexcept {
-    using fixed = decltype(lhs);
-    return fixed::from_data(lhs.data() << rhs);
+template <Fixed Lhs>
+constexpr auto operator<<(Lhs lhs, std::integral auto rhs) noexcept {
+    return Lhs::from_data(lhs.data() << rhs);
 }
 
-constexpr auto operator>>(Fixed auto lhs, std::integral auto rhs) noexcept {
-    using fixed = decltype(lhs);
-    return fixed::from_data(lhs.data() >> rhs);
+template <Fixed Lhs>
+constexpr auto operator>>(Lhs lhs, std::integral auto rhs) noexcept {
+    return Lhs::from_data(lhs.data() >> rhs);
 }
 
 } // namespace gba

@@ -86,7 +86,15 @@ struct fixed {
 
     // Floating point conversion
     template <std::floating_point Rhs>
-    explicit consteval fixed(Rhs rhs) : m_data{round_float<data_type>(rhs * data_unit)} {}
+    explicit consteval fixed(Rhs rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
+
+    template <std::floating_point Rhs>
+    explicit constexpr fixed(Rhs rhs) requires Vector<data_type> {
+        const auto val = round_float<data_type>(rhs * data_unit);
+        for (size_type ii = 0; ii < size; ++ii) {
+            m_data[ii] = val;
+        }
+    }
 
     template <std::floating_point Rhs>
     consteval fixed& operator=(Rhs rhs) {
@@ -101,7 +109,15 @@ struct fixed {
 
     // Integral conversion
     template <std::integral Rhs>
-    explicit constexpr fixed(Rhs rhs) : m_data{rhs << fractional_bits} {}
+    explicit constexpr fixed(Rhs rhs) requires (!Vector<data_type>) : m_data{rhs << fractional_bits} {}
+
+    template <std::integral Rhs>
+    explicit constexpr fixed(Rhs rhs) requires Vector<data_type> {
+        const auto val = rhs << fractional_bits;
+        for (size_type ii = 0; ii < size; ++ii) {
+            m_data[ii] = val;
+        }
+    }
 
     template <std::integral Rhs>
     constexpr fixed& operator=(Rhs rhs) noexcept {
@@ -323,6 +339,157 @@ struct fixed {
 
 template <typename T>
 concept FixedScopedRef = std::same_as<T, typename T::owner_type::scoped_ref> && Fixed<typename T::owner_type>;
+
+// operator+
+template <Fixed Lhs, Fixed Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = (Lhs::fractional_bits + Rhs::fractional_bits) / 2;
+    using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
+
+    const auto lhsData = shift_to<Lhs::fractional_bits, frac_bits>(lhs.data());
+    const auto rhsData = shift_to<Rhs::fractional_bits, frac_bits>(rhs.data());
+
+    return fixed<data_type, frac_bits>::from_data(lhsData + rhsData);
+}
+
+template <Fixed Lhs, Fundamental Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = Lhs::fractional_bits;
+    using data_type = decltype(typename Lhs::data_type() + Rhs());
+
+    const auto lhsData = shift_to<Lhs::fractional_bits, frac_bits>(lhs.data());
+    const auto rhsData = shift_to<0, frac_bits>(rhs);
+
+    return fixed<data_type, frac_bits>::from_data(lhsData + rhsData);
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator+(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = Rhs::fractional_bits;
+    using data_type = decltype(Lhs() + typename Rhs::data_type());
+
+    const auto lhsData = shift_to<0, frac_bits>(lhs);
+    const auto rhsData = shift_to<Rhs::fractional_bits, frac_bits>(rhs.data());
+
+    return fixed<data_type, frac_bits>::from_data(lhsData + rhsData);
+}
+
+// operator-
+template <Fixed Lhs, Fixed Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = (Lhs::fractional_bits + Rhs::fractional_bits) / 2;
+    using data_type = decltype(typename Lhs::data_type() - typename Rhs::data_type());
+
+    const auto lhsData = shift_to<Lhs::fractional_bits, frac_bits>(lhs.data());
+    const auto rhsData = shift_to<Rhs::fractional_bits, frac_bits>(rhs.data());
+
+    return fixed<data_type, frac_bits>::from_data(lhsData - rhsData);
+}
+
+template <Fixed Lhs, Fundamental Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = Lhs::fractional_bits;
+    using data_type = decltype(typename Lhs::data_type() - Rhs());
+
+    const auto lhsData = shift_to<Lhs::fractional_bits, frac_bits>(lhs.data());
+    const auto rhsData = shift_to<0, frac_bits>(rhs);
+
+    return fixed<data_type, frac_bits>::from_data(lhsData - rhsData);
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator-(Lhs lhs, Rhs rhs) noexcept {
+    constexpr auto frac_bits = Rhs::fractional_bits;
+    using data_type = decltype(Lhs() - typename Rhs::data_type());
+
+    const auto lhsData = shift_to<0, frac_bits>(lhs);
+    const auto rhsData = shift_to<Rhs::fractional_bits, frac_bits>(rhs.data());
+
+    return fixed<data_type, frac_bits>::from_data(lhsData - rhsData);
+}
+
+// operator*
+template <Fixed Lhs, Fixed Rhs>
+constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+    using data_type = decltype(typename Lhs::data_type() * typename Rhs::data_type());
+    using bigger_type = typename make_bigger<data_type>::type;
+
+    constexpr auto bits_combined = Lhs::fractional_bits + Rhs::fractional_bits;
+    constexpr auto frac_bits = bits_combined / 2;
+
+    if constexpr (Vector<data_type>) {
+        const auto data = __builtin_convertvector(lhs.data(), bigger_type) * __builtin_convertvector(rhs.data(), bigger_type);
+        return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(shift_to<bits_combined, frac_bits>(data), data_type));
+    } else {
+        const auto data = bigger_type(lhs.data()) * rhs.data();
+        return fixed<data_type, frac_bits>::from_data(shift_to<bits_combined, frac_bits>(data));
+    }
+}
+
+template <Fixed Lhs, Fundamental Rhs>
+constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+    return Lhs::from_data(lhs.data() * rhs);
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs::from_data(lhs * rhs.data());
+}
+
+// operator/
+template <Fixed Lhs, Fixed Rhs>
+constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+    using data_type = decltype(typename Lhs::data_type() / typename Rhs::data_type());
+    using bigger_type = typename make_bigger<data_type>::type;
+
+    constexpr auto bits_combined = Lhs::fractional_bits + Rhs::fractional_bits;
+    constexpr auto frac_bits = bits_combined / 2;
+
+    if constexpr (Vector<data_type>) {
+        const auto data = shift_to<Lhs::fractional_bits, frac_bits + Rhs::fractional_bits>(__builtin_convertvector(lhs.data(), bigger_type));
+        return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(data / __builtin_convertvector(rhs.data(), bigger_type), data_type));
+    } else {
+        const auto data = shift_to<Lhs::fractional_bits, frac_bits + Rhs::fractional_bits>(bigger_type(lhs.data()));
+        return fixed<data_type, frac_bits>::from_data(data / rhs.data());
+    }
+}
+
+template <Fixed Lhs, Fundamental Rhs>
+constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+    return Lhs::from_data(lhs.data() / rhs);
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs) / rhs;
+}
+
+// Lhs equality operators
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator<=>(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs) <=> rhs;
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator==(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs) == rhs;
+}
+
+template <Fundamental Lhs, Fixed Rhs>
+constexpr auto operator!=(Lhs lhs, Rhs rhs) noexcept {
+    return Rhs(lhs) != rhs;
+}
+
+// Shifting
+constexpr auto operator<<(Fixed auto lhs, std::integral auto rhs) noexcept {
+    using fixed = decltype(lhs);
+    return fixed::from_data(lhs.data() << rhs);
+}
+
+constexpr auto operator>>(Fixed auto lhs, std::integral auto rhs) noexcept {
+    using fixed = decltype(lhs);
+    return fixed::from_data(lhs.data() >> rhs);
+}
 
 } // namespace gba
 

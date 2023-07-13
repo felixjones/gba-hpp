@@ -14,12 +14,16 @@
 
 #include <gba/type.hpp>
 
+#include <gba/hardware/dma.hpp>
+
 #include <gba/input/key.hpp>
 
 #include <gba/interrupt/irq.hpp>
 
 #include <gba/sound/noise.hpp>
 #include <gba/sound/soundcnt.hpp>
+#include <gba/sound/tone.hpp>
+#include <gba/sound/wave.hpp>
 
 #include <gba/video/bgxcnt.hpp>
 #include <gba/video/bld.hpp>
@@ -87,18 +91,18 @@ namespace {
     constexpr auto BLDALPHA = registral<const_ptr<volatile fixed<make_vector<u8, 2>, 5>>(0x4000052)>{};
     constexpr auto BLDY = registral<const_ptr<volatile fixed<u16, 4>>(0x4000054)>{};
 
-    // Keys
-
-    constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
-
-    // Interrupts
-
-    constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
-    constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
-    constexpr auto WAITCNT = registral<const_ptr<volatile u32>(0x4000204)>{};
-    constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
-
     // Sound
+
+    constexpr auto TONE1_SWEEP = registral<const_ptr<volatile sound1cnt_l>(0x4000060)>{};
+    constexpr auto TONE1_PATTERN = registral<const_ptr<volatile sound1cnt_h>(0x4000062)>{};
+    constexpr auto TONE1_FREQUENCY = registral<const_ptr<volatile sound1cnt_x>(0x4000064)>{};
+
+    constexpr auto TONE2_PATTERN = registral<const_ptr<volatile sound2cnt_l>(0x4000068)>{};
+    constexpr auto TONE2_FREQUENCY = registral<const_ptr<volatile sound2cnt_h>(0x400006C)>{};
+
+    constexpr auto WAVE_BANK = registral<const_ptr<volatile sound3cnt_l>(0x4000070)>{};
+    constexpr auto WAVE_LEN_VOLUME = registral<const_ptr<volatile sound3cnt_h>(0x4000072)>{};
+    constexpr auto WAVE_FREQ = registral<const_ptr<volatile sound3cnt_x>(0x4000074)>{};
 
     constexpr auto NOISE_LEN_ENV = registral<const_ptr<volatile sound4cnt_l>(0x4000078)>{};
     constexpr auto NOISE_FREQ = registral<const_ptr<volatile sound4cnt_h>(0x400007C)>{};
@@ -110,6 +114,39 @@ namespace {
 
     constexpr auto FIFO_A = registral<const_ptr<volatile u32>(0x40000A0)>{};
     constexpr auto FIFO_B = registral<const_ptr<volatile u32>(0x40000A4)>{};
+
+    // DMA
+
+    constexpr auto DMA0_SRC = registral<const_ptr<const void* volatile>(0x40000B0)>{};
+    constexpr auto DMA0_DEST = registral<const_ptr<void* volatile>(0x40000B4)>{};
+    constexpr auto DMA0_COUNT = registral<const_ptr<volatile u16>(0x40000B8)>{};
+    constexpr auto DMA0_CONTROL = registral<const_ptr<volatile dma0cnt_h>(0x40000BA)>{};
+
+    constexpr auto DMA1_SRC = registral<const_ptr<const void* volatile>(0x40000BC)>{};
+    constexpr auto DMA1_DEST = registral<const_ptr<void* volatile>(0x40000C0)>{};
+    constexpr auto DMA1_COUNT = registral<const_ptr<volatile u16>(0x40000C4)>{};
+    constexpr auto DMA1_CONTROL = registral<const_ptr<volatile dma1cnt_h>(0x40000C6)>{};
+
+    constexpr auto DMA2_SRC = registral<const_ptr<const void* volatile>(0x40000C8)>{};
+    constexpr auto DMA2_DEST = registral<const_ptr<void* volatile>(0x40000CC)>{};
+    constexpr auto DMA2_COUNT = registral<const_ptr<volatile u16>(0x40000D0)>{};
+    constexpr auto DMA2_CONTROL = registral<const_ptr<volatile dma2cnt_h>(0x40000D2)>{};
+
+    constexpr auto DMA3_SRC = registral<const_ptr<const void* volatile>(0x40000D4)>{};
+    constexpr auto DMA3_DEST = registral<const_ptr<void* volatile>(0x40000D8)>{};
+    constexpr auto DMA3_COUNT = registral<const_ptr<volatile u16>(0x40000DC)>{};
+    constexpr auto DMA3_CONTROL = registral<const_ptr<volatile dma3cnt_h>(0x40000DE)>{};
+
+    // Keys
+
+    constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
+
+    // Interrupts
+
+    constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
+    constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
+    constexpr auto WAITCNT = registral<const_ptr<volatile u32>(0x4000204)>{};
+    constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
 
     // Palette RAM
 

@@ -200,7 +200,7 @@ namespace gba {
 
     template <typename T>
     constexpr auto operator+(const_ptr<T> reg, std::integral auto offset) noexcept -> const_ptr<T> {
-        return const_ptr<T>(reg.m_ptr + offset);
+        return const_ptr<T>(reg.m_ptr + std::uintptr_t(offset));
     }
 
     template <typename T>

@@ -112,7 +112,7 @@ namespace gba {
     }
 
     template <typename T, typename... Args>
-    constexpr T volatile_emplace(T* ptr, Args&&... args) noexcept {
+    constexpr std::remove_cvref_t<T> volatile_emplace(T* ptr, Args&&... args) noexcept {
         using value_type = std::remove_cvref_t<T>;
         static_assert(std::is_trivially_copyable_v<value_type>, "Volatile emplace can only be used with trivially copyable types");
 
@@ -290,7 +290,7 @@ namespace gba {
             const registral* m_owner;
         };
 
-        constexpr auto acquire() const noexcept {
+        constexpr auto acquire() const noexcept requires (!Fundamental<value_type>) {
             return scoped_ref{this};
         }
     };

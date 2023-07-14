@@ -27,15 +27,11 @@ namespace gba {
         fixed = 2
     };
 
-    struct alignas(short) dma0cnt_h {
+    struct alignas(short) dmaxcnt_h {
         short : 5;
         dest_addr dest_control : 2{};
         src_addr src_control : 2{};
     };
-
-    using dma1cnt_h = dma0cnt_h;
-    using dma2cnt_h = dma0cnt_h;
-    using dma3cnt_h = dma0cnt_h;
 
 } // namespace gba
 

@@ -27,7 +27,7 @@ namespace gba {
         fixed = 2
     };
 
-    struct alignas(short) dmaxcnt_h {
+    struct alignas(short) dmacnt_h {
         short : 5;
         dest_addr dest_control : 2{};
         src_addr src_control : 2{};

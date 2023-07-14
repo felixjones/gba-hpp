@@ -21,7 +21,7 @@ namespace gba {
         _1024 = 3
     };
 
-    struct alignas(short) tmxcnt_h {
+    struct alignas(short) tmcnt_h {
         timer_scale scale : 2{};
         bool cascade : 1{};
         short : 3;

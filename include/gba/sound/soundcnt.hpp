@@ -53,7 +53,7 @@ namespace gba {
         bool enabled : 1{};
     };
 
-    enum class sample_cycle : u16 {
+    enum class sample : u16 {
         _9bit = 0,
         _8bit = 1,
         _7bit = 2,
@@ -64,7 +64,7 @@ namespace gba {
         short : 1;
         u16 bias_level : 9{};
         short : 4;
-        gba::sample_cycle sample_cycle : 2{};
+        sample cycle : 2{};
     };
 
 } // namespace gba

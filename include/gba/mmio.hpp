@@ -15,6 +15,7 @@
 #include <gba/type.hpp>
 
 #include <gba/hardware/dma.hpp>
+#include <gba/hardware/timer.hpp>
 
 #include <gba/input/key.hpp>
 
@@ -120,22 +121,40 @@ namespace {
     constexpr auto DMA0_SRC = registral<const_ptr<const void* volatile>(0x40000B0)>{};
     constexpr auto DMA0_DEST = registral<const_ptr<void* volatile>(0x40000B4)>{};
     constexpr auto DMA0_COUNT = registral<const_ptr<volatile u16>(0x40000B8)>{};
-    constexpr auto DMA0_CONTROL = registral<const_ptr<volatile dma0cnt_h>(0x40000BA)>{};
+    constexpr auto DMA0_CONTROL = registral<const_ptr<volatile dmaxcnt_h>(0x40000BA)>{};
 
     constexpr auto DMA1_SRC = registral<const_ptr<const void* volatile>(0x40000BC)>{};
     constexpr auto DMA1_DEST = registral<const_ptr<void* volatile>(0x40000C0)>{};
     constexpr auto DMA1_COUNT = registral<const_ptr<volatile u16>(0x40000C4)>{};
-    constexpr auto DMA1_CONTROL = registral<const_ptr<volatile dma1cnt_h>(0x40000C6)>{};
+    constexpr auto DMA1_CONTROL = registral<const_ptr<volatile dmaxcnt_h>(0x40000C6)>{};
 
     constexpr auto DMA2_SRC = registral<const_ptr<const void* volatile>(0x40000C8)>{};
     constexpr auto DMA2_DEST = registral<const_ptr<void* volatile>(0x40000CC)>{};
     constexpr auto DMA2_COUNT = registral<const_ptr<volatile u16>(0x40000D0)>{};
-    constexpr auto DMA2_CONTROL = registral<const_ptr<volatile dma2cnt_h>(0x40000D2)>{};
+    constexpr auto DMA2_CONTROL = registral<const_ptr<volatile dmaxcnt_h>(0x40000D2)>{};
 
     constexpr auto DMA3_SRC = registral<const_ptr<const void* volatile>(0x40000D4)>{};
     constexpr auto DMA3_DEST = registral<const_ptr<void* volatile>(0x40000D8)>{};
     constexpr auto DMA3_COUNT = registral<const_ptr<volatile u16>(0x40000DC)>{};
-    constexpr auto DMA3_CONTROL = registral<const_ptr<volatile dma3cnt_h>(0x40000DE)>{};
+    constexpr auto DMA3_CONTROL = registral<const_ptr<volatile dmaxcnt_h>(0x40000DE)>{};
+
+    // Timers
+
+    constexpr auto TIMER0_COUNT = registral<const_ptr<const volatile u16>(0x4000100)>{};
+    constexpr auto TIMER0_RELOAD = registral<const_ptr<volatile short>(0x4000100)>{};
+    constexpr auto TIMER0_CONTROL = registral<const_ptr<volatile tmxcnt_h>(0x4000102)>{};
+
+    constexpr auto TIMER1_COUNT = registral<const_ptr<const volatile u16>(0x4000104)>{};
+    constexpr auto TIMER1_RELOAD = registral<const_ptr<volatile short>(0x4000104)>{};
+    constexpr auto TIMER1_CONTROL = registral<const_ptr<volatile tmxcnt_h>(0x4000106)>{};
+
+    constexpr auto TIMER2_COUNT = registral<const_ptr<const volatile u16>(0x4000108)>{};
+    constexpr auto TIMER2_RELOAD = registral<const_ptr<volatile short>(0x4000108)>{};
+    constexpr auto TIMER2_CONTROL = registral<const_ptr<volatile tmxcnt_h>(0x400010A)>{};
+
+    constexpr auto TIMER3_COUNT = registral<const_ptr<const volatile u16>(0x400010C)>{};
+    constexpr auto TIMER3_RELOAD = registral<const_ptr<volatile short>(0x400010C)>{};
+    constexpr auto TIMER3_CONTROL = registral<const_ptr<volatile tmxcnt_h>(0x400010E)>{};
 
     // Keys
 

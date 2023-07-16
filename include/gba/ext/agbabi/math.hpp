@@ -39,14 +39,14 @@ namespace {
         using fixed_type = decltype(x);
         using unsigned_type = std::make_unsigned_t<typename fixed_type::data_type>;
 
-        static constexpr auto half_exp = (fixed_type::exp + 1) / 2;
-        static constexpr auto odd_bit = fixed_type::exp % 2;
+        static constexpr auto half_exp = (fixed_type::fractional_bits + 1) / 2;
+        static constexpr auto odd_bit = fixed_type::fractional_bits % 2;
 
         return fixed<typename fixed_type::data_type, half_exp + Exp>::from_data(__agbabi_sqrt(unsigned_type(x.data() << ((Exp * 2) + odd_bit))));
     }
 
     [[gnu::const]]
-    auto sqrt(std::integral auto x) noexcept {
+    inline auto sqrt(u32 x) noexcept {
         return __agbabi_sqrt(x);
     }
 

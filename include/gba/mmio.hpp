@@ -14,6 +14,7 @@
 
 #include <gba/type.hpp>
 
+#include <gba/hardware/cartridge.hpp>
 #include <gba/hardware/dma.hpp>
 #include <gba/hardware/serial.hpp>
 #include <gba/hardware/timer.hpp>
@@ -203,7 +204,7 @@ namespace {
 
     constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
     constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
-    constexpr auto WAITCNT = registral<const_ptr<volatile u32>(0x4000204)>{};
+    constexpr auto WAITCNT = registral<const_ptr<volatile waitcnt>(0x4000204)>{};
     constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
 
     // Palette RAM
@@ -245,6 +246,12 @@ namespace {
     constexpr auto AFFINE_PARAM_B = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700000E), 32>{};
     constexpr auto AFFINE_PARAM_C = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x7000016), 32>{};
     constexpr auto AFFINE_PARAM_D = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700001E), 32>{};
+
+    // Cartridge IO
+
+    constexpr auto IO_PORT_DATA = registral<const_ptr<volatile cartdata>(0x080000C4)>{};
+    constexpr auto IO_PORT_DIRECTION = registral<const_ptr<volatile cartdirection>(0x080000C6)>{};
+    constexpr auto IO_PORT_CONTROL = registral<const_ptr<volatile cartcontrol>(0x080000C8)>{};
 
 }
 

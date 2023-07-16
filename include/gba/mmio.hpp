@@ -16,6 +16,7 @@
 
 #include <gba/hardware/cartridge.hpp>
 #include <gba/hardware/dma.hpp>
+#include <gba/hardware/memcnt.hpp>
 #include <gba/hardware/serial.hpp>
 #include <gba/hardware/timer.hpp>
 
@@ -206,6 +207,10 @@ namespace {
     constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
     constexpr auto WAITCNT = registral<const_ptr<volatile waitcnt>(0x4000204)>{};
     constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
+
+    // Memory control
+
+    constexpr auto MEMCNT = registral<const_ptr<volatile memcnt>(0x4000800)>{};
 
     // Palette RAM
 

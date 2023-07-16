@@ -27,10 +27,22 @@ namespace gba {
         fixed = 2
     };
 
+    enum class start : u16 {
+        immediate = 0,
+        vblank = 1,
+        hblank = 2,
+        special = 3
+    };
+
     struct alignas(short) dmacnt_h {
         short : 5;
         dest_addr dest_control : 2{};
         src_addr src_control : 2{};
+        bool repeat : 1{};
+        bool transfer_32bit : 1{};
+        start start_time : 2{};
+        bool irq_after : 1{};
+        bool enabled : 1{};
     };
 
 } // namespace gba

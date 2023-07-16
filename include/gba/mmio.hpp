@@ -187,9 +187,17 @@ namespace {
     constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
     constexpr auto KEYCNT = registral<const_ptr<volatile keycnt>(0x4000132)>{};
 
+    // RCNT
+
+    constexpr auto RCNT_JOYBUS = registral<const_ptr<volatile rcnt_joybus>(0x4000134)>{};
+    constexpr auto RCNT_GPIO = registral<const_ptr<volatile rcnt_gpio>(0x4000134)>{};
+
     // Joybus
 
-
+    constexpr auto JOYCNT = registral<const_ptr<volatile joycnt>(0x4000140)>{};
+    constexpr auto JOY_RECV = registral<const_ptr<volatile u32>(0x4000150)>{};
+    constexpr auto JOY_TRANS = registral<const_ptr<volatile u32>(0x4000154)>{};
+    constexpr auto JOYSTAT = registral<const_ptr<volatile joystat>(0x4000158)>{};
 
     // Interrupts
 
@@ -209,6 +217,11 @@ namespace {
     constexpr auto CHARBLOCK1_4BPP = const_ptr<volatile tile4bpp[512]>(0x6004000);
     constexpr auto CHARBLOCK2_4BPP = const_ptr<volatile tile4bpp[512]>(0x6009000);
     constexpr auto CHARBLOCK3_4BPP = const_ptr<volatile tile4bpp[512]>(0x600C000);
+
+    constexpr auto CHARBLOCK0_8BPP = const_ptr<volatile tile8bpp[256]>(0x6000000);
+    constexpr auto CHARBLOCK1_8BPP = const_ptr<volatile tile8bpp[256]>(0x6004000);
+    constexpr auto CHARBLOCK2_8BPP = const_ptr<volatile tile8bpp[256]>(0x6009000);
+    constexpr auto CHARBLOCK3_8BPP = const_ptr<volatile tile8bpp[256]>(0x600C000);
 
     constexpr auto TEXT_SCREENBLOCKS = const_ptr<volatile textscreen[1024]>(0x6000000);
 

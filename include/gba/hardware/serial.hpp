@@ -62,6 +62,39 @@ namespace gba {
         bool irq_after : 1{};
     };
 
+    struct alignas(short) rcnt_joybus {
+        bool clock : 1{};
+        bool direction : 1{};
+        bool input : 1{};
+        bool output : 1{};
+        short : 10;
+        u16 joybus_mode : 2{3};
+    };
+
+    struct alignas(int) joycnt {
+        bool reset : 1{};
+        bool receive : 1{};
+        bool send : 1{};
+        short : 3;
+        bool irq_on_reset : 1{};
+    };
+
+    struct alignas(int) joystat {
+        int : 1;
+        bool receive : 1{};
+        int : 1;
+        bool send : 1{};
+        u32 general_purpose : 2{};
+    };
+
+    struct alignas(short) rcnt_gpio {
+        u16 data : 4{};
+        u16 direction : 4{};
+        bool irq_after : 1{};
+        short : 5;
+        u16 gpio_mode : 2{2};
+    };
+
 } // namespace gba
 
 #endif // define GBAXX_HARDWARE_SERIAL_HPP

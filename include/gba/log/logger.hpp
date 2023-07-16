@@ -129,7 +129,7 @@ namespace gba {
         }
 
 #ifdef _PSPRINTF_HEADER_
-        [[gnu::always_inline, gnu::format(printf, 2, 3)]]
+        [[gnu::always_inline]]
         static void posprintf(int level, const char* fmt, ...) noexcept {
             interface->posprintf(level, fmt, __builtin_va_arg_pack_len(), __builtin_va_arg_pack());
         }

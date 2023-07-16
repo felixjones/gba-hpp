@@ -19,6 +19,13 @@ namespace {
         asm volatile inline ("swi 0x5 << ((1f - . == 4) * -16); 1:" ::: "r0", "r1", "r3");
     }
 
+    [[gnu::always_inline, gnu::const]]
+    inline int GetBiosChecksum() noexcept {
+        register int i asm("r0");
+        asm volatile inline ("swi 0xD << ((1f - . == 4) * -16); 1:" : "=r"(i) :: "r1", "r3");
+        return i;
+    }
+
 }
 
 } // namespace gba::bios

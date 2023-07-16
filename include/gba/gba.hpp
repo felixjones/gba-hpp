@@ -14,6 +14,7 @@
 #include <gba/type.hpp>
 
 #include <gba/bios/halt.hpp>
+#include <gba/bios/misc.hpp>
 
 #include <gba/ext/agbabi/agbabi.hpp>
 

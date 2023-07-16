@@ -15,16 +15,16 @@
 namespace gba {
 
     struct alignas(short) keyinput {
-        bool i_a : 1 {true};
-        bool i_b : 1 {true};
-        bool i_select : 1 {true};
-        bool i_start : 1 {true};
-        bool i_right : 1 {true};
-        bool i_left : 1 {true};
-        bool i_up : 1 {true};
-        bool i_down : 1 {true};
-        bool i_r : 1 {true};
-        bool i_l : 1 {true};
+        bool i_a : 1{true};
+        bool i_b : 1{true};
+        bool i_select : 1{true};
+        bool i_start : 1{true};
+        bool i_right : 1{true};
+        bool i_left : 1{true};
+        bool i_up : 1{true};
+        bool i_down : 1{true};
+        bool i_r : 1{true};
+        bool i_l : 1{true};
 
         [[nodiscard]]
         constexpr int xaxis() const noexcept {
@@ -69,6 +69,22 @@ namespace gba {
             return keys - (keys >> 1); // Optimize for code density
 #endif
         }
+    };
+
+    struct alignas(short) keycnt {
+        bool a : 1{};
+        bool b : 1{};
+        bool select : 1{};
+        bool start : 1{};
+        bool right : 1{};
+        bool left : 1{};
+        bool up : 1{};
+        bool down : 1{};
+        bool r : 1{};
+        bool l : 1{};
+        short : 4;
+        bool irq_enabled : 1{};
+        bool irq_all : 1{};
     };
 
 } // namespace gba

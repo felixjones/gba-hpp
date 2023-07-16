@@ -360,9 +360,12 @@ namespace gba {
         return reg.value() <=> value;
     }
 
-    template <auto Ptr, std::ptrdiff_t Stride> requires ConstPtr<decltype(Ptr)> && std::is_array_v<typename decltype(Ptr)::element_type>
+    template <auto Ptr, std::ptrdiff_t Stride = 0> requires ConstPtr<decltype(Ptr)> && std::is_array_v<typename decltype(Ptr)::element_type>
     struct registral_series {
         using element_type = std::remove_extent_t<std::remove_reference_t<typename decltype(Ptr)::element_type>>;
+        using ptr_type = decltype(Ptr.m_ptr);
+
+        static constexpr auto stride = Stride ? Stride : sizeof(element_type);
 
         constexpr auto& operator=(const std::remove_cvref_t<typename decltype(Ptr)::element_type>& value) const noexcept requires(!std::is_const_v<typename decltype(Ptr)::element_type>) {
             volatile_store(Ptr.get(), std::remove_cvref_t<typename decltype(Ptr)::element_type>(value));
@@ -373,35 +376,33 @@ namespace gba {
             return Ptr.get();
         }
 
-        constexpr auto& operator[](std::integral auto i) const noexcept requires(!std::is_const_v<element_type>) {
-            return *reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * Stride);
+        constexpr auto& operator[](ptr_type i) const noexcept requires(!std::is_const_v<element_type>) {
+            return *reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * stride);
         }
 
-        constexpr auto operator[](std::integral auto i) const noexcept requires(std::is_const_v<element_type>) {
-            return volatile_load(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride));
+        constexpr auto operator[](ptr_type i) const noexcept requires(std::is_const_v<element_type>) {
+            return volatile_load(reinterpret_cast<element_type*>(Ptr.m_ptr + i * stride));
         }
 
         constexpr auto get(std::size_t i) const noexcept {
-            return volatile_load(reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * Stride));
+            return volatile_load(reinterpret_cast<std::remove_volatile_t<element_type>*>(Ptr.m_ptr + i * stride));
         }
 
         template <typename T = std::remove_volatile_t<element_type>>
         constexpr void set(std::size_t i, T&& value) const noexcept {
-            volatile_store(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), static_cast<element_type&&>(value));
+            volatile_store(reinterpret_cast<element_type*>(Ptr.m_ptr + i * stride), static_cast<element_type&&>(value));
         }
 
         constexpr void reset(std::size_t i) const noexcept requires(!std::is_const_v<element_type>) {
-            volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride));
+            volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * stride));
         }
 
         template <typename... Args>
         constexpr auto emplace(std::size_t i, Args&&... args) const noexcept -> std::remove_cvref_t<element_type> requires(!std::is_const_v<element_type>) {
-            return volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * Stride), std::forward<Args>(args)...);
+            return volatile_emplace(reinterpret_cast<element_type*>(Ptr.m_ptr + i * stride), std::forward<Args>(args)...);
         }
 
         struct scoped_ref : std::remove_cvref_t<element_type> {
-            scoped_ref() noexcept = default;
-
             constexpr ~scoped_ref() noexcept {
                 if (!m_address) {
                     return;
@@ -433,7 +434,7 @@ namespace gba {
         };
 
         constexpr auto acquire(std::size_t i) const noexcept {
-            return scoped_ref{Ptr.m_ptr + i * Stride};
+            return scoped_ref{Ptr.m_ptr + i * stride};
         }
     };
 
@@ -442,9 +443,9 @@ namespace gba {
 namespace std {
 
     template <auto Lhs, auto Rhs> requires
-        std::is_same_v<std::remove_cvref_t<decltype(Lhs)>, gba::const_ptr < typename decltype(Lhs)::element_type>> &&
-        std::is_same_v<std::remove_cvref_t<decltype(Rhs)>, gba::const_ptr < typename decltype(Rhs)::element_type>>
-    constexpr void swap(const gba::registral<Lhs>& lhs, const gba::registral<Rhs>& rhs ) noexcept(noexcept(lhs.swap(rhs))) {
+        std::is_same_v<std::remove_cvref_t<decltype(Lhs)>, gba::const_ptr<typename decltype(Lhs)::element_type>> &&
+        std::is_same_v<std::remove_cvref_t<decltype(Rhs)>, gba::const_ptr<typename decltype(Rhs)::element_type>>
+    constexpr void swap(const gba::registral<Lhs>& lhs, const gba::registral<Rhs>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
         lhs.swap(rhs);
     }
 

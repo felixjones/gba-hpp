@@ -15,6 +15,7 @@
 #include <gba/type.hpp>
 
 #include <gba/hardware/dma.hpp>
+#include <gba/hardware/serial.hpp>
 #include <gba/hardware/timer.hpp>
 
 #include <gba/input/key.hpp>
@@ -138,6 +139,11 @@ namespace {
     constexpr auto DMA3_COUNT = registral<const_ptr<volatile u16>(0x40000DC)>{};
     constexpr auto DMA3_CONTROL = registral<const_ptr<volatile dmacnt_h>(0x40000DE)>{};
 
+    constexpr auto DMA_SRC = registral_series<const_ptr<const void* volatile[4]>(0x40000B0), 12>{};
+    constexpr auto DMA_DEST = registral_series<const_ptr<void* volatile[4]>(0x40000B4), 12>{};
+    constexpr auto DMA_COUNT = registral_series<const_ptr<volatile u16[4]>(0x40000B8), 12>{};
+    constexpr auto DMA_CONTROL = registral_series<const_ptr<volatile dmacnt_h[4]>(0x40000BA), 4>{};
+
     // Timers
 
     constexpr auto TIMER0_COUNT = registral<const_ptr<const volatile u16>(0x4000100)>{};
@@ -156,9 +162,34 @@ namespace {
     constexpr auto TIMER3_RELOAD = registral<const_ptr<volatile short>(0x400010C)>{};
     constexpr auto TIMER3_CONTROL = registral<const_ptr<volatile tmcnt_h>(0x400010E)>{};
 
+    constexpr auto TIMER_COUNT = registral_series<const_ptr<const volatile u16[4]>(0x4000100), 4>{};
+    constexpr auto TIMER_RELOAD = registral_series<const_ptr<volatile u16[4]>(0x4000100), 4>{};
+    constexpr auto TIMER_CONTROL = registral_series<const_ptr<volatile tmcnt_h[4]>(0x4000102), 4>{};
+
+    // Serial
+
+    constexpr auto SIODATA32 = registral<const_ptr<volatile u32>(0x4000120)>{};
+    constexpr auto SIOMULTI0 = registral<const_ptr<volatile u16>(0x4000120)>{};
+    constexpr auto SIOMULTI1 = registral<const_ptr<volatile u16>(0x4000122)>{};
+    constexpr auto SIOMULTI2 = registral<const_ptr<volatile u16>(0x4000124)>{};
+    constexpr auto SIOMULTI3 = registral<const_ptr<volatile u16>(0x4000126)>{};
+    constexpr auto SIOMULTI = registral_series<const_ptr<volatile u16[4]>(0x4000120)>{};
+
+    constexpr auto SIOCNT_NORMAL = registral<const_ptr<volatile siocnt_normal>(0x4000128)>{};
+    constexpr auto SIOCNT_MULTI = registral<const_ptr<volatile siocnt_multi>(0x4000128)>{};
+    constexpr auto SIOCNT_UART = registral<const_ptr<volatile siocnt_uart>(0x4000128)>{};
+
+    constexpr auto SIODATA8 = registral<const_ptr<volatile u8>(0x400012A)>{};
+    constexpr auto SIOMLT_SEND = registral<const_ptr<volatile u16>(0x400012A)>{};
+
     // Keys
 
     constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
+    constexpr auto KEYCNT = registral<const_ptr<volatile keycnt>(0x4000132)>{};
+
+    // Joybus
+
+
 
     // Interrupts
 

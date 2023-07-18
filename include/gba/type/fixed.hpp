@@ -125,7 +125,7 @@ struct fixed {
     }
 
     // Vector conversion
-    template <Fundamental... Args>
+    template <Fixed... Args>
     explicit constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
         static_assert(sizeof...(Args) == size);
     }

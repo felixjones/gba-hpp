@@ -372,8 +372,9 @@ namespace gba {
             return *this;
         }
 
-        constexpr auto operator&() const noexcept -> typename decltype(Ptr)::element_type* {
-            return Ptr.get();
+        constexpr auto* operator&() const noexcept {
+            using decayed_type = std::decay_t<typename decltype(Ptr)::element_type>;
+            return reinterpret_cast<decayed_type>(Ptr.get());
         }
 
         constexpr auto& operator[](ptr_type i) const noexcept requires(!std::is_const_v<element_type>) {

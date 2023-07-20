@@ -95,6 +95,34 @@ namespace gba {
         u16 gpio_mode : 2{2};
     };
 
+    struct multi_boot_param {
+        u32	reserved1[5];
+        u8 handshake_data;
+        u8 padding;
+        u16	handshake_timeout;
+        u8 probe_count;
+        u8 client_data[3];
+        u8 palette_data;
+        u8 response_bit;
+        u8 client_bit;
+        u8 reserved2;
+        u8* boot_srcp;
+        u8* boot_endp;
+        u8* masterp;
+        u8* reserved3[3];
+        u32	system_work2[4];
+        u8 sendflag;
+        u8 probe_target_bit;
+        u8 check_wait;
+        u8 server_type;
+    };
+
+    enum class multi_boot_mode : int {
+        normal_256KHz_32bit = 0,
+        multi_play_115KHz_16bit = 1,
+        normal_2MHz_32bit = 2,
+    };
+
 } // namespace gba
 
 #endif // define GBAXX_HARDWARE_SERIAL_HPP

@@ -13,6 +13,7 @@
 #include <gba/mmio.hpp>
 #include <gba/type.hpp>
 
+#include <gba/bios/compress.hpp>
 #include <gba/bios/halt.hpp>
 #include <gba/bios/math.hpp>
 #include <gba/bios/misc.hpp>

@@ -17,6 +17,7 @@
 #include <gba/bios/halt.hpp>
 #include <gba/bios/math.hpp>
 #include <gba/bios/misc.hpp>
+#include <gba/bios/sound.hpp>
 
 #include <gba/ext/agbabi/agbabi.hpp>
 

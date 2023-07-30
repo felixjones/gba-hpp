@@ -18,6 +18,15 @@ namespace gba::agbabi {
 
 namespace {
 
+    /**
+     * @brief Attempts to overclock the EWRAM (reduces wait-states).
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000800h---32bit---undocumented---internal-memory-control-rw">4000800h - 32bit - Undocumented - Internal Memory Control (R/W)</a>
+     *
+     * A section of EWRAM is tested to check if overclocking was successful before applying the overclock and returning
+     * the result.
+     *
+     * @warning Not all GBA models support overclocked EWRAM.
+     */
     inline bool try_overclock_ewram() noexcept {
         if (__agbabi_poll_ewram()) {
             mmio::MEMCNT = memcnt_fast_ewram;

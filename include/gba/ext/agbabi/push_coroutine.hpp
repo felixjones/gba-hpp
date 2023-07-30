@@ -23,12 +23,17 @@
 
 namespace gba::agbabi {
 
-    template <typename T, typename U>
-    concept IsReferenceTo = (std::is_same_v<U, std::remove_cvref_t<T>>);
-
     template <typename T>
     class pull_coroutine;
 
+    /**
+     * @class push_coroutine
+     * @brief A class that represents a push-style coroutine.
+     *
+     * This class allows the user to define a coroutine that can be iterated over to push values to a consumer.
+     * The coroutine is implemented using a stack-based context and can be used by calling operator() to push the next
+     * value to the coroutine.
+     */
     template <typename T>
     class push_coroutine {
     private:
@@ -70,6 +75,15 @@ namespace gba::agbabi {
 
         context_type* m_ctx;
     public:
+        /**
+         * @brief Constructs a push_coroutine object that encapsulates a stack and a function.
+         * @tparam Fn The type of the function to be executed by the push_coroutine.
+         * @param stack A reference to a stack container that supports std::end().
+         * @param fn The function to be executed by the push_coroutine.
+         * @warning The push_coroutine object does not take ownership of the stack or the function. It is the
+         *          responsibility of the caller to ensure that the stack and function are valid and remain valid during
+         *          the lifetime of the push_coroutine object.
+         */
         template <typename Fn>
         push_coroutine(stack::PointerEnd auto& stack, Fn&& fn) noexcept : m_ctx{make_context(std::end(stack), std::forward<Fn>(fn))} {
             m_ctx->swap(); // Execute until a push is requested
@@ -87,6 +101,16 @@ namespace gba::agbabi {
             return *this;
         }
 
+        /**
+         * @brief Calls the push_coroutine.
+         *
+         * This function swaps the context of execution between the calling context and the push_coroutine context. The
+         * execution context includes the program counter, stack pointer, and other register values.
+         *
+         * @tparam T The type of values produced by the coroutine.
+         * @tparam Args The types of the arguments to be pushed to the coroutine.
+         * @param args The arguments to be pushed to the coroutine.
+         */
         template <typename... Args>
         void operator()(Args&&... args) noexcept {
             *m_ctx->coro->value = T(std::forward<Args>(args)...);
@@ -103,6 +127,15 @@ namespace gba::agbabi {
             return !m_ctx || m_ctx->coro->joined;
         }
 
+        /**
+         * @class iterator
+         * @brief An iterator class for a push-based coroutine.
+         *
+         * This iterator class is used to iterate over the values to send to a push-based coroutine.
+         * It provides the necessary interfaces and operators required for iteration.
+         *
+         * @tparam T The type of values received by the coroutine.
+         */
         class iterator {
         private:
             push_coroutine* m_coro{};

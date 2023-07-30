@@ -18,6 +18,17 @@ namespace {
 
     // Integer functions
 
+    /**
+     * @brief A function to divide two integers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-06h-gba-or-swi-09h-nds7nds9dsi7dsi9---div">SWI 06h (GBA) or SWI 09h (NDS7/NDS9/DSi7/DSi9) - Div</a>
+     *
+     * @param number The numerator to be divided.
+     * @param denom The denominator to divide by (must be nonzero).
+     *
+     * @return Vector containing the result of the division operation and the remainder.
+     *
+     * @warning If the denominator is zero then this function is likely to enter an infinite loop.
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto Div(int number, int denom) noexcept {
         register auto r0 asm("r0") = number;
@@ -26,6 +37,21 @@ namespace {
         return make_vector<int, 2>{r0, r1};
     }
 
+    /**
+     * @brief A function to divide two integers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-07h-gba---divarm">SWI 07h (GBA) - DivArm</a>
+     *
+     * @param denom The denominator to divide by (must be nonzero).
+     * @param number The numerator to be divided.
+     *
+     * @return Vector containing the result of the division operation and the remainder.
+     *
+     * @note This is the same as Div(), however the parameters are swapped. It is recommended to use Div().
+     *
+     * @warning If the denominator is zero then this function is likely to enter an infinite loop.
+     *
+     * @sa Div()
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto DivArm(int denom, int number) noexcept {
         register auto r0 asm("r0") = denom;
@@ -34,6 +60,13 @@ namespace {
         return make_vector<int, 2>{r0, r1};
     }
 
+    /**
+     * @brief Calculates the square root of a 32-bit unsigned integer.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-08h-gba-or-swi-0dh-nds7nds9dsi7dsi9---sqrt">SWI 08h (GBA) or SWI 0Dh (NDS7/NDS9/DSi7/DSi9) - Sqrt</a>
+     *
+     * @param arg The 32-bit unsigned integer argument for which to calculate the square root.
+     * @return The square root of the given argument.
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto Sqrt(u32 arg) noexcept {
         register auto r0 asm("r0") = arg;
@@ -43,6 +76,18 @@ namespace {
 
     // Fixed point functions
 
+    /**
+     * @brief Computes the square root of the given fixed-point number.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-08h-gba-or-swi-0dh-nds7nds9dsi7dsi9---sqrt">SWI 08h (GBA) or SWI 0Dh (NDS7/NDS9/DSi7/DSi9) - Sqrt</a>
+     *
+     * @tparam Exp How many extra bits of precision to add.
+     * @param arg The fixed-point number for which to calculate the square root.
+     * @return The square root of the input fixed-point number.
+     *
+     * @note The result will have half the precision in bits to the input. Precision can be increased with Exp.
+     *
+     * @warning Increasing the precision with Exp may result in losing the upper bits and producing an incorrect result.
+     */
     template <std::size_t Exp = 0>
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto Sqrt(Fixed auto arg) noexcept {
@@ -57,6 +102,15 @@ namespace {
         return fixed<unsigned_type, half_exp + Exp>::from_data(r0);
     }
 
+    /**
+     * @brief Calculates the arc tangent of the given fixed-point number.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-09h-gba---arctan">SWI 09h (GBA) - ArcTan</a>
+     *
+     * This function returns the arc tangent of the specified fixed-point value using a precision of 14 fractional bits.
+     *
+     * @param arg The fixed-point number for which to calculate the arc tangent.
+     * @return The arc tangent of the input fixed-point number as a binary angle.
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto ArcTan(fixed<int, 14> arg) noexcept {
         register auto r0 asm("r0") = arg.data();
@@ -64,6 +118,20 @@ namespace {
         return angle<int, 14>{r0};
     }
 
+    /**
+     * @brief Calculates the arc tangent of the given coordinates.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0ah-gba---arctan2">SWI 0Ah (GBA) - ArcTan2</a>
+     *
+     * This function returns the arc tangent of the fixed-point coordinates (x, y) using a precision of 14 fractional
+     * bits.
+     *
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @return The arc tangent of the coordinates (x, y) as a binary angle.
+     *
+     * @note Unlike ArcTan(), the result is a 16-bit binary angle.
+     * @note Notice that the order of the parameters are (x, y), unlike some atan2 implementations.
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto ArcTan2(fixed<int, 14> x, fixed<int, 14> y) noexcept {
         register auto r0 asm("r0") = x.data();
@@ -72,6 +140,13 @@ namespace {
         return angle<int, 16>{r0};
     }
 
+    /**
+     * @brief Represents a structure for affine background source data.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0eh-gba---bgaffineset">SWI 0Eh (GBA) - BgAffineSet</a>
+     *
+     * @sa bg_affine_dest
+     * @sa BgAffineSet()
+     */
     struct bg_affine_src {
         fixed<int, 8> tex_x;
         fixed<int, 8> tex_y;
@@ -83,6 +158,13 @@ namespace {
         short : 16;
     };
 
+    /**
+     * @brief Represents a structure for affine background destination data.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0eh-gba---bgaffineset">SWI 0Eh (GBA) - BgAffineSet</a>
+     *
+     * @sa bg_affine_src
+     * @sa BgAffineSet()
+     */
     struct bg_affine_dest {
         fixed<short, 8> pa;
         fixed<short, 8> pb;
@@ -92,6 +174,21 @@ namespace {
         fixed<int, 8> dy;
     };
 
+    /**
+     * @brief Fills the destination buffer with affine matrices built from the source buffer.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0eh-gba---bgaffineset">SWI 0Eh (GBA) - BgAffineSet</a>
+     *
+     * @param src Pointer to the source buffer in bg_affine_src format.
+     * @param dest Pointer to the destination buffer in bg_affine_dest format.
+     * @param num The number of matrices to calculate.
+     *
+     * @note This function assumes that both `src` and `dest` buffers have sufficient memory allocated to hold `num`
+     *       elements. Also, it is the responsibility of the caller to ensure that the memory regions pointed by `src`
+     *       and `dest` do not overlap.
+     *
+     * @sa bg_affine_dest
+     * @sa bg_affine_src
+     */
     [[gnu::always_inline, gnu::nonnull(1, 2)]]
     inline void BgAffineSet(const bg_affine_src* __restrict__ src, volatile bg_affine_dest* __restrict__ dest, std::size_t num) noexcept {
         register auto* r0 asm("r0") = src;
@@ -100,6 +197,12 @@ namespace {
         asm volatile inline ("swi 0xE << ((1f - . == 4) * -16); 1:" : "+r"(r0), "+r"(r1) : "r"(r2) : "r3", "memory");
     }
 
+    /**
+     * @brief Represents a structure for affine object destination data.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0fh-gba---objaffineset">SWI 0Fh (GBA) - ObjAffineSet</a>
+     *
+     * @sa ObjAffineSet()
+     */
     struct obj_affine_src {
         fixed<short, 8> sx;
         fixed<short, 8> sy;
@@ -107,6 +210,22 @@ namespace {
         short : 16;
     };
 
+    /**
+     * @brief Fills the destination with affine matrices built from the source buffer.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0fh-gba---objaffineset">SWI 0Fh (GBA) - ObjAffineSet</a>
+     *
+     * @param src Pointer to the source buffer in obj_affine_src format.
+     * @param dest Pointer to the first element of the destination matrices.
+     * @param num The number of matrices to calculate.
+     * @param stride The stride between each element of the destination matrices.
+     *
+     * @note The stride must be greater than or equal 2.
+     * @note This function assumes that both `src` and `dest` arrays have sufficient memory allocated to hold `num`
+     *       elements. Also, it is the responsibility of the caller to ensure that the memory regions pointed by `src`
+     *       and `dest` do not overlap.
+     *
+     * @sa obj_affine_src
+     */
     [[gnu::always_inline, gnu::nonnull(1, 2)]]
     inline void ObjAffineSet(const obj_affine_src* __restrict__ src, volatile fixed<short, 8>* __restrict__ dest, std::size_t num, std::size_t stride) noexcept {
         register auto* r0 asm("r0") = src;
@@ -116,6 +235,19 @@ namespace {
         asm volatile inline ("swi 0xF << ((1f - . == 4) * -16); 1:" : "+r"(r0), "+r"(r1), "+r"(r3) : "r"(r2) : "memory");
     }
 
+    /**
+     * @brief Calculates the sine and cosine of the given angle.
+     *
+     * This function utilizes ObjAffineSet() to simultaneously perform the calculation.
+     *
+     * @param alpha The binary angle.
+     * @return A vector of two fixed-point numbers containing the sine and cosine values.
+     *
+     * @note The return fixed-point values have a precision of 8 bits and a storage of 16 bits each, meaning they fit
+     *       within a single 32-bit register.
+     *
+     * @sa ObjAffineSet()
+     */
     [[nodiscard, gnu::always_inline, gnu::const]]
     inline auto SinCos(Angle auto alpha) noexcept {
         const obj_affine_src src = {fixed<short, 8>{1}, fixed<short, 8>{1}, alpha};

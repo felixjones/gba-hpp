@@ -32,10 +32,10 @@ namespace {
      *
      * @section Reading BIOS memory:
      * @code{cpp}
-     * auto read_bios_byte(std::size_t idx) noexcept {
-     *     const auto a = gba::bios::MidiKey2Freq(reinterpret_cast&lt;const void*>(idx - 4), 180 - 12, 0) * 2;
-     *     return std::byte(a >> 24);
-     * }
+     *auto read_bios_byte(std::size_t idx) noexcept {
+     *    const auto a = gba::bios::MidiKey2Freq(reinterpret_cast&lt;const void*>(idx - 4), 180 - 12, 0) * 2;
+     *    return std::byte(a >> 24);
+     *}
      * @endcode
      */
     [[nodiscard, gnu::always_inline, gnu::const]]

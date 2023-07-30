@@ -16,12 +16,27 @@
 
 namespace gba::agbabi {
 
+    /**
+     * @brief Represents a coroutine object.
+     *
+     * This struct provides a convenience interface to work with coroutines using pull and push types. The pull type is
+     * used to pull values from the coroutine, while the push type is used to push values into the coroutine.
+     *
+     * @tparam T The type of values passed between the coroutine and the caller
+     */
     template <typename T>
     struct coroutine {
         using pull_type = pull_coroutine<T>;
         using push_type = push_coroutine<T>;
     };
 
+    /**
+     * @brief Specialization of coroutine where pull_type and push_type are both fiber types.
+     *
+     * Unlike pull_coroutine or push_coroutine, fiber does not pass values between the coroutine and the caller.
+     *
+     * @sa coroutine
+     */
     template <>
     struct coroutine<void> {
         using pull_type = fiber;

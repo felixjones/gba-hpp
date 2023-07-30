@@ -26,6 +26,14 @@ namespace gba::agbabi {
     template <typename T>
     class push_coroutine;
 
+    /**
+     * @class pull_coroutine
+     * @brief A class that represents a pull-style coroutine.
+     *
+     * This class allows the user to define a coroutine that can be iterated over to produce a sequence of values.
+     * The coroutine is implemented using a stack-based context and can be used by calling operator() to pull the next
+     * value from the coroutine.
+     */
     template <typename T>
     class pull_coroutine {
     private:
@@ -67,6 +75,15 @@ namespace gba::agbabi {
 
         context_type* m_ctx;
     public:
+        /**
+         * @brief Constructs a pull_coroutine object that encapsulates a stack and a function.
+         * @tparam Fn The type of the function to be executed by the pull_coroutine.
+         * @param stack A reference to a stack container that supports std::end().
+         * @param fn The function to be executed by the pull_coroutine.
+         * @warning The pull_coroutine object does not take ownership of the stack or the function. It is the
+         *          responsibility of the caller to ensure that the stack and function are valid and remain valid during
+         *          the lifetime of the pull_coroutine object.
+         */
         template <typename Fn>
         pull_coroutine(stack::PointerEnd auto& stack, Fn&& fn) noexcept : m_ctx{make_context(std::end(stack), std::forward<Fn>(fn))} {
         }
@@ -83,6 +100,15 @@ namespace gba::agbabi {
             return *this;
         }
 
+        /**
+         * @brief Calls the pull_coroutine.
+         *
+         * This function swaps the context of execution between the calling context and the pull_coroutine context. The
+         * execution context includes the program counter, stack pointer, and other register values.
+         *
+         * @tparam T The type of values produced by the coroutine.
+         * @return Value pulled from the pull_coroutine.
+         */
         T&& operator()() noexcept {
             m_ctx->swap();
             return std::move(*m_ctx->coro->value);
@@ -98,6 +124,15 @@ namespace gba::agbabi {
             return !m_ctx || m_ctx->coro->joined;
         }
 
+        /**
+         * @class iterator
+         * @brief An iterator class for a pull-based coroutine.
+         *
+         * This iterator class is used to iterate over the values produced by a pull-based coroutine.
+         * It provides the necessary interfaces and operators required for iteration.
+         *
+         * @tparam T The type of values produced by the coroutine.
+         */
         class iterator {
         private:
             pull_coroutine* m_coro{};

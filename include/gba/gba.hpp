@@ -20,10 +20,9 @@
 #include <gba/bios/sound.hpp>
 
 #include <gba/ext/agbabi/agbabi.hpp>
+#include <gba/ext/mgba/log.hpp>
 
 #include <gba/input/keyhelper.hpp>
-
-#include <gba/log/logger.hpp>
 
 namespace gba {
 

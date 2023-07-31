@@ -14,6 +14,15 @@
 
 namespace gba {
 
+    /**
+     * @brief Enumeration for the operation to be applied to the destination address.
+     *
+     * `inc_reload` will behave like `increment`, only when the transfer is completed the destination address will be
+     * set back to the original value from prior to the beginning of the transfer.
+     *
+     * @sa dmacnt_h
+     * @sa src_addr
+     */
     enum class dest_addr : u16 {
         increment = 0,
         decrement = 1,
@@ -21,12 +30,30 @@ namespace gba {
         inc_reload = 3
     };
 
+    /**
+     * @brief Enumeration for the operation to be applied to the source address.
+     *
+     * @sa dmacnt_h
+     * @sa dest_addr
+     */
     enum class src_addr : u16 {
         increment = 0,
         decrement = 1,
         fixed = 2
     };
 
+    /**
+     * @brief Enumeration for setting when to begin a DMA transfer.
+     *
+     * The `special` mode depends on which DMA register is doing the operation.
+     *
+     * <ul>
+     * <li>DMA1/DMA2 = Sound FIFO</li>
+     * <li>DMA3 = Video Capture</li>
+     * </ul>
+     *
+     * @sa dmacnt_h
+     */
     enum class start : u16 {
         immediate = 0,
         vblank = 1,
@@ -34,12 +61,26 @@ namespace gba {
         special = 3
     };
 
+    /**
+     * @brief Represents the settings for a DMA transfer.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000bah---dma0cnt_h---dma-0-control-rw">40000BAh - DMA0CNT_H - DMA 0 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c6h---dma0cnt_h---dma-1-control-rw">40000C6h - DMA1CNT_H - DMA 1 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d2h---dma0cnt_h---dma-2-control-rw">40000D2h - DMA2CNT_H - DMA 2 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000deh---dma0cnt_h---dma-3-control-rw">40000DEh - DMA3CNT_H - DMA 3 Control (R/W)</a>
+     *
+     * @sa mmio::DMA0_CONTROL
+     * @sa mmio::DMA1_CONTROL
+     * @sa mmio::DMA2_CONTROL
+     * @sa mmio::DMA3_CONTROL
+     * @sa mmio::DMA_CONTROL
+     */
     struct alignas(short) dmacnt_h {
         short : 5;
         dest_addr dest_control : 2{};
         src_addr src_control : 2{};
         bool repeat : 1{};
         bool transfer_32bit : 1{};
+        bool dma3_pak_req : 1{};
         start start_time : 2{};
         bool irq_after : 1{};
         bool enabled : 1{};

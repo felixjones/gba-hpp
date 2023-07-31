@@ -28,7 +28,6 @@ namespace gba::mgba {
 namespace {
 
     /**
-     * @enum log
      * @brief Enumeration class for log levels.
      *
      * This enumeration class represents different levels of logging that can be used in mGBA.

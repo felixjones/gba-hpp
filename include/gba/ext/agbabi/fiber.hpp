@@ -21,8 +21,6 @@
 namespace gba::agbabi {
 
     /**
-     * @class fiber
-     *
      * @brief The `fiber` class represents a thread of execution.
      *
      * A fiber is a cooperative multitasking entity that can be used to switch between different contexts of execution

@@ -254,7 +254,7 @@ namespace {
 
     // Cartridge IO
 
-    constexpr auto IO_PORT_DATA = registral<const_ptr<volatile cartdata>(0x080000C4)>{};
+    constexpr auto IO_PORT_DATA = registral<const_ptr<volatile u16>(0x080000C4)>{};
     constexpr auto IO_PORT_DIRECTION = registral<const_ptr<volatile cartdirection>(0x080000C6)>{};
     constexpr auto IO_PORT_CONTROL = registral<const_ptr<volatile cartcontrol>(0x080000C8)>{};
 

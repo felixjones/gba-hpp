@@ -19,7 +19,7 @@ namespace gba::agbabi {
 namespace {
 
     /**
-     * Calculates the sine of the given binary angle.
+     * @brief Calculates the sine of the given binary angle.
      *
      * @param bam The binary angle for which the sine value will be calculated.
      * @return The signed fixed-point sine value of the given binary angle.
@@ -35,7 +35,7 @@ namespace {
     }
 
     /**
-     * Calculates the cosine of the given binary angle.
+     * @brief Calculates the cosine of the given binary angle.
      *
      * @param bam The binary angle for which the cosine value will be calculated.
      * @return The signed fixed-point cosine value of the given binary angle.

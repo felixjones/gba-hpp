@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_EXT_AGBABI_IRQ_HPP
 #define GBAXX_EXT_AGBABI_IRQ_HPP
+/** @file */
 
 #include <agbabi.h>
 
@@ -35,8 +36,6 @@ namespace gba::agbabi {
 
 namespace {
 
-    using irq_function = std::function<void(irq flags)>;
-
     /**
      * @brief Empty IRQ handler.
      *
@@ -45,21 +44,21 @@ namespace {
      *
      * @section Setting up VBlank interrupt with an empty IRQ handler:
      * @code{cpp}
-     *#include &lt;gba/gba.hpp>
+     * #include <gba/gba.hpp>
      *
-     *int main() {
-     *    using namespace gba;
+     * int main() {
+     *     using namespace gba;
      *
-     *    mmio::IRQ_HANDLER = agbabi::irq_empty;
+     *     mmio::IRQ_HANDLER = agbabi::irq_empty;
      *
-     *    mmio::DISPSTAT = {.irq_vblank = true};
-     *    mmio::IE = {.vblank = true};
-     *    mmio::IME = true;
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::IE = {.vblank = true};
+     *     mmio::IME = true;
      *
-     *    while (true) {
-     *        bios::VBlankIntrWait();
-     *    }
-     *}
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *     }
+     * }
      * @endcode
      */
     const auto irq_empty = __agbabi_irq_empty;
@@ -75,25 +74,25 @@ namespace {
      *
      * @section Setting a user-defined interrupt handler:
      * @code{cpp}
-     *#include &lt;gba/gba.hpp>
+     * #include <gba/gba.hpp>
      *
-     *int main() {
-     *    using namespace gba;
+     * int main() {
+     *     using namespace gba;
      *
-     *    mmio::IRQ_HANDLER = irq_user([](int irqFlags) {
-     *        if (irqFlags & 0x1) {
-     *            // Handle VBlank interrupt
-     *        }
-     *    });
+     *     mmio::IRQ_HANDLER = irq_user([](int irqFlags) {
+     *         if (irqFlags & 0x1) {
+     *             // Handle VBlank interrupt
+     *         }
+     *     });
      *
-     *    mmio::DISPSTAT = {.irq_vblank = true};
-     *    mmio::IE = {.vblank = true};
-     *    mmio::IME = true;
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::IE = {.vblank = true};
+     *     mmio::IME = true;
      *
-     *    while (true) {
-     *        bios::VBlankIntrWait();
-     *    }
-     *}
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *     }
+     * }
      * @endcode
      */
     inline auto irq_user(void(*func)(int)) noexcept -> decltype(&__agbabi_irq_user) {
@@ -112,25 +111,25 @@ namespace {
      *
      * @section Setting a user-defined interrupt handler:
      * @code{cpp}
-     *#include &lt;gba/gba.hpp>
+     * #include <gba/gba.hpp>
      *
-     *int main() {
-     *    using namespace gba;
+     * int main() {
+     *     using namespace gba;
      *
-     *    mmio::IRQ_HANDLER = irq_user([](irq flags) {
-     *        if (flags.vblank) {
-     *            // Handle VBlank interrupt
-     *        }
-     *    });
+     *     mmio::IRQ_HANDLER = irq_user([](irq flags) {
+     *         if (flags.vblank) {
+     *             // Handle VBlank interrupt
+     *         }
+     *     });
      *
-     *    mmio::DISPSTAT = {.irq_vblank = true};
-     *    mmio::IE = {.vblank = true};
-     *    mmio::IME = true;
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::IE = {.vblank = true};
+     *     mmio::IME = true;
      *
-     *    while (true) {
-     *        bios::VBlankIntrWait();
-     *    }
-     *}
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *     }
+     * }
      * @endcode
      */
     template <std::same_as<void(*)(irq)> Pointer>
@@ -151,29 +150,29 @@ namespace {
      *
      * @section Setting a user-defined interrupt handler with a lambda capture:
      * @code{cpp}
-     *#include &lt;gba/gba.hpp>
+     * #include <gba/gba.hpp>
      *
-     *int main() {
-     *    using namespace gba;
+     * int main() {
+     *     using namespace gba;
      *
-     *    int counter = 0;
-     *    mmio::IRQ_HANDLER = irq_user([&](irq flags) {
-     *        if (flags.vblank) {
-     *            counter += 1; // Counts up once per vblank
-     *        }
-     *    });
+     *     int counter = 0;
+     *     mmio::IRQ_HANDLER = irq_user([&](irq flags) {
+     *         if (flags.vblank) {
+     *             counter += 1; // Counts up once per vblank
+     *         }
+     *     });
      *
-     *    mmio::DISPSTAT = {.irq_vblank = true};
-     *    mmio::IE = {.vblank = true};
-     *    mmio::IME = true;
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::IE = {.vblank = true};
+     *     mmio::IME = true;
      *
-     *    while (true) {
-     *        bios::VBlankIntrWait();
-     *        if (counter == 600) {
-     *            break; // Break after roughly 10 seconds
-     *        }
-     *    }
-     *}
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *         if (counter == 600) {
+     *             break; // Break after roughly 10 seconds
+     *         }
+     *     }
+     * }
      * @endcode
      */
     template <detail::NotSameAs<void(*)(irq)> Pointer>
@@ -182,7 +181,7 @@ namespace {
             decltype(+func) f = +func;
             __agbabi_irq_user_fn = std::bit_cast<decltype(__agbabi_irq_user_fn)>(f);
         } else {
-            static irq_function f = std::forward<Pointer>(func);
+            static std::function<void(irq flags)> f = std::forward<Pointer>(func);
             __agbabi_irq_user_fn = [](int irqFlags) {
                 f(std::bit_cast<irq>(short(irqFlags)));
             };

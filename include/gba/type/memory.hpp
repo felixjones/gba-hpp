@@ -118,7 +118,7 @@ namespace gba {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion" // Bizarre bug with std::forward...not forwarding?
-        const auto value = value_type{std::forward<Args>(args)...};
+        const auto value = value_type(std::forward<Args>(args)...);
 #pragma GCC diagnostic pop
 
         if constexpr (sizeof(value_type) == sizeof(char)) {

@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_EXT_AGBABI_COROUTINE_HPP
 #define GBAXX_EXT_AGBABI_COROUTINE_HPP
+/** @file */
 
 #include <gba/ext/agbabi/fiber.hpp>
 #include <gba/ext/agbabi/pull_coroutine.hpp>
@@ -17,6 +18,7 @@
 namespace gba::agbabi {
 
     /**
+     * @struct coroutine
      * @brief Represents a coroutine object.
      *
      * This struct provides a convenience interface to work with coroutines using pull and push types. The pull type is
@@ -31,6 +33,7 @@ namespace gba::agbabi {
     };
 
     /**
+     * @struct coroutine
      * @brief Specialization of coroutine where pull_type and push_type are both fiber types.
      *
      * Unlike pull_coroutine or push_coroutine, fiber does not pass values between the coroutine and the caller.

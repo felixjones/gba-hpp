@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_EXT_AGBABI_PUSH_COROUTINE_HPP
 #define GBAXX_EXT_AGBABI_PUSH_COROUTINE_HPP
+/** @file */
 
 #include <iterator>
 #include <utility>
@@ -27,6 +28,7 @@ namespace gba::agbabi {
     class pull_coroutine;
 
     /**
+     * @class push_coroutine
      * @brief A class that represents a push-style coroutine.
      *
      * This class allows the user to define a coroutine that can be iterated over to push values to a consumer.
@@ -127,6 +129,7 @@ namespace gba::agbabi {
         }
 
         /**
+         * @class push_coroutine::iterator
          * @brief An iterator class for a push-based coroutine.
          *
          * This iterator class is used to iterate over the values to send to a push-based coroutine.

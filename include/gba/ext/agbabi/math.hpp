@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_EXT_AGBABI_MATH_HPP
 #define GBAXX_EXT_AGBABI_MATH_HPP
+/** @file */
 
 #include <agbabi.h>
 

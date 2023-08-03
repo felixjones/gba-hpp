@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_BIOS_SOUND_HPP
 #define GBAXX_BIOS_SOUND_HPP
+/** @file */
 
 #include <gba/type.hpp>
 
@@ -32,10 +33,10 @@ namespace {
      *
      * @section Reading BIOS memory:
      * @code{cpp}
-     *auto read_bios_byte(std::size_t idx) noexcept {
-     *    const auto a = gba::bios::MidiKey2Freq(reinterpret_cast&lt;const void*>(idx - 4), 180 - 12, 0) * 2;
-     *    return std::byte(a >> 24);
-     *}
+     * auto read_bios_byte(std::size_t idx) noexcept {
+     *     const auto a = gba::bios::MidiKey2Freq(reinterpret_cast&lt;const void*>(idx - 4), 180 - 12, 0) * 2;
+     *     return std::byte(a >> 24);
+     * }
      * @endcode
      */
     [[nodiscard, gnu::always_inline, gnu::const]]
@@ -100,6 +101,7 @@ namespace {
     }
 
     /**
+     * @struct Parameters for SoundDriverMode().
      * @brief The sound driver mode configuration.
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-1bh-gba---sounddrivermode">SWI 1Bh (GBA) - SoundDriverMode</a>
      *
@@ -109,12 +111,12 @@ namespace {
      * @sa SoundDriverMode()
      */
     struct alignas(int) sound_mode {
-        u32 reverb : 7{};
-        bool use_reverb : 1{};
-        u32 virtual_channels : 4{8};
-        u32 volume : 4{15};
-        u32 frequency : 4{4};
-        u32 num_bits : 4{9};
+        u32 reverb : 7{}; /**< Strength of reverb. @note sound_mode::use_reverb must be true. */
+        bool use_reverb : 1{}; /**< Enable the reverb effect. @sa sound_mode::reverb. */
+        u32 virtual_channels : 4{8}; /**< Number of sound channels to mix. @note Default is 8. */
+        u32 volume : 4{15}; /**< Mix volume. @note Default is 15. */
+        u32 frequency : 4{4}; /**< Playback frequency. @note Default is 4. */
+        u32 num_bits : 4{9}; /**< Final output bit-depth. Higher number = less bits. @note Default is 9. */
     };
 
     /**

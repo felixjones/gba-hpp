@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_BIOS_COMPRESS_HPP
 #define GBAXX_BIOS_COMPRESS_HPP
+/** @file */
 
 #include <gba/type.hpp>
 
@@ -17,19 +18,18 @@ namespace gba::bios {
 namespace {
 
     /**
-     * @brief Structure for unpacking bits.
+     * @struct bit_un_pack
+     * @brief Parameters for BitUnPack().
      * @see <a href="https://mgba-emu.github.io/gbatek/#bitunpack---swi-10h-gbands7nds9dsi7dsi9">BitUnPack - SWI 10h (GBA/NDS7/NDS9/DSi7/DSi9)</a>
-     *
-     * This structure represents the information needed to unpack bits from a source into a destination buffer.
      *
      * @sa BitUnPack()
      */
     struct bit_un_pack {
-        u16 src_len;
-        u8 src_bpp;
-        u8 dst_bpp;
-        u32 dst_ofs : 31;
-        bool offset_zero : 1;
+        u16 src_len; /**< Length of the source buffer in bytes. */
+        u8 src_bpp; /**< Width of the source units in bits. @note Only 1, 2, 4, and 8 bits-per-pixel supported. */
+        u8 dst_bpp; /**< Length of the destination buffer in bytes. */
+        u32 dst_ofs : 31; /**< Value to add to the destination units. */
+        bool offset_zero : 1; /**< When true, bit_un_pack::dst_ofs will also apply to occurrences of the value zero. */
     };
 
     /**

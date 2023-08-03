@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_BIOS_HALT_HPP
 #define GBAXX_BIOS_HALT_HPP
+/** @file */
 
 #include <gba/interrupt/irq.hpp>
 

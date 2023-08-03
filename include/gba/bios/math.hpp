@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_BIOS_MATH_HPP
 #define GBAXX_BIOS_MATH_HPP
+/** @file */
 
 #include <gba/type/fixed.hpp>
 
@@ -141,26 +142,30 @@ namespace {
     }
 
     /**
-     * @brief Represents a structure for affine background source data.
+     * @struct bg_affine_src
+     * @brief Input parameters for BgAffineSet().
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0eh-gba---bgaffineset">SWI 0Eh (GBA) - BgAffineSet</a>
      *
      * @sa bg_affine_dest
      * @sa BgAffineSet()
      */
     struct bg_affine_src {
-        fixed<int, 8> tex_x;
-        fixed<int, 8> tex_y;
-        short scr_x;
-        short scr_y;
-        fixed<short, 8> sx;
-        fixed<short, 8> sy;
-        angle<u16> alpha;
+        fixed<int, 8> tex_x; /**< Texture source center X. */
+        fixed<int, 8> tex_y; /**< Texture source center Y. */
+        short scr_x; /**< Screen destination center X. */
+        short scr_y; /**< Screen destination center Y. */
+        fixed<short, 8> sx; /**< Texture scale X. */
+        fixed<short, 8> sy; /**< Texture scale Y. */
+        angle<u16> alpha; /**< Texture rotation around source center. @sa bg_affine_src::tex_x @sa bg_affine_src::tex_y */
         short : 16;
     };
 
     /**
-     * @brief Represents a structure for affine background destination data.
+     * @struct bg_affine_dest
+     * @brief Affine matrix result of BgAffineSet().
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0eh-gba---bgaffineset">SWI 0Eh (GBA) - BgAffineSet</a>
+     *
+     * This is a 2x3 affine transformation matrix.
      *
      * @sa bg_affine_src
      * @sa BgAffineSet()
@@ -198,15 +203,16 @@ namespace {
     }
 
     /**
-     * @brief Represents a structure for affine object destination data.
+     * @struct obj_affine_src
+     * @brief Input parameters for ObjAffineSet().
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0fh-gba---objaffineset">SWI 0Fh (GBA) - ObjAffineSet</a>
      *
      * @sa ObjAffineSet()
      */
     struct obj_affine_src {
-        fixed<short, 8> sx;
-        fixed<short, 8> sy;
-        angle<u16> alpha;
+        fixed<short, 8> sx; /**< Object scale X. */
+        fixed<short, 8> sy; /**< Object scale Y. */
+        angle<u16> alpha; /**< Object rotation around center. */
         short : 16;
     };
 

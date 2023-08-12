@@ -32,8 +32,8 @@ namespace gba::agbabi {
      * its context and execution state to another `fiber` object, allowing for easy transfer of control between
      * different fibers.
      *
-     * @note Fibers are created using a stack, which defines the memory used for the fiber's execution. The stack is allocated
-     * outside the `fiber` class and passed as an argument in the constructor.
+     * @note Fibers are created using a stack, which defines the memory used for the fiber's execution. The stack is
+     *       allocated outside the `fiber` class and passed as an argument in the constructor.
      * @warning The lifetime of the stack must be longer than the lifetime of the fiber.
      */
     class fiber {

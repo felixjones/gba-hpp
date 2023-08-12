@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_TYPE_FIXED_HPP
 #define GBAXX_TYPE_FIXED_HPP
+/** @file */
 
 #include <array>
 #include <cstddef>
@@ -21,25 +22,63 @@
 
 namespace gba {
 
+/**
+ * @brief Provides type traits for either std::integral or Vector types.
+ *
+ * Either implements for an integer type, or forwards vector_traits.
+ *
+ * @tparam T The type of the value
+ */
 template <typename T> requires std::integral<T> || Vector<T>
 struct value_traits;
 
+/**
+ * @brief Provides type traits for either std::integral or Vector types.
+ *
+ * This has the same signature and members as vector_traits.
+ *
+ * @tparam T The type of the value
+ */
 template <typename T> requires std::integral<T>
 struct value_traits<T> {
     using size_type = std::size_t;
     using value_type = T;
-    static constexpr size_type size = 1;
+    static constexpr size_type size = 1; /**< Pseudo vector size. A single integer is one element. */
 };
 
+/**
+ * @brief Provides type traits for either std::integral or Vector types.
+ *
+ * Forwards vector_traits.
+ *
+ * @tparam T The type of the value
+ *
+ * @sa vector_traits
+ */
 template <typename T> requires Vector<T>
 struct value_traits<T> : vector_traits<T> {};
 
 template <Fundamental DataType, std::size_t FractionalBits>
 struct fixed;
 
+/**
+ * @brief Fixed point type concept.
+ *
+ * @tparam T Expected to be fixed.
+ *
+ * @sa fixed
+ */
 template <typename T>
 concept Fixed = std::same_as<T, fixed<typename T::data_type, T::fractional_bits>>;
 
+/**
+ * @struct fixed
+ * @brief A fixed-point number class template.
+ * @see <a href="https://en.wikipedia.org/wiki/Fixed-point_arithmetic">Fixed-point arithmetic - Wikipedia</a>
+ *
+ * @tparam DataType The underlying data type used to store the fixed-point number.
+ * @tparam FractionalBits The number of fractional bits.
+ */
 template <Fundamental DataType, std::size_t FractionalBits>
 struct fixed {
     using data_type = DataType;
@@ -69,6 +108,14 @@ struct fixed {
     constexpr fixed& operator=(fixed&&) noexcept = default;
 
     // raw data
+
+    /**
+     * @brief Helper constructor for directly setting the underlying data for a fixed-point value.
+     *
+     * @note The second parameter, nullptr, is used to differentiate from the normal integer conversion constructor.
+     *
+     * @param data The data to be stored in the fixed object.
+     */
     constexpr fixed(data_type data, std::nullptr_t) noexcept : m_data{data} {}
 
     static constexpr fixed from_data(data_type data) noexcept {
@@ -76,6 +123,14 @@ struct fixed {
     }
 
     // Fixed point conversion
+
+    /**
+     * @brief Convert from a fixed point number of another format.
+     *
+     * @note The source value must match the vector size of the destination value.
+     *
+     * @param rhs Source fixed point number.
+     */
     explicit constexpr fixed(Fixed auto rhs) noexcept requires (Vector<data_type> == Vector<typename decltype(rhs)::data_type>) :
             m_data{shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data)} {}
 
@@ -85,8 +140,23 @@ struct fixed {
     }
 
     // Floating point conversion
+
+    /**
+     * @brief Convert from a floating point value.
+     *
+     * @note This is only available in constexpr context.
+     *
+     * @param rhs Floating point number.
+     */
     explicit consteval fixed(std::floating_point auto rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
 
+    /**
+     * @brief Convert from a floating point value to a vector.
+     *
+     * This copies the `rhs` value into all elements of the m_data vector.
+     *
+     * @note This is only available in constexpr context.
+     */
     explicit consteval fixed(std::floating_point auto rhs) requires Vector<data_type> {
         const auto val = round_float<data_type>(rhs * data_unit);
         for (size_type ii = 0; ii < size; ++ii) {
@@ -99,14 +169,30 @@ struct fixed {
         return *this;
     }
 
+    /**
+     * @brief Convert from fixed point to floating point.
+     *
+     * @note This is only available in constexpr context.
+     *
+     * @return Floating point representation of `m_data`.
+     */
     template <std::floating_point Lhs>
     explicit consteval operator Lhs() const {
         return m_data / Lhs{data_unit};
     }
 
     // Integral conversion
+
+    /**
+     * @brief Convert from integer to fixed point.
+     */
     explicit constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{typename value_type::data_type(rhs << fractional_bits)} {}
 
+    /**
+     * @brief Convert from integer to fixed point vector.
+     *
+     * This copies the `rhs` value into all elements of the m_data vector.
+     */
     explicit constexpr fixed(std::integral auto rhs) requires Vector<data_type> {
         const auto val = rhs << fractional_bits;
         for (size_type ii = 0; ii < size; ++ii) {
@@ -119,29 +205,77 @@ struct fixed {
         return *this;
     }
 
+    /**
+     * @brief Convert from fixed point to integer.
+     *
+     * @note This behaves similar to floating point to integer conversion.
+     *
+     * @tparam Lhs Destination integer type.
+     * @return Integer conversion of the fixed point value.
+     */
     template <std::integral Lhs> requires (!std::same_as<Lhs, bool>)
     explicit constexpr operator Lhs() const noexcept {
         return m_data >> fractional_bits;
     }
 
     // Vector conversion
+
+    /**
+     * @brief Initializes fixed point value with other fixed-point values.
+     *
+     * The number of arguments must match the size of the vector.
+     *
+     * @note This will call a conversion constructor for each argument passed.
+     *
+     * @tparam Args The type of the fixed-point arguments.
+     */
     template <Fixed... Args>
     explicit constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
         static_assert(sizeof...(Args) == size);
     }
 
+    /**
+     * @brief Converts to an array of the same type and size as the vector.
+     *
+     * @note The returned array is a copy, not a reference, to the underlying vector.
+     *
+     * @return The array representation of the vector.
+     */
     constexpr std::array<value_type, size> to_array() const noexcept requires Vector<data_type> {
         return __builtin_bit_cast(std::array<value_type, size>, m_data);
     }
 
+    /**
+     * @brief Calls to_array().
+     *
+     * @return The array representation of the vector.
+     *
+     * @sa to_array()
+     */
     explicit constexpr operator std::array<value_type, size>() const noexcept requires Vector<data_type> {
         return to_array();
     }
 
+    /**
+     * @brief Converts from an array into a vector.
+     *
+     * @note The array must be the same type and size as the vector.
+     */
     explicit constexpr fixed(const std::array<value_type, size>& data) requires Vector<data_type> :
             m_data{__builtin_bit_cast(data_type, data)} {}
 
     // Vector access
+
+    /**
+     * @struct scoped_ref
+     * @brief Scoped accessor to the underlying fixed-point vector.
+     *
+     * Due to limitations with GNU vector extensions, it is not possible to return a reference to a vector element with
+     * a different pointer type. To avoid this limitation, is used to maintain a temporary array that represents the
+     * value of the vector at construction, and writes back any changes at destruction.
+     *
+     * @sa tie()
+     */
     struct scoped_ref : std::array<value_type, size> {
         using owner_type = fixed;
 
@@ -176,19 +310,75 @@ struct fixed {
         volatile fixed* m_owner{};
     };
 
+    /**
+     * @brief Creates a temporary scoped_ref of the vector data.
+     *
+     * This is intended for similar usage to that of std::tie(), but it is not identical.
+     *
+     * @return scoped_ref of this fixed point vector.
+     *
+     * @section Mutating a fixed-point vector with tie():
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     using fixed16_vec = fixed<make_vector<int, 2>, 16>;
+     *     using fixed16 = fixed16_vec::value_type;
+     *
+     *     auto my_vector = fixed16_vec{fixed16{1.23}, fixed16{4.56}};
+     *     if (auto tied = my_vector.tie()) {
+     *         auto& [x, y] = tied;
+     *         std::swap(x, y);
+     *         // tied is written back to my_vector on scope exit
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa scoped_ref
+     */
     constexpr auto tie() noexcept requires Vector<data_type> {
         return scoped_ref(this);
     }
 
+    /**
+     * @brief volatile qualified tie().
+     *
+     * @return scoped_ref of this fixed point vector.
+     *
+     * @sa scoped_ref
+     */
     constexpr auto tie() volatile noexcept requires Vector<data_type> {
         return scoped_ref(this);
     }
 
-    // Returns const value to prevent []= pattern
+    /**
+     * @brief Array-access operator.
+     *
+     * @warning This returns a const value to prevent []= pattern, which is incompatible with GNU vector extensions.
+     *
+     * @param idx Vector element index.
+     * @return const-qualified copy of the element at the index.
+     *
+     * @sa tie()
+     * @sa set()
+     */
     constexpr const value_type operator[](size_type idx) const noexcept requires Vector<data_type> {
         return value_type::from_data(m_data[idx]);
     }
 
+    /**
+     * @brief Direct array element setting.
+     *
+     * @note The []= pattern is not available, so this member function is provided for convenience.
+     *
+     * @param idx Vector element index.
+     * @param value Value to set the vector at the given index.
+     * @return Reference to this fixed-point vector.
+     *
+     * @sa tie()
+     */
     constexpr fixed& set(size_type idx, Fixed auto value) noexcept requires Vector<data_type> && (value.size == 1) {
         m_data[idx] = fixed(value).m_data;
         return *this;
@@ -197,6 +387,12 @@ struct fixed {
     data_type m_data{};
 
     // Unary operators
+
+    /**
+     * @brief Boolean conversion.
+     *
+     * @return True if any element is not zero.
+     */
     [[nodiscard]]
     explicit constexpr operator bool() const noexcept {
         if constexpr (Vector<data_type>) {
@@ -482,7 +678,16 @@ constexpr auto operator>>(Lhs lhs, std::integral auto rhs) noexcept {
     return Lhs::from_data(lhs.data() >> rhs);
 }
 
-// Mathematical functions
+// Arithmetic functions
+
+/**
+ * @brief Performs std::abs() on a fixed point value.
+ *
+ * @note If x is unsigned, this will simply return x.
+ *
+ * @param x Fixed-point value.
+ * @return The absolute value of x.
+ */
 constexpr auto abs(Fixed auto x) noexcept {
     if constexpr (std::is_signed_v<typename decltype(x)::data_type>) {
         return decltype(x)::from_data(std::abs(x.data()));
@@ -491,6 +696,12 @@ constexpr auto abs(Fixed auto x) noexcept {
     }
 }
 
+/**
+ * @brief Returns the fractional value of x.
+ *
+ * @param x Fixed-point value.
+ * @return The fractional portion of x.
+ */
 constexpr auto frac(Fixed auto x) noexcept {
     const auto mask = decltype(x)::data_unit - 1;
     return decltype(x)::from_data(x.data() & mask);

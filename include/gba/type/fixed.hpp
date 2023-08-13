@@ -268,7 +268,7 @@ struct fixed {
 
     /**
      * @struct scoped_ref
-     * @brief Scoped accessor to the underlying fixed-point vector.
+     * @brief Scoped accessor to the underlying fixed-point vector. RAII is used to write-back any changes.
      *
      * Due to limitations with GNU vector extensions, it is not possible to return a reference to a vector element with
      * a different pointer type. To avoid this limitation, is used to maintain a temporary array that represents the

@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_TYPE_VECTOR_HPP
 #define GBAXX_TYPE_VECTOR_HPP
+/** @file */
 
 #include <array>
 #include <concepts>
@@ -16,14 +17,42 @@
 
 namespace gba {
 
+    /**
+     * @brief Utility for making a GNU vector with integral element type T of size N.
+     *
+     * @tparam T Integer type of the vector elements.
+     * @tparam N Size of the vector (number of elements). Must be a power of 2 to conform to GNU vector requirements.
+     *
+     * @section Defining a vector of 4 integers:
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * using ivec4 = gba::make_vector<int, 4>;
+     *
+     * static constexpr auto my_vector = ivec4{ 1, 2, 3, 4 };
+     * @endcode
+     */
     template <std::integral T, std::size_t N>
     using make_vector [[gnu::vector_size(sizeof(T) * N)]] = T;
 
+    /**
+     * @brief Concept for a GNU vector.
+     *
+     * @tparam T Type to test for GNU vector.
+     */
     template <typename T>
     concept Vector = requires(T t, std::remove_cvref_t<decltype(t[0])> a) {
         requires std::same_as<T, make_vector<decltype(a), sizeof(t) / sizeof(a)>>;
     };
 
+    /**
+     * @brief Traits for GNU vectors.
+     *
+     * Provides compile-time information about a GNU vector type. Defines the underlying value type and size type, as
+     * well as a compile-time constant for the size of the vector.
+     *
+     * @tparam T The type of the vector container.
+     */
     template <Vector T>
     struct vector_traits {
         using value_type = typename std::remove_cvref_t<decltype(T{}[0])>;
@@ -32,17 +61,67 @@ namespace gba {
         static constexpr auto size = size_type(sizeof(T) / sizeof(value_type));
     };
 
+    /**
+     * @brief Converts a GNU vector to an array.
+     *
+     * The resulting array will have the same elements and order as the GNU vector.
+     *
+     * @param v The vector to be converted to an array.     *
+     * @return The resulting array.
+     *
+     * @see array_to_vector()
+     */
     constexpr auto vector_to_array(Vector auto v) noexcept {
         using array_type = std::array<typename vector_traits<decltype(v)>::value_type, vector_traits<decltype(v)>::size>;
         return __builtin_bit_cast(array_type, v);
     }
 
+    /**
+     * @brief Converts std::array to GNU vector.
+     *
+     * The resulting GNU vector will have the same elements as the original array, in the same order.
+     *
+     * @tparam T The type of elements in the array.
+     * @tparam N The size of the array.
+     * @param a The std::array to be converted.
+     * @return GNU vector with the same elements as the original array.
+     *
+     * @sa array_to_vector()
+     */
     template <typename T, std::size_t N>
     constexpr auto array_to_vector(std::array<T, N> a) noexcept {
         using vector_type = make_vector<T, N>;
         return __builtin_bit_cast(vector_type, a);
     }
 
+    /**
+     * @brief Uses RAII to temporarily copy a GNU vector to std::array.
+     *
+     * GNU vector extensions do not support custom types, meaning element access must always be for fundamental types.
+     * vector_bind() provides a work-around, which temporarily copies the GNU vector to an std::array, and copies any
+     * changes back to the GNU vector once it has left scope.
+     *
+     * @tparam As Type to convert the GNU vector elements to for the std::array.
+     * @param v GNU vector to bind.
+     *
+     * @section Binding a vector of 4 integers:
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     using ivec4 = make_vector<int, 4>;
+     *     auto my_vector = ivec4{1, 2, 3, 4};
+     *
+     *     if (auto bound = vector_bind<int>(my_vector)) {
+     *         std::swap(bound[0], bound[3]);
+     *         std::swap(bound[1], bound[2]);
+     *         // bound written back to my_vector on scope exit
+     *     }
+     * }
+     * @endcode
+     */
     template <typename As>
     constexpr auto vector_bind(Vector auto& v) noexcept {
         using vector_type = std::remove_cvref_t<decltype(v)>;

@@ -9,6 +9,7 @@
 
 #ifndef GBAXX_GBA_HPP
 #define GBAXX_GBA_HPP
+/** @file */
 
 #include <gba/mmio.hpp>
 #include <gba/type.hpp>
@@ -26,14 +27,38 @@
 
 namespace gba {
 
+    /**
+     * @brief Constant 240 representing the horizontal resolution of the GBA.
+     *
+     * @tparam T Desired value type.
+     *
+     * @sa screen_height_v
+     */
     template <typename T>
     inline constexpr auto screen_width_v = T(240);
 
+    /**
+     * @brief Constant 160 representing the vertical resolution of the GBA.
+     *
+     * @tparam T Desired value type.
+     *
+     * @sa screen_width_v
+     */
     template <typename T>
     inline constexpr auto screen_height_v = T(160);
 
+    /**
+     * @brief Constant 240 representing the horizontal resolution of the GBA.
+     *
+     * @sa screen_height
+     */
     inline constexpr auto screen_width = screen_width_v<int>;
 
+    /**
+     * @brief Constant 160 representing the vertical resolution of the GBA.
+     *
+     * @sa screen_width
+     */
     inline constexpr auto screen_height = screen_width_v<int>;
 
 } // namespace gba

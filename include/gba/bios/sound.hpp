@@ -15,8 +15,6 @@
 
 namespace gba::bios {
 
-namespace {
-
     /**
      * @brief Calculates the frequency of a MIDI key with fine adjustment.
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-1fh-gba---midikey2freq">SWI 1Fh (GBA) - MidiKey2Freq</a>
@@ -178,8 +176,6 @@ namespace {
     inline void SoundDriverVSyncOn() noexcept {
         asm volatile inline ("swi 0x29 << ((1f - . == 4) * -16); 1:" ::: "r0", "r1", "r3");
     }
-
-}
 
 } // namespace gba::bios
 

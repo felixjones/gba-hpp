@@ -17,8 +17,6 @@
 
 namespace gba::agbabi {
 
-namespace {
-
     /**
      * @brief Attempts to overclock the EWRAM (reduces wait-states).
      * @see <a href="https://mgba-emu.github.io/gbatek/#4000800h---32bit---undocumented---internal-memory-control-rw">4000800h - 32bit - Undocumented - Internal Memory Control (R/W)</a>
@@ -35,8 +33,6 @@ namespace {
         }
         return false;
     }
-
-}
 
 } // namespace gba::agbabi
 

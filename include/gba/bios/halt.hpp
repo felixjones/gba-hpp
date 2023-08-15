@@ -15,8 +15,6 @@
 
 namespace gba::bios {
 
-namespace {
-
     /**
      * @brief Halts the CPU until an interrupt request occurs.
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-02h-gba-or-swi-06h-nds7nds9dsi7dsi9---halt">SWI 02h (GBA) or SWI 06h (NDS7/NDS9/DSi7/DSi9) - Halt</a>
@@ -94,8 +92,6 @@ namespace {
         register auto r2 asm("r2") = stop ? 0x80 : 0;
         asm volatile inline ("swi 0x27 << ((1f - . == 4) * -16); 1:" :: "r"(r2) : "r0", "r1", "r3");
     }
-
-}
 
 } // namespace gba::bios
 

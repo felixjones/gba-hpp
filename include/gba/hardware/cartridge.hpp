@@ -61,7 +61,7 @@ namespace gba {
      * @sa waitcnt
      * @sa mmio::WAITCNT
      */
-    static constexpr auto waitcnt_default = waitcnt{.sram = 3, .ws0_first = 1, .ws0_second = 1, .ws2_first = 3, .prefetch = true};
+    inline constexpr auto waitcnt_default = waitcnt{.sram = 3, .ws0_first = 1, .ws0_second = 1, .ws2_first = 3, .prefetch = true};
 
     /**
      * @struct cartdirection

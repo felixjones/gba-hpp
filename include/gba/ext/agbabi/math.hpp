@@ -17,8 +17,6 @@
 
 namespace gba::agbabi {
 
-namespace {
-
     /**
      * @brief Calculates the sine of the given binary angle.
      *
@@ -108,8 +106,6 @@ namespace {
     inline auto sqrt(u32 x) noexcept {
         return __agbabi_sqrt(x);
     }
-
-}
 
 } // namespace gba::agbabi
 

@@ -15,8 +15,7 @@ namespace gba {
 
     /**
      * @struct bgcnt
-     * @brief Background control parameters.
-     *
+     * @brief Background control parameters.     *
      * @see <a href="https://mgba-emu.github.io/gbatek/#4000008h---bg0cnt---bg0-control-rw-bg-modes-01-only">4000008h - BG0CNT - BG0 Control (R/W) (BG Modes 0,1 only)</a>
      * @see <a href="https://mgba-emu.github.io/gbatek/#400000ah---bg1cnt---bg1-control-rw-bg-modes-01-only">400000Ah - BG1CNT - BG1 Control (R/W) (BG Modes 0,1 only)</a>
      * @see <a href="https://mgba-emu.github.io/gbatek/#400000ch---bg2cnt---bg2-control-rw-bg-modes-012-only">400000Ch - BG2CNT - BG2 Control (R/W) (BG Modes 0,1,2 only)</a>

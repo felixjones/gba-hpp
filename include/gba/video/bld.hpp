@@ -30,8 +30,7 @@ namespace gba {
 
     /**
      * @struct bldcnt
-     * @brief Parameters for blending control.
-     *
+     * @brief Parameters for blending control.     *
      * @see <a href="https://mgba-emu.github.io/gbatek/#4000050h---bldcnt---color-special-effects-selection-rw">4000050h - BLDCNT - Color Special Effects Selection (R/W)</a>
      *
      * @sa mmio::BLDCNT

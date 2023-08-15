@@ -43,7 +43,7 @@ namespace gba {
      * @sa memcnt
      * @sa mmio::MEMCNT
      */
-    static constexpr auto memcnt_default = memcnt{.ewram = true, .ws_ewram = 0xd};
+    inline constexpr auto memcnt_default = memcnt{.ewram = true, .ws_ewram = 0xd};
 
     /**
      * @var memcnt_fast_ewram
@@ -55,7 +55,7 @@ namespace gba {
      * @sa mmio::MEMCNT
      * @sa agbabi::try_overclock_ewram()
      */
-    static constexpr auto memcnt_fast_ewram = memcnt{.ewram = true, .ws_ewram = 0xe};
+    inline constexpr auto memcnt_fast_ewram = memcnt{.ewram = true, .ws_ewram = 0xe};
 
 } // namespace gba
 

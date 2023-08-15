@@ -15,8 +15,6 @@
 
 namespace gba::bios {
 
-namespace {
-
     // Integer functions
 
     /**
@@ -261,8 +259,6 @@ namespace {
         ObjAffineSet(&src, dest, 1, 2);
         return fixed<make_vector<short, 2>, 8>{dest[2], dest[0]};
     }
-
-}
 
 } // namespace gba::bios
 

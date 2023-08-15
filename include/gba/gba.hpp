@@ -26,12 +26,15 @@
 
 namespace gba {
 
-namespace {
+    template <typename T>
+    inline constexpr auto screen_width_v = T(240);
 
-    constexpr auto screen_width = 240;
-    constexpr auto screen_height = 160;
+    template <typename T>
+    inline constexpr auto screen_height_v = T(160);
 
-}
+    inline constexpr auto screen_width = screen_width_v<int>;
+
+    inline constexpr auto screen_height = screen_width_v<int>;
 
 } // namespace gba
 

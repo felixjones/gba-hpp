@@ -27,8 +27,6 @@ extern "C" {
 
 namespace gba::mgba {
 
-namespace {
-
     /**
      * @enum log
      * @brief Enumeration class for log levels.
@@ -57,7 +55,7 @@ namespace {
          * @see DEBUG_FLAGS
          * @see DEBUG_ENABLE
          */
-        constexpr auto DEBUG_STRING = const_ptr<volatile char[256]>{0x04FFF600};
+        inline constexpr auto DEBUG_STRING = const_ptr<volatile char[256]>{0x04FFF600};
 
         /**
          * @var DEBUG_FLAGS
@@ -74,7 +72,7 @@ namespace {
          * @see DEBUG_ENABLE
          * @see log
          */
-        constexpr auto DEBUG_FLAGS = registral<const_ptr<volatile u16>(0x04FFF700)>{};
+        inline constexpr auto DEBUG_FLAGS = registral<const_ptr<volatile u16>(0x04FFF700)>{};
 
         /**
          * @var DEBUG_ENABLE
@@ -93,7 +91,7 @@ namespace {
          * @see open()
          * @see close()
          */
-        constexpr auto DEBUG_ENABLE = registral<const_ptr<volatile u16>(0x04FFF780)>{};
+        inline constexpr auto DEBUG_ENABLE = registral<const_ptr<volatile u16>(0x04FFF780)>{};
 
     }
 
@@ -201,8 +199,6 @@ namespace {
         mmio::DEBUG_FLAGS.emplace(static_cast<std::underlying_type_t<log>>(level) | 0x100);
     }
 #endif
-
-}
 
 } // namespace gba::mgba
 

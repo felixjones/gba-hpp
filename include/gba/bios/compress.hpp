@@ -15,8 +15,6 @@
 
 namespace gba::bios {
 
-namespace {
-
     /**
      * @struct bit_un_pack
      * @brief Parameters for BitUnPack().
@@ -226,8 +224,6 @@ namespace {
         register auto* r1 asm("r1") = dest;
         asm volatile inline ("swi 0x15 << ((1f - . == 4) * -16); 1:" : "+r"(r0), "+r"(r1) :: "r3", "memory");
     }
-
-}
 
 } // namespace gba::bios
 

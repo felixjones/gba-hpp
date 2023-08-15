@@ -16,8 +16,6 @@
 
 namespace gba::bios {
 
-namespace {
-
     /**
      * @brief Retrieves the BIOS checksum.
      * @see <a href="https://mgba-emu.github.io/gbatek/#swi-0dh-gba---getbioschecksum-undocumented">SWI 0Dh (GBA) - GetBiosChecksum (Undocumented)</a>
@@ -214,8 +212,6 @@ namespace {
         asm volatile inline ("swi 0x25 << ((1f - . == 4) * -16); 1:" : "+r"(r0), "+r"(r1) :: "r3");
         return r0.res;
     }
-
-}
 
 } // namespace gba::bios
 

@@ -34,8 +34,6 @@ namespace gba::agbabi {
 
     } // namespace detail
 
-namespace {
-
     /**
      * @brief Empty IRQ handler.
      *
@@ -61,7 +59,7 @@ namespace {
      * }
      * @endcode
      */
-    const auto irq_empty = __agbabi_irq_empty;
+    inline const auto irq_empty = __agbabi_irq_empty;
 
     /**
      * @brief Register a user-defined interrupt handler function.
@@ -188,8 +186,6 @@ namespace {
         }
         return __agbabi_irq_user;
     }
-
-}
 
 } // namespace gba::agbabi
 

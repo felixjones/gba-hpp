@@ -9,14 +9,24 @@
 
 #ifndef GBAXX_VIDEO_MOSAIC_HPP
 #define GBAXX_VIDEO_MOSAIC_HPP
+/** @file */
+
+#include <gba/type.hpp>
 
 namespace gba {
 
+    /**
+     * @struct mosaic
+     * @brief Mosaic effect parameters.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400004ch---mosaic---mosaic-size-w">400004Ch - MOSAIC - Mosaic Size (W)</a>
+     *
+     * @sa mmio::DISPSTAT
+     */
     struct alignas(int) mosaic {
-        unsigned int bg_h_extra : 4 {};
-        unsigned int bg_v_extra : 4 {};
-        unsigned int obj_h_extra : 4 {};
-        unsigned int obj_v_extra : 4 {};
+        u32 bg_h_extra : 4{}; /**< Number of extra horizontal pixels to repeat when rendering mosaic backgrounds. */
+        u32 bg_v_extra : 4{}; /**< Number of extra vertical pixels to repeat when rendering mosaic backgrounds. */
+        u32 obj_h_extra : 4{}; /**< Number of extra horizontal pixels to repeat when rendering mosaic objects. */
+        u32 obj_v_extra : 4{}; /**< Number of extra vertical pixels to repeat when rendering mosaic objects. */
     };
 
 } // namespace gba

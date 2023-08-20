@@ -20,7 +20,7 @@ namespace gba {
      * @brief Mosaic effect parameters.
      * @see <a href="https://mgba-emu.github.io/gbatek/#400004ch---mosaic---mosaic-size-w">400004Ch - MOSAIC - Mosaic Size (W)</a>
      *
-     * @sa mmio::DISPSTAT
+     * @sa mmio::MOSAIC
      */
     struct alignas(int) mosaic {
         u32 bg_h_extra : 4{}; /**< Number of extra horizontal pixels to repeat when rendering mosaic backgrounds. */

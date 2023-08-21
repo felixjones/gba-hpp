@@ -135,7 +135,7 @@ struct fixed {
             m_data{vector_cast<data_type>(shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data))} {}
 
     constexpr fixed& operator=(Fixed auto rhs) noexcept {
-        m_data = shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
+        m_data = vector_cast<data_type>(shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data));
         return *this;
     }
 
@@ -633,11 +633,10 @@ constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
     constexpr auto bits_combined = Lhs::fractional_bits + Rhs::fractional_bits;
     constexpr auto frac_bits = bits_combined / 2;
 
+    const auto data = shift_to<Lhs::fractional_bits, frac_bits + Rhs::fractional_bits>(vector_cast<bigger_type>(lhs.data()));
     if constexpr (Vector<data_type>) {
-        const auto data = shift_to<Lhs::fractional_bits, frac_bits + Rhs::fractional_bits>(__builtin_convertvector(lhs.data(), bigger_type));
         return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(data / __builtin_convertvector(rhs.data(), bigger_type), data_type));
     } else {
-        const auto data = shift_to<Lhs::fractional_bits, frac_bits + Rhs::fractional_bits>(bigger_type(lhs.data()));
         return fixed<data_type, frac_bits>::from_data(data / rhs.data());
     }
 }

@@ -770,8 +770,111 @@ namespace gba::mmio {
      * @sa mosaic
      */
     inline constexpr auto MOSAIC = registral<const_ptr<volatile mosaic>(0x400004C)>{};
+
+    /**
+     * @brief Blend effect control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000050h---bldcnt---color-special-effects-selection-rw">4000050h - BLDCNT - Color Special Effects Selection (R/W)</a>
+     *
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::DISPCNT = {.video_mode = 0, .show_bg0 = true};
+     *
+     *     mmio::BLDCNT = bldcnt{
+     *         .target1_bg0 = true,
+     *         .mode = gba::color_effect::brighten
+     *     };
+     *
+     *     auto gamma = decltype(mmio::BLDY)::value_type{}; // Shadow variable for tracking the current gamma
+     *
+     *     keystate keys{};
+     *     while (true) {
+     *         gamma.data() += (keys = *mmio::KEYINPUT).yaxis();
+     *
+     *         mmio::BLDY = gamma;
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa bldcnt
+     */
     inline constexpr auto BLDCNT = registral<const_ptr<volatile bldcnt>(0x4000050)>{};
-    inline constexpr auto BLDALPHA = registral<const_ptr<volatile fixed<make_vector<u8, 2>, 5>>(0x4000052)>{};
+
+    /**
+     * @brief Blend effect alpha value register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000052h---bldalpha---alpha-blending-coefficients-rw-not-w">4000052h - BLDALPHA - Alpha Blending Coefficients (R/W) (not W)</a>
+     *
+     * Used when bldcnt::mode is set to color_effect::alpha_blend.
+     *
+     * @note Some documentation refers to the two elements of this register as EVA and EVB, possibly meaning "exposure
+     *       value A/B" in reference to a double-exposure in photography.
+     *
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::DISPCNT = {.video_mode = 0, .show_bg0 = true};
+     *
+     *     mmio::BLDCNT = bldcnt{
+     *         .target1_backdrop = true,
+     *         .mode = gba::color_effect::alpha_blend,
+     *         .target2_bg0 = true
+     *     };
+     *
+     *     auto alpha = fixed<int, 5>{}; // Shadow variable for tracking the current alpha
+     *
+     *     keystate keys{};
+     *     while (true) {
+     *         alpha.data() += (keys = *mmio::KEYINPUT).yaxis();
+     *
+     *         // EVA = alpha, EVB = 1 - alpha
+     *         mmio::BLDALPHA = fixed<u8x2, 5>{alpha, 1 - alpha};
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa bldcnt
+     */
+    inline constexpr auto BLDALPHA = registral<const_ptr<volatile fixed<u8x2, 5>>(0x4000052)>{};
+
+    /**
+     * @brief Blend effect gamma register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000054h---bldy---brightness-fade-inout-coefficient-w-not-rw">4000054h - BLDY - Brightness (Fade-In/Out) Coefficient (W) (not R/W)</a>
+     *
+     * @note Some documentation refers to the element of this register as EVY, possibly meaning "exposure gamma" (where
+     *       the "Y" resembles a Greek gamma) in reference to increasing/decreasing exposure in photography.
+     *
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::DISPCNT = {.video_mode = 0, .show_bg0 = true};
+     *
+     *     mmio::BLDCNT = bldcnt{
+     *         .target1_bg0 = true,
+     *         .mode = gba::color_effect::brighten
+     *     };
+     *
+     *     auto gamma = decltype(mmio::BLDY)::value_type{}; // Shadow variable for tracking the current gamma
+     *
+     *     keystate keys{};
+     *     while (true) {
+     *         gamma.data() += (keys = *mmio::KEYINPUT).yaxis();
+     *
+     *         mmio::BLDY = gamma;
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa bldcnt
+     */
     inline constexpr auto BLDY = registral<const_ptr<volatile fixed<u16, 4>>(0x4000054)>{};
 
     // Sound

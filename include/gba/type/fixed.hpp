@@ -132,7 +132,7 @@ struct fixed {
      * @param rhs Source fixed point number.
      */
     explicit constexpr fixed(Fixed auto rhs) noexcept requires (Vector<data_type> == Vector<typename decltype(rhs)::data_type>) :
-            m_data{shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data)} {}
+            m_data{vector_cast<data_type>(shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data))} {}
 
     constexpr fixed& operator=(Fixed auto rhs) noexcept {
         m_data = shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);

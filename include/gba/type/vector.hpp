@@ -62,6 +62,32 @@ namespace gba {
     };
 
     /**
+     * @brief Converts vector x to type T.
+     *
+     * @tparam T Vector type to convert x to.
+     * @param x Vector to be converted to T.
+     * @return Vector x converted to vector type T.
+     */
+    template <Vector T>
+    [[gnu::always_inline]]
+    constexpr auto vector_cast(Vector auto&& x) noexcept {
+        return __builtin_convertvector(x, T);
+    }
+
+    /**
+     * @brief Static casts x to type T.
+     *
+     * @tparam T Type to static cast x to.
+     * @param x Value to be static cast to T.
+     * @return x static cast to type T.
+     */
+    template <typename T>
+    [[gnu::always_inline]]
+    constexpr auto vector_cast(auto&& x) noexcept {
+        return static_cast<T>(x);
+    }
+
+    /**
      * @brief Converts a GNU vector to an array.
      *
      * The resulting array will have the same elements and order as the GNU vector.

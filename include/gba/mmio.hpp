@@ -879,26 +879,162 @@ namespace gba::mmio {
 
     // Sound
 
+    /**
+     * @brief Sound tone 1 sweep register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000060h---sound1cnt_l-nr10---channel-1-sweep-register-rw">4000060h - SOUND1CNT_L (NR10) - Channel 1 Sweep register (R/W)</a>
+     *
+     * @sa TONE1_PATTERN
+     * @sa TONE1_FREQUENCY
+     * @sa sound1cnt_l
+     */
     inline constexpr auto TONE1_SWEEP = registral<const_ptr<volatile sound1cnt_l>(0x4000060)>{};
+
+    /**
+     * @brief Sound tone 1 pattern register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000062h---sound1cnt_h-nr11-nr12---channel-1-dutylenenvelope-rw">4000062h - SOUND1CNT_H (NR11, NR12) - Channel 1 Duty/Len/Envelope (R/W)</a>
+     *
+     * @sa TONE1_SWEEP
+     * @sa TONE1_FREQUENCY
+     * @sa sound1cnt_h
+     */
     inline constexpr auto TONE1_PATTERN = registral<const_ptr<volatile sound1cnt_h>(0x4000062)>{};
+
+    /**
+     * @brief Sound tone 1 frequency register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000064h---sound1cnt_x-nr13-nr14---channel-1-frequencycontrol-rw">4000064h - SOUND1CNT_X (NR13, NR14) - Channel 1 Frequency/Control (R/W)</a>
+     *
+     * @sa TONE1_SWEEP
+     * @sa TONE1_PATTERN
+     * @sa sound1cnt_x
+     */
     inline constexpr auto TONE1_FREQUENCY = registral<const_ptr<volatile sound1cnt_x>(0x4000064)>{};
 
+    /**
+     * @brief Sound tone 2 pattern register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000068h---sound2cnt_l-nr21-nr22---channel-2-dutylengthenvelope-rw">4000068h - SOUND2CNT_L (NR21, NR22) - Channel 2 Duty/Length/Envelope (R/W)</a>
+     *
+     * @sa TONE2_FREQUENCY
+     * @sa sound2cnt_l
+     */
     inline constexpr auto TONE2_PATTERN = registral<const_ptr<volatile sound2cnt_l>(0x4000068)>{};
+
+    /**
+     * @brief Sound tone 2 frequency register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400006ch---sound2cnt_h-nr23-nr24---channel-2-frequencycontrol-rw">400006Ch - SOUND2CNT_H (NR23, NR24) - Channel 2 Frequency/Control (R/W)</a>
+     *
+     * @sa TONE2_PATTERN
+     * @sa sound2cnt_h
+     */
     inline constexpr auto TONE2_FREQUENCY = registral<const_ptr<volatile sound2cnt_h>(0x400006C)>{};
 
+    /**
+     * @brief Sound wave bank register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000070h---sound3cnt_l-nr30---channel-3-stopwave-ram-select-rw">4000070h - SOUND3CNT_L (NR30) - Channel 3 Stop/Wave RAM select (R/W)</a>
+     *
+     * @sa WAVE_LEN_VOLUME
+     * @sa WAVE_FREQ
+     * @sa sound3cnt_l
+     */
     inline constexpr auto WAVE_BANK = registral<const_ptr<volatile sound3cnt_l>(0x4000070)>{};
+
+    /**
+     * @brief Sound wave length & volume register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000072h---sound3cnt_h-nr31-nr32---channel-3-lengthvolume-rw">4000072h - SOUND3CNT_H (NR31, NR32) - Channel 3 Length/Volume (R/W)</a>
+     *
+     * @sa WAVE_BANK
+     * @sa WAVE_FREQ
+     * @sa sound3cnt_h
+     */
     inline constexpr auto WAVE_LEN_VOLUME = registral<const_ptr<volatile sound3cnt_h>(0x4000072)>{};
+
+    /**
+     * @brief Sound wave frequency register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000074h---sound3cnt_x-nr33-nr34---channel-3-frequencycontrol-rw">4000074h - SOUND3CNT_X (NR33, NR34) - Channel 3 Frequency/Control (R/W)</a>
+     *
+     * @sa WAVE_BANK
+     * @sa WAVE_LEN_VOLUME
+     * @sa sound3cnt_x
+     */
     inline constexpr auto WAVE_FREQ = registral<const_ptr<volatile sound3cnt_x>(0x4000074)>{};
 
+    /**
+     * @brief Sound noise length & envelope register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000078h---sound4cnt_l-nr41-nr42---channel-4-lengthenvelope-rw">4000078h - SOUND4CNT_L (NR41, NR42) - Channel 4 Length/Envelope (R/W)</a>
+     *
+     * @sa NOISE_FREQ
+     * @sa sound4cnt_l
+     */
     inline constexpr auto NOISE_LEN_ENV = registral<const_ptr<volatile sound4cnt_l>(0x4000078)>{};
+
+    /**
+     * @brief Sound noise frequency register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400007ch---sound4cnt_h-nr43-nr44---channel-4-frequencycontrol-rw">400007Ch - SOUND4CNT_H (NR43, NR44) - Channel 4 Frequency/Control (R/W)</a>
+     *
+     * @sa NOISE_LEN_ENV
+     * @sa sound4cnt_h
+     */
     inline constexpr auto NOISE_FREQ = registral<const_ptr<volatile sound4cnt_h>(0x400007C)>{};
 
+    /**
+     * @brief Stereo volume register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000080h---soundcnt_l-nr50-nr51---channel-lr-volumeenable-rw">4000080h - SOUNDCNT_L (NR50, NR51) - Channel L/R Volume/Enable (R/W)</a>
+     *
+     * @sa SOUND_MIX
+     * @sa SOUND_ENABLED
+     * @sa SOUNDBIAS
+     * @sa soundcnt_l
+     */
     inline constexpr auto LEFT_RIGHT_VOLUME = registral<const_ptr<volatile soundcnt_l>(0x4000080)>{};
+
+    /**
+     * @brief Sound channel mixing register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000082h---soundcnt_h-gba-only---dma-sound-controlmixing-rw">4000082h - SOUNDCNT_H (GBA only) - DMA Sound Control/Mixing (R/W)</a>
+     *
+     * @sa LEFT_RIGHT_VOLUME
+     * @sa SOUND_ENABLED
+     * @sa SOUNDBIAS
+     * @sa soundcnt_h
+     */
     inline constexpr auto SOUND_MIX = registral<const_ptr<volatile soundcnt_h>(0x4000082)>{};
+
+    /**
+     * @brief Sound enable & status register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000084h---soundcnt_x-nr52---sound-onoff-rw">4000084h - SOUNDCNT_X (NR52) - Sound on/off (R/W)</a>
+     *
+     * @sa LEFT_RIGHT_VOLUME
+     * @sa SOUND_MIX
+     * @sa SOUNDBIAS
+     * @sa soundcnt_x
+     */
     inline constexpr auto SOUND_ENABLED = registral<const_ptr<volatile soundcnt_x>(0x4000084)>{};
+
+    /**
+     * @brief Sound output hardware control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000088h---soundbias---sound-pwm-control-rw-see-below">4000088h - SOUNDBIAS - Sound PWM Control (R/W, see below)</a>
+     *
+     * @sa LEFT_RIGHT_VOLUME
+     * @sa SOUND_MIX
+     * @sa SOUND_ENABLED
+     * @sa soundbias
+     */
     inline constexpr auto SOUNDBIAS = registral<const_ptr<volatile soundbias>(0x4000088)>{};
 
+    /**
+     * @brief Sound FIFO buffer A.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000a0h---fifo_a_l---sound-a-fifo-data-0-and-data-1-w">40000A0h - FIFO_A_L - Sound A FIFO, Data 0 and Data 1 (W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000a2h---fifo_a_h---sound-a-fifo-data-2-and-data-3-w">40000A2h - FIFO_A_H - Sound A FIFO, Data 2 and Data 3 (W)</a>
+     *
+     * @sa FIFO_B
+     */
     inline constexpr auto FIFO_A = registral<const_ptr<volatile u32>(0x40000A0)>{};
+
+    /**
+     * @brief Sound FIFO buffer B.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000a4h---fifo_b_l---sound-b-fifo-data-0-and-data-1-w">40000A4h - FIFO_B_L - Sound B FIFO, Data 0 and Data 1 (W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000a6h---fifo_b_h---sound-b-fifo-data-2-and-data-3-w">40000A6h - FIFO_B_H - Sound B FIFO, Data 2 and Data 3 (W)</a>
+     *
+     * @sa FIFO_A
+     */
     inline constexpr auto FIFO_B = registral<const_ptr<volatile u32>(0x40000A4)>{};
 
     // DMA

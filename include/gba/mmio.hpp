@@ -1039,29 +1039,347 @@ namespace gba::mmio {
 
     // DMA
 
+    /**
+     * @brief Source address for DMA 0.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b0h0b2h---dma0sad---dma-0-source-address-w-internal-memory">40000B0h,0B2h - DMA0SAD - DMA 0 Source Address (W) (internal memory)</a>
+     *
+     * @warning Cannot transfer from ROM.
+     *
+     * @sa DMA0_DEST
+     * @sa DMA0_COUNT
+     * @sa DMA0_CONTROL
+     * @sa DMA1_SRC
+     * @sa DMA2_SRC
+     * @sa DMA3_SRC
+     * @sa DMA_SRC
+     */
     inline constexpr auto DMA0_SRC = registral<const_ptr<const void* volatile>(0x40000B0)>{};
+
+    /**
+     * @brief Destination address for DMA 0.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b4h0b6h---dma0dad---dma-0-destination-address-w-internal-memory">40000B4h,0B6h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)</a>
+     *
+     * @warning Cannot transfer to ROM.
+     *
+     * @sa DMA0_SRC
+     * @sa DMA0_COUNT
+     * @sa DMA0_CONTROL
+     * @sa DMA1_DEST
+     * @sa DMA2_DEST
+     * @sa DMA3_DEST
+     * @sa DMA_DEST
+     */
     inline constexpr auto DMA0_DEST = registral<const_ptr<void* volatile>(0x40000B4)>{};
+
+    /**
+     * @brief Transfer count register for DMA 0.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b8h---dma0cnt_l---dma-0-word-count-w-14-bit-14000h">40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)</a>
+     *
+     * This is the number of units to be transferred: 16 or 32 bits, depending on the value of dmacnt_h::transfer_32bit.
+     *
+     * @warning Only the lower 14 bits are used.
+     *
+     * @sa DMA0_SRC
+     * @sa DMA0_DEST
+     * @sa DMA0_CONTROL
+     * @sa DMA1_COUNT
+     * @sa DMA2_COUNT
+     * @sa DMA3_COUNT
+     * @sa DMA_COUNT
+     */
     inline constexpr auto DMA0_COUNT = registral<const_ptr<volatile u16>(0x40000B8)>{};
+
+    /**
+     * @brief Control register for DMA 0.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000bah---dma0cnt_h---dma-0-control-rw">40000BAh - DMA0CNT_H - DMA 0 Control (R/W)</a>
+     *
+     * @sa DMA0_SRC
+     * @sa DMA0_DEST
+     * @sa DMA0_COUNT
+     * @sa DMA1_CONTROL
+     * @sa DMA2_CONTROL
+     * @sa DMA3_CONTROL
+     * @sa DMA_CONTROL
+     * @sa dmacnt_h
+     */
     inline constexpr auto DMA0_CONTROL = registral<const_ptr<volatile dmacnt_h>(0x40000BA)>{};
 
+    /**
+     * @brief Source address for DMA 1.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000bch0beh---dma1sad---dma-1-source-address-w-any-memory">40000BCh,0BEh - DMA1SAD - DMA 1 Source Address (W) (any memory)</a>
+     *
+     * @sa DMA1_DEST
+     * @sa DMA1_COUNT
+     * @sa DMA1_CONTROL
+     * @sa DMA0_SRC
+     * @sa DMA2_SRC
+     * @sa DMA3_SRC
+     * @sa DMA_SRC
+     */
     inline constexpr auto DMA1_SRC = registral<const_ptr<const void* volatile>(0x40000BC)>{};
+
+    /**
+     * @brief Destination address for DMA 1.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c0h0c2h---dma1dad---dma-1-destination-address-w-internal-memory">40000C0h,0C2h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)</a>
+     *
+     * @warning Cannot transfer to ROM.
+     *
+     * @sa DMA1_SRC
+     * @sa DMA1_COUNT
+     * @sa DMA1_CONTROL
+     * @sa DMA0_DEST
+     * @sa DMA2_DEST
+     * @sa DMA3_DEST
+     * @sa DMA_DEST
+     */
     inline constexpr auto DMA1_DEST = registral<const_ptr<void* volatile>(0x40000C0)>{};
+
+    /**
+     * @brief Transfer count register for DMA 1.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c4h---dma1cnt_l---dma-1-word-count-w-14-bit-14000h">40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)</a>
+     *
+     * This is the number of units to be transferred: 16 or 32 bits, depending on the value of dmacnt_h::transfer_32bit.
+     *
+     * @warning Only the lower 14 bits are used.
+     *
+     * @sa DMA1_SRC
+     * @sa DMA1_DEST
+     * @sa DMA1_CONTROL
+     * @sa DMA0_COUNT
+     * @sa DMA2_COUNT
+     * @sa DMA3_COUNT
+     * @sa DMA_COUNT
+     */
     inline constexpr auto DMA1_COUNT = registral<const_ptr<volatile u16>(0x40000C4)>{};
+
+    /**
+     * @brief Control register for DMA 1.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c6h---dma1cnt_h---dma-1-control-rw">40000C6h - DMA1CNT_H - DMA 1 Control (R/W)</a>
+     *
+     * @sa DMA1_SRC
+     * @sa DMA1_DEST
+     * @sa DMA1_COUNT
+     * @sa DMA0_CONTROL
+     * @sa DMA2_CONTROL
+     * @sa DMA3_CONTROL
+     * @sa DMA_CONTROL
+     * @sa dmacnt_h
+     */
     inline constexpr auto DMA1_CONTROL = registral<const_ptr<volatile dmacnt_h>(0x40000C6)>{};
 
+    /**
+     * @brief Source address for DMA 2.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c8h0cah---dma2sad---dma-2-source-address-w-any-memory">40000C8h,0CAh - DMA2SAD - DMA 2 Source Address (W) (any memory)</a>
+     *
+     * @sa DMA2_DEST
+     * @sa DMA2_COUNT
+     * @sa DMA2_CONTROL
+     * @sa DMA0_SRC
+     * @sa DMA1_SRC
+     * @sa DMA3_SRC
+     * @sa DMA_SRC
+     */
     inline constexpr auto DMA2_SRC = registral<const_ptr<const void* volatile>(0x40000C8)>{};
+
+    /**
+     * @brief Destination address for DMA 2.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000cch0ceh---dma2dad---dma-2-destination-address-w-internal-memory">40000CCh,0CEh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)</a>
+     *
+     * @warning Cannot transfer to ROM.
+     *
+     * @sa DMA2_SRC
+     * @sa DMA2_COUNT
+     * @sa DMA2_CONTROL
+     * @sa DMA0_DEST
+     * @sa DMA1_DEST
+     * @sa DMA3_DEST
+     * @sa DMA_DEST
+     */
     inline constexpr auto DMA2_DEST = registral<const_ptr<void* volatile>(0x40000CC)>{};
+
+    /**
+     * @brief Transfer count register for DMA 2.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d0h---dma2cnt_l---dma-2-word-count-w-14-bit-14000h">40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)</a>
+     *
+     * This is the number of units to be transferred: 16 or 32 bits, depending on the value of dmacnt_h::transfer_32bit.
+     *
+     * @warning Only the lower 14 bits are used.
+     *
+     * @sa DMA2_SRC
+     * @sa DMA2_DEST
+     * @sa DMA2_CONTROL
+     * @sa DMA0_COUNT
+     * @sa DMA1_COUNT
+     * @sa DMA3_COUNT
+     * @sa DMA_COUNT
+     */
     inline constexpr auto DMA2_COUNT = registral<const_ptr<volatile u16>(0x40000D0)>{};
+
+    /**
+     * @brief Control register for DMA 2.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d2h---dma2cnt_h---dma-2-control-rw">40000D2h - DMA2CNT_H - DMA 2 Control (R/W)</a>
+     *
+     * @sa DMA2_SRC
+     * @sa DMA2_DEST
+     * @sa DMA2_COUNT
+     * @sa DMA0_CONTROL
+     * @sa DMA1_CONTROL
+     * @sa DMA3_CONTROL
+     * @sa DMA_CONTROL
+     * @sa dmacnt_h
+     */
     inline constexpr auto DMA2_CONTROL = registral<const_ptr<volatile dmacnt_h>(0x40000D2)>{};
 
+    /**
+     * @brief Source address for DMA 3.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d4h0d6h---dma3sad---dma-3-source-address-w-any-memory">40000D4h,0D6h - DMA3SAD - DMA 3 Source Address (W) (any memory)</a>
+     *
+     * @sa DMA3_DEST
+     * @sa DMA3_COUNT
+     * @sa DMA3_CONTROL
+     * @sa DMA0_SRC
+     * @sa DMA1_SRC
+     * @sa DMA2_SRC
+     * @sa DMA_SRC
+     */
     inline constexpr auto DMA3_SRC = registral<const_ptr<const void* volatile>(0x40000D4)>{};
+
+    /**
+     * @brief Destination address for DMA 3.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d8h0dah---dma3dad---dma-3-destination-address-w-any-memory">40000D8h,0DAh - DMA3DAD - DMA 3 Destination Address (W) (any memory)</a>
+     *
+     * @sa DMA3_SRC
+     * @sa DMA3_COUNT
+     * @sa DMA3_CONTROL
+     * @sa DMA0_DEST
+     * @sa DMA1_DEST
+     * @sa DMA2_DEST
+     * @sa DMA_DEST
+     */
     inline constexpr auto DMA3_DEST = registral<const_ptr<void* volatile>(0x40000D8)>{};
+
+    /**
+     * @brief Transfer count register for DMA 3.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000dch---dma3cnt_l---dma-3-word-count-w-16-bit-110000h">40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)</a>
+     *
+     * This is the number of units to be transferred: 16 or 32 bits, depending on the value of dmacnt_h::transfer_32bit.
+     *
+     * @warning Only the lower 14 bits are used.
+     *
+     * @sa DMA3_SRC
+     * @sa DMA3_DEST
+     * @sa DMA3_CONTROL
+     * @sa DMA0_COUNT
+     * @sa DMA1_COUNT
+     * @sa DMA2_COUNT
+     * @sa DMA_COUNT
+     */
     inline constexpr auto DMA3_COUNT = registral<const_ptr<volatile u16>(0x40000DC)>{};
+
+    /**
+     * @brief Control register for DMA 3.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000deh---dma3cnt_h---dma-3-control-rw">40000DEh - DMA3CNT_H - DMA 3 Control (R/W)</a>
+     *
+     * @note DMA3 is the most appropriate DMA register for general purpose transfers.
+     *
+     * @code{cpp}
+     * #include <gba/gba.hpp>
+     *
+     * extern const std::array<int, 1024> some_data;
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     std::array<int, 1024> destination{};
+     *
+     *     mmio::DMA3_SRC = some_data.data();
+     *     mmio::DMA3_DEST = destination.data();
+     *     mmio::DMA3_COUNT = destination.size(); // Number of 32-bit transfers
+     *
+     *     // Begin 32-bit transfer
+     *     mmio::DMA3_CONTROL = dmacnt_h{
+     *         .transfer_32bit = true,
+     *         .enabled = true
+     *     };
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa DMA3_SRC
+     * @sa DMA3_DEST
+     * @sa DMA3_COUNT
+     * @sa DMA0_CONTROL
+     * @sa DMA1_CONTROL
+     * @sa DMA2_CONTROL
+     * @sa DMA_CONTROL
+     * @sa dmacnt_h
+     */
     inline constexpr auto DMA3_CONTROL = registral<const_ptr<volatile dmacnt_h>(0x40000DE)>{};
 
+    /**
+     * @brief DMA source registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b0h0b2h---dma0sad---dma-0-source-address-w-internal-memory">40000B0h,0B2h - DMA0SAD - DMA 0 Source Address (W) (internal memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000bch0beh---dma1sad---dma-1-source-address-w-any-memory">40000BCh,0BEh - DMA1SAD - DMA 1 Source Address (W) (any memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c8h0cah---dma2sad---dma-2-source-address-w-any-memory">40000C8h,0CAh - DMA2SAD - DMA 2 Source Address (W) (any memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d4h0d6h---dma3sad---dma-3-source-address-w-any-memory">40000D4h,0D6h - DMA3SAD - DMA 3 Source Address (W) (any memory)</a>
+     *
+     * The four DMA source registers as a registral_series.
+     *
+     * @sa DMA0_SRC
+     * @sa DMA1_SRC
+     * @sa DMA2_SRC
+     * @sa DMA3_SRC
+     */
     inline constexpr auto DMA_SRC = registral_series<const_ptr<const void* volatile[4]>(0x40000B0), 12>{};
+
+    /**
+     * @brief DMA destination registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b4h0b6h---dma0dad---dma-0-destination-address-w-internal-memory">40000B4h,0B6h - DMA0DAD - DMA 0 Destination Address (W) (internal memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c0h0c2h---dma1dad---dma-1-destination-address-w-internal-memory">40000C0h,0C2h - DMA1DAD - DMA 1 Destination Address (W) (internal memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000cch0ceh---dma2dad---dma-2-destination-address-w-internal-memory">40000CCh,0CEh - DMA2DAD - DMA 2 Destination Address (W) (internal memory)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d8h0dah---dma3dad---dma-3-destination-address-w-any-memory">40000D8h,0DAh - DMA3DAD - DMA 3 Destination Address (W) (any memory)</a>
+     *
+     * The four DMA destination registers as a registral_series.
+     *
+     * @sa DMA0_DEST
+     * @sa DMA1_DEST
+     * @sa DMA2_DEST
+     * @sa DMA3_DEST
+     */
     inline constexpr auto DMA_DEST = registral_series<const_ptr<void* volatile[4]>(0x40000B4), 12>{};
+
+    /**
+     * @brief DMA transfer count registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000b8h---dma0cnt_l---dma-0-word-count-w-14-bit-14000h">40000B8h - DMA0CNT_L - DMA 0 Word Count (W) (14 bit, 1..4000h)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c4h---dma1cnt_l---dma-1-word-count-w-14-bit-14000h">40000C4h - DMA1CNT_L - DMA 1 Word Count (W) (14 bit, 1..4000h)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d0h---dma2cnt_l---dma-2-word-count-w-14-bit-14000h">40000D0h - DMA2CNT_L - DMA 2 Word Count (W) (14 bit, 1..4000h)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000dch---dma3cnt_l---dma-3-word-count-w-16-bit-110000h">40000DCh - DMA3CNT_L - DMA 3 Word Count (W) (16 bit, 1..10000h)</a>
+     *
+     * The four DMA transfer count registers as a registral_series.
+     *
+     * @sa DMA0_COUNT
+     * @sa DMA1_COUNT
+     * @sa DMA2_COUNT
+     * @sa DMA3_COUNT
+     */
     inline constexpr auto DMA_COUNT = registral_series<const_ptr<volatile u16[4]>(0x40000B8), 12>{};
+
+    /**
+     * @brief DMA control registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000bah---dma0cnt_h---dma-0-control-rw">40000BAh - DMA0CNT_H - DMA 0 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000c6h---dma1cnt_h---dma-1-control-rw">40000C6h - DMA1CNT_H - DMA 1 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000d2h---dma2cnt_h---dma-2-control-rw">40000D2h - DMA2CNT_H - DMA 2 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#40000deh---dma3cnt_h---dma-3-control-rw">40000DEh - DMA3CNT_H - DMA 3 Control (R/W)</a>
+     *
+     * The four DMA control registers as a registral_series.
+     *
+     * @sa DMA0_CONTROL
+     * @sa DMA1_CONTROL
+     * @sa DMA2_CONTROL
+     * @sa DMA3_CONTROL
+     * @sa dmacnt_h
+     */
     inline constexpr auto DMA_CONTROL = registral_series<const_ptr<volatile dmacnt_h[4]>(0x40000BA), 4>{};
 
     // Timers

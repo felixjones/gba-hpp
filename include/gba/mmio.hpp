@@ -1384,24 +1384,251 @@ namespace gba::mmio {
 
     // Timers
 
+    /**
+     * @brief Timer 0 counter register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000100h---tm0cnt_l---timer-0-counterreload-rw">4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)</a>
+     *
+     * @note This is a read-only alias of TIMER0_RELOAD.
+     *
+     * @sa TIMER0_RELOAD
+     * @sa TIMER0_CONTROL
+     * @sa TIMER1_COUNT
+     * @sa TIMER2_COUNT
+     * @sa TIMER3_COUNT
+     * @sa TIMER_COUNT
+     */
     inline constexpr auto TIMER0_COUNT = registral<const_ptr<const volatile u16>(0x4000100)>{};
+
+    /**
+     * @brief Timer 0 counter & reload register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000100h---tm0cnt_l---timer-0-counterreload-rw">4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)</a>
+     *
+     * @note Writing to this register sets the value to start counting from when the timer overflows/ticks.
+     *
+     * @sa TIMER0_COUNT
+     * @sa TIMER0_CONTROL
+     * @sa TIMER1_RELOAD
+     * @sa TIMER2_RELOAD
+     * @sa TIMER3_RELOAD
+     * @sa TIMER_RELOAD
+     */
     inline constexpr auto TIMER0_RELOAD = registral<const_ptr<volatile short>(0x4000100)>{};
+
+    /**
+     * @brief Timer 0 control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000102h---tm0cnt_h---timer-0-control-rw">4000102h - TM0CNT_H - Timer 0 Control (R/W)</a>
+     *
+     * @sa TIMER0_COUNT
+     * @sa TIMER0_RELOAD
+     * @sa TIMER1_CONTROL
+     * @sa TIMER2_CONTROL
+     * @sa TIMER3_CONTROL
+     * @sa TIMER_CONTROL
+     */
     inline constexpr auto TIMER0_CONTROL = registral<const_ptr<volatile tmcnt_h>(0x4000102)>{};
 
+    /**
+     * @brief Timer 1 counter register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000104h---tm1cnt_l---timer-1-counterreload-rw">4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)</a>
+     *
+     * @note This is a read-only alias of TIMER1_RELOAD.
+     *
+     * @sa TIMER1_RELOAD
+     * @sa TIMER1_CONTROL
+     * @sa TIMER0_COUNT
+     * @sa TIMER2_COUNT
+     * @sa TIMER3_COUNT
+     * @sa TIMER_COUNT
+     */
     inline constexpr auto TIMER1_COUNT = registral<const_ptr<const volatile u16>(0x4000104)>{};
+
+    /**
+     * @brief Timer 1 counter & reload register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000104h---tm1cnt_l---timer-1-counterreload-rw">4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)</a>
+     *
+     * @note Writing to this register sets the value to start counting from when the timer overflows/ticks.
+     *
+     * @sa TIMER1_COUNT
+     * @sa TIMER1_CONTROL
+     * @sa TIMER0_RELOAD
+     * @sa TIMER2_RELOAD
+     * @sa TIMER3_RELOAD
+     * @sa TIMER_RELOAD
+     */
     inline constexpr auto TIMER1_RELOAD = registral<const_ptr<volatile short>(0x4000104)>{};
+
+    /**
+     * @brief Timer 1 control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000106h---tm1cnt_h---timer-1-control-rw">4000106h - TM1CNT_H - Timer 1 Control (R/W)</a>
+     *
+     * @sa TIMER1_COUNT
+     * @sa TIMER1_RELOAD
+     * @sa TIMER0_CONTROL
+     * @sa TIMER2_CONTROL
+     * @sa TIMER3_CONTROL
+     * @sa TIMER_CONTROL
+     */
     inline constexpr auto TIMER1_CONTROL = registral<const_ptr<volatile tmcnt_h>(0x4000106)>{};
 
+    /**
+     * @brief Timer 2 counter register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000108h---tm2cnt_l---timer-2-counterreload-rw">4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)</a>
+     *
+     * @note This is a read-only alias of TIMER2_RELOAD.
+     *
+     * @sa TIMER2_RELOAD
+     * @sa TIMER2_CONTROL
+     * @sa TIMER0_COUNT
+     * @sa TIMER1_COUNT
+     * @sa TIMER3_COUNT
+     * @sa TIMER_COUNT
+     */
     inline constexpr auto TIMER2_COUNT = registral<const_ptr<const volatile u16>(0x4000108)>{};
+
+    /**
+     * @brief Timer 2 counter & reload register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000108h---tm2cnt_l---timer-2-counterreload-rw">4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)</a>
+     *
+     * @note Writing to this register sets the value to start counting from when the timer overflows/ticks.
+     *
+     * @sa TIMER2_COUNT
+     * @sa TIMER2_CONTROL
+     * @sa TIMER0_RELOAD
+     * @sa TIMER1_RELOAD
+     * @sa TIMER3_RELOAD
+     * @sa TIMER_RELOAD
+     */
     inline constexpr auto TIMER2_RELOAD = registral<const_ptr<volatile short>(0x4000108)>{};
+
+    /**
+     * @brief Timer 2 control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ah---tm2cnt_h---timer-2-control-rw">400010Ah - TM2CNT_H - Timer 2 Control (R/W)</a>
+     *
+     * @sa TIMER2_COUNT
+     * @sa TIMER2_RELOAD
+     * @sa TIMER0_CONTROL
+     * @sa TIMER1_CONTROL
+     * @sa TIMER3_CONTROL
+     * @sa TIMER_CONTROL
+     */
     inline constexpr auto TIMER2_CONTROL = registral<const_ptr<volatile tmcnt_h>(0x400010A)>{};
 
+    /**
+     * @brief Timer 3 counter register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ch---tm3cnt_l---timer-3-counterreload-rw">400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)</a>
+     *
+     * @note This is a read-only alias of TIMER3_RELOAD.
+     *
+     * @sa TIMER3_RELOAD
+     * @sa TIMER3_CONTROL
+     * @sa TIMER0_COUNT
+     * @sa TIMER1_COUNT
+     * @sa TIMER2_COUNT
+     * @sa TIMER_COUNT
+     */
     inline constexpr auto TIMER3_COUNT = registral<const_ptr<const volatile u16>(0x400010C)>{};
+
+    /**
+     * @brief Timer 3 counter & reload register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ch---tm3cnt_l---timer-3-counterreload-rw">400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)</a>
+     *
+     * @note Writing to this register sets the value to start counting from when the timer overflows/ticks.
+     *
+     * @sa TIMER3_COUNT
+     * @sa TIMER3_CONTROL
+     * @sa TIMER0_RELOAD
+     * @sa TIMER1_RELOAD
+     * @sa TIMER2_RELOAD
+     * @sa TIMER_RELOAD
+     */
     inline constexpr auto TIMER3_RELOAD = registral<const_ptr<volatile short>(0x400010C)>{};
+
+    /**
+     * @brief Timer 3 control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010eh---tm3cnt_h---timer-3-control-rw">400010Eh - TM3CNT_H - Timer 3 Control (R/W)</a>
+     *
+     * @sa TIMER3_COUNT
+     * @sa TIMER3_RELOAD
+     * @sa TIMER0_CONTROL
+     * @sa TIMER1_CONTROL
+     * @sa TIMER2_CONTROL
+     * @sa TIMER_CONTROL
+     */
     inline constexpr auto TIMER3_CONTROL = registral<const_ptr<volatile tmcnt_h>(0x400010E)>{};
 
+    /**
+     * @brief Timer count registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000100h---tm0cnt_l---timer-0-counterreload-rw">4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000104h---tm1cnt_l---timer-1-counterreload-rw">4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000108h---tm2cnt_l---timer-2-counterreload-rw">4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ch---tm3cnt_l---timer-3-counterreload-rw">400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)</a>
+     *
+     * The four timer count registers as a registral_series.
+     *
+     * @sa TIMER0_COUNT
+     * @sa TIMER1_COUNT
+     * @sa TIMER2_COUNT
+     * @sa TIMER3_COUNT
+     */
     inline constexpr auto TIMER_COUNT = registral_series<const_ptr<const volatile u16[4]>(0x4000100), 4>{};
+
+    /**
+     * @brief Timer reload registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000100h---tm0cnt_l---timer-0-counterreload-rw">4000100h - TM0CNT_L - Timer 0 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000104h---tm1cnt_l---timer-1-counterreload-rw">4000104h - TM1CNT_L - Timer 1 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000108h---tm2cnt_l---timer-2-counterreload-rw">4000108h - TM2CNT_L - Timer 2 Counter/Reload (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ch---tm3cnt_l---timer-3-counterreload-rw">400010Ch - TM3CNT_L - Timer 3 Counter/Reload (R/W)</a>
+     *
+     * The four timer reload registers as a registral_series.
+     *
+     * @sa TIMER0_RELOAD
+     * @sa TIMER1_RELOAD
+     * @sa TIMER2_RELOAD
+     * @sa TIMER3_RELOAD
+     */
     inline constexpr auto TIMER_RELOAD = registral_series<const_ptr<volatile u16[4]>(0x4000100), 4>{};
+
+    /**
+     * @brief Timer control registers.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000102h---tm0cnt_h---timer-0-control-rw">4000102h - TM0CNT_H - Timer 0 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000106h---tm1cnt_h---timer-1-control-rw">4000106h - TM1CNT_H - Timer 1 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010ah---tm2cnt_h---timer-2-control-rw">400010Ah - TM2CNT_H - Timer 2 Control (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400010eh---tm3cnt_h---timer-3-control-rw">400010Eh - TM3CNT_H - Timer 3 Control (R/W)</a>
+     *
+     * The four timer control registers as a registral_series.
+     *
+     * @code{cpp}
+     * // Create a 1 second timer
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::TIMER2_RELOAD = -0x4000;
+     *     mmio::TIMER2_CONTROL = tmcnt_h{.scale = timer_scale::_1024};
+     *
+     *     mmio::TIMER3_CONTROL = tmcnt_h{.cascade = true, .enabled = true};
+     *
+     *     int prev = -1;
+     *     while (true) {
+     *         // Detect that at least one second has elapsed
+     *         if (u16 curr = *mmio::TIMER3_COUNT; curr != prev) {
+     *             // Calculate hours, minutes, seconds elapsed
+     *             const int hours = curr / 3600;
+     *             const int minutes = (curr % 3600) / 60;
+     *             const int seconds = curr % 60;
+     *
+     *             prev = curr;
+     *         }
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa TIMER0_CONTROL
+     * @sa TIMER1_CONTROL
+     * @sa TIMER2_CONTROL
+     * @sa TIMER3_CONTROL
+     */
     inline constexpr auto TIMER_CONTROL = registral_series<const_ptr<volatile tmcnt_h[4]>(0x4000102), 4>{};
 
     // Serial

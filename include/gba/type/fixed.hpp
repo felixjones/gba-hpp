@@ -317,8 +317,9 @@ struct fixed {
      *
      * @return scoped_ref of this fixed point vector.
      *
-     * @section Mutating a fixed-point vector with tie():
      * @code{cpp}
+     * // Mutating a fixed-point vector with tie()
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {

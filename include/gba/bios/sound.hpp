@@ -29,8 +29,8 @@ namespace gba::bios {
      * @note This function assumes that the wave pointer is pointing to a valid WaveData object.
      * @note This function is made famous by its use to read BIOS memory without triggering the BIOS protection
      *
-     * @section Reading BIOS memory:
      * @code{cpp}
+     * // Reading BIOS memory
      * auto read_bios_byte(std::size_t idx) noexcept {
      *     const auto a = gba::bios::MidiKey2Freq(reinterpret_cast&lt;const void*>(idx - 4), 180 - 12, 0) * 2;
      *     return std::byte(a >> 24);

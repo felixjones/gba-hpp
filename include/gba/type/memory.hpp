@@ -439,8 +439,9 @@ namespace gba {
          *
          * @return Scoped reference to the data stored at the registral.
          *
-         * @section Reading and writing a registral with acquire():
          * @code{cpp}
+         * // Reading and writing a registral with acquire()
+         *
          * #include <gba/gba.hpp>
          *
          * int main() {
@@ -661,8 +662,9 @@ namespace gba {
          *
          * @return Scoped reference to the data stored at index `i`.
          *
-         * @section Reading and writing a registral_series entry with acquire():
          * @code{cpp}
+         * // Reading and writing a registral_series entry with acquire()
+         * 
          * #include <gba/gba.hpp>
          *
          * int main() {

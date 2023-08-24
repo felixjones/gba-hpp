@@ -70,8 +70,9 @@ namespace gba {
      *
      * 0 bit (low) = input (read mmio::IO_PORT_DATA), 1 bit (high) = output (write mmio::IO_PORT_DATA)
      *
-     * @section Reading, and then writing, a nibble:
      * @code{cpp}
+     * // Reading, and then writing, a nibble
+     *
      * #include <gba/gba.hpp>
      *
      * int read_and_write_nibble(int input) {

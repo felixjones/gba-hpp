@@ -109,8 +109,9 @@ namespace gba {
      *
      * This struct contains state for the previous keyinput, which is used to detect button presses and releases.
      *
-     * @section Polling keys:
      * @code{cpp}
+     * // Polling keys
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {
@@ -156,8 +157,9 @@ namespace gba {
          * @param in The new `keyinput` state.
          * @return A reference to the current `keystate` after assignment.
          *
-         * @section Polling keys:
          * @code{cpp}
+         * // Polling keys
+         *
          * #include <gba/gba.hpp>
          *
          * int main() {

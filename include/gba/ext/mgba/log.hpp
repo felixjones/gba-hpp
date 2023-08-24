@@ -101,8 +101,9 @@ namespace gba::mgba {
      * @return true if mGBA is present and the debug features were enabled.
      * @note This can be used to detect mGBA.
      *
-     * @section Testing for the presence of mGBA:
      * @code{cpp}
+     * // Testing for the presence of mGBA
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {

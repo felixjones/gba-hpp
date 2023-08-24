@@ -23,8 +23,9 @@ namespace gba {
      * @tparam T Integer type of the vector elements.
      * @tparam N Size of the vector (number of elements). Must be a power of 2 to conform to GNU vector requirements.
      *
-     * @section Defining a vector of 4 integers:
      * @code{cpp}
+     * // Defining a vector of 4 integers
+     *
      * #include <gba/gba.hpp>
      *
      * using ivec4 = gba::make_vector<int, 4>;
@@ -130,8 +131,9 @@ namespace gba {
      * @tparam As Type to convert the GNU vector elements to for the std::array.
      * @param v GNU vector to bind.
      *
-     * @section Binding a vector of 4 integers:
      * @code{cpp}
+     * // Binding a vector of 4 integers
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {
@@ -140,7 +142,7 @@ namespace gba {
      *     using ivec4 = make_vector<int, 4>;
      *     auto my_vector = ivec4{1, 2, 3, 4};
      *
-     *     if (auto bound = vector_bind<int>(my_vector)) {
+     *     if (auto bound = vector_bind(my_vector)) {
      *         std::swap(bound[0], bound[3]);
      *         std::swap(bound[1], bound[2]);
      *         // bound written back to my_vector on scope exit
@@ -148,23 +150,24 @@ namespace gba {
      * }
      * @endcode
      */
-    template <typename As>
+    template <typename As = void>
     constexpr auto vector_bind(Vector auto& v) noexcept {
         using vector_type = std::remove_cvref_t<decltype(v)>;
 
         constexpr auto vector_size = vector_traits<vector_type>::size;
+        using element_type = std::conditional_t<std::same_as<As, void>, typename vector_traits<vector_type>::value_type, As>;
 
-        struct scoped_ref : std::array<As, vector_size> {
+        struct scoped_ref : std::array<element_type, vector_size> {
             constexpr explicit scoped_ref(vector_type& v) noexcept :
-                std::array<As, vector_size>(__builtin_bit_cast(std::array<As, vector_size>, v)),
+                std::array<element_type, vector_size>(__builtin_bit_cast(std::array<element_type, vector_size>, v)),
                 m_owner{v} {}
 
             constexpr ~scoped_ref() noexcept {
-                m_owner = __builtin_bit_cast(vector_type, *(std::array<As, vector_size>*) this);
+                m_owner = __builtin_bit_cast(vector_type, *(std::array<element_type, vector_size>*) this);
             }
 
             consteval explicit operator bool() const noexcept {
-                return !std::is_const_v<As>;
+                return !std::is_const_v<element_type>;
             }
 
             vector_type& m_owner;

@@ -40,8 +40,9 @@ namespace gba::agbabi {
      * This IRQ handler simply acknowledges raised IRQs and returns. This is useful if you need to use BIOS functions
      * that rely on an IRQ, but you do not wish to implement an IRQ handler.
      *
-     * @section Setting up VBlank interrupt with an empty IRQ handler:
      * @code{cpp}
+     * // Setting up VBlank interrupt with an empty IRQ handler
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {
@@ -70,8 +71,9 @@ namespace gba::agbabi {
      * @param func Pointer to the user-defined interrupt handler function.
      * @return func again (useful for chaining calls)
      *
-     * @section Setting a user-defined interrupt handler:
      * @code{cpp}
+     * // Setting a user-defined interrupt handler
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {
@@ -107,8 +109,9 @@ namespace gba::agbabi {
      * @param func Pointer to the user-defined interrupt handler function.
      * @return func again (useful for chaining calls)
      *
-     * @section Setting a user-defined interrupt handler:
      * @code{cpp}
+     * // Setting a user-defined interrupt handler
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {
@@ -146,8 +149,9 @@ namespace gba::agbabi {
      * @param func Pointer to the user-defined interrupt handler function.
      * @return func again (useful for chaining calls)
      *
-     * @section Setting a user-defined interrupt handler with a lambda capture:
      * @code{cpp}
+     * // Setting a user-defined interrupt handler with a lambda capture
+     *
      * #include <gba/gba.hpp>
      *
      * int main() {

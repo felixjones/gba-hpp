@@ -25,6 +25,8 @@ namespace gba::agbabi {
      * the result.
      *
      * @warning Not all GBA models support overclocked EWRAM.
+     *
+     * @return True if overclocking was successful.
      */
     inline bool try_overclock_ewram() noexcept {
         if (__agbabi_poll_ewram()) {

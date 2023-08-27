@@ -81,6 +81,7 @@ namespace gba::mmio {
      *
      *     // Enable VBlank and keypad IRQs
      *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::KEYCNT = {.irq_enabled = true};
      *     mmio::IE = {.vblank = true, .keypad = true};
      *
      *     mmio::IME = true; // Activate IRQ interrupt handling
@@ -1786,7 +1787,74 @@ namespace gba::mmio {
 
     // Keys
 
+    /**
+     * @brief Read-only keypad input register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000130h---keyinput---key-status-r">4000130h - KEYINPUT - Key Status (R)</a>
+     *
+     * Reads the current state of the keypad keys. The buttons are pulled-low when pressed, resulting in a pressed
+     * button being in a `0` state, and a released button being in a `1` state.
+     *
+     * @code{cpp}
+     * // Read the keypad
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     while (true) {
+     *         const auto keys = *mmio::KEYINPUT;
+     *
+     *         // Invert the buttons for more logical boolean states
+     *         const auto a = !keys.i_a; // button A
+     *         const auto b = !keys.i_b; // button B
+     *         const auto select = !keys.i_select; // button Select
+     *         const auto start = !keys.i_start; // button Start
+     *
+     *         // The ::*axis() member functions convert dpad directions to a signed integer
+     *         const auto xaxis = keys.xaxis(); // dpad left/right
+     *         const auto yaxis = keys.yaxis(); // dpad down/up
+     *
+     *         const auto r = !keys.i_r; // button R
+     *         const auto l = !keys.i_l; // button L
+     *     }
+     * }
+     * @endcode
+     *
+     * @note It is recommended to handle key input via the keystate helper struct.
+     *
+     * @sa KEYCNT
+     * @sa keyinput
+     */
     inline constexpr auto KEYINPUT = registral<const_ptr<volatile keyinput>(0x4000130)>{};
+
+    /**
+     * @brief Keypad interrupt control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000132h---keycnt---key-interrupt-control-rw">4000132h - KEYCNT - Key Interrupt Control (R/W)</a>
+     *
+     * @code{cpp}
+     * // Enable keypad IRQ
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::IRQ_HANDLER = agbabi::irq_empty;
+     *
+     *     // Enable keypad IRQs
+     *     mmio::KEYCNT = {.irq_enabled = true};
+     *     mmio::IE = {.keypad = true};
+     *
+     *     mmio::IME = true;
+     *
+     *     while (true) {
+     *         bios::IntrWait(true, irq{.keypad = true}); // Wait for any button to be pressed
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa IE
+     * @sa keycnt
+     */
     inline constexpr auto KEYCNT = registral<const_ptr<volatile keycnt>(0x4000132)>{};
 
     // RCNT

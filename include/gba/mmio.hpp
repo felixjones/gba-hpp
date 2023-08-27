@@ -1633,18 +1633,155 @@ namespace gba::mmio {
 
     // Serial
 
+    /**
+     * @brief Serial IO 32-bit data read/write register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000120h---siodata32_l---sio-normal-communication-lower-16bit-data-rw">4000120h - SIODATA32_L - SIO Normal Communication lower 16bit data (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000122h---siodata32_h---sio-normal-communication-upper-16bit-data-rw">4000122h - SIODATA32_H - SIO Normal Communication upper 16bit data (R/W)</a>
+     *
+     * @sa SIOCNT_NORMAL
+     * @sa SIODATA8
+     */
     inline constexpr auto SIODATA32 = registral<const_ptr<volatile u32>(0x4000120)>{};
+
+    /**
+     * @brief Serial IO 16-bit data read/write register for multiplayer client 0.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000120h---siomulti0---sio-multi-player-data-0-parent-rw">4000120h - SIOMULTI0 - SIO Multi-Player Data 0 (Parent) (R/W)</a>
+     *
+     * Incoming 16-bit data received from multiplayer client 0.
+     *
+     * @sa SIOCNT_MULTI
+     * @sa SIOMULTI1
+     * @sa SIOMULTI2
+     * @sa SIOMULTI3
+     * @sa SIOMULTI
+     */
     inline constexpr auto SIOMULTI0 = registral<const_ptr<volatile u16>(0x4000120)>{};
+
+    /**
+     * @brief Serial IO 16-bit data read/write register for multiplayer client 1.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000122h---siomulti1---sio-multi-player-data-1-parent-rw">4000122h - SIOMULTI1 - SIO Multi-Player Data 1 (Parent) (R/W)</a>
+     *
+     * Incoming 16-bit data received from multiplayer client 1.
+     *
+     * @sa SIOCNT_MULTI
+     * @sa SIOMULTI0
+     * @sa SIOMULTI2
+     * @sa SIOMULTI3
+     * @sa SIOMULTI
+     */
     inline constexpr auto SIOMULTI1 = registral<const_ptr<volatile u16>(0x4000122)>{};
+
+    /**
+     * @brief Serial IO 16-bit data read/write register for multiplayer client 2.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000124h---siomulti2---sio-multi-player-data-2-parent-rw">4000124h - SIOMULTI2 - SIO Multi-Player Data 2 (Parent) (R/W)</a>
+     *
+     * Incoming 16-bit data received from multiplayer client 2.
+     *
+     * @sa SIOCNT_MULTI
+     * @sa SIOMULTI0
+     * @sa SIOMULTI1
+     * @sa SIOMULTI3
+     * @sa SIOMULTI
+     */
     inline constexpr auto SIOMULTI2 = registral<const_ptr<volatile u16>(0x4000124)>{};
+
+    /**
+     * @brief Serial IO 16-bit data read/write register for multiplayer client 3.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000126h---siomulti3---sio-multi-player-data-3-parent-rw">4000126h - SIOMULTI3 - SIO Multi-Player Data 3 (Parent) (R/W)</a>
+     *
+     * Incoming 16-bit data received from multiplayer client 3.
+     *
+     * @sa SIOCNT_MULTI
+     * @sa SIOMULTI0
+     * @sa SIOMULTI1
+     * @sa SIOMULTI2
+     * @sa SIOMULTI
+     */
     inline constexpr auto SIOMULTI3 = registral<const_ptr<volatile u16>(0x4000126)>{};
+
+    /**
+     * @brief Registral series for 16-bit data read/write multiplayer clients.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000120h---siomulti0---sio-multi-player-data-0-parent-rw">4000120h - SIOMULTI0 - SIO Multi-Player Data 0 (Parent) (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000122h---siomulti1---sio-multi-player-data-1-parent-rw">4000122h - SIOMULTI1 - SIO Multi-Player Data 1 (Parent) (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000124h---siomulti2---sio-multi-player-data-2-parent-rw">4000124h - SIOMULTI2 - SIO Multi-Player Data 2 (Parent) (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000126h---siomulti3---sio-multi-player-data-3-parent-rw">4000126h - SIOMULTI3 - SIO Multi-Player Data 3 (Parent) (R/W)</a>
+     *
+     * @sa SIOCNT_MULTI
+     * @sa SIOMULTI0
+     * @sa SIOMULTI1
+     * @sa SIOMULTI2
+     * @sa SIOMULTI3
+     */
     inline constexpr auto SIOMULTI = registral_series<const_ptr<volatile u16[4]>(0x4000120)>{};
 
+    /**
+     * @brief Serial IO control register for Normal mode.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000128h---siocnt---sio-control-usage-in-normal-mode-rw">4000128h - SIOCNT - SIO Control, usage in NORMAL Mode (R/W)</a>
+     *
+     * @sa SIODATA8
+     * @sa SIODATA32
+     * @sa SIOCNT_MULTI
+     * @sa SIOCNT_UART
+     * @sa RCNT
+     * @sa siocnt_normal
+     */
     inline constexpr auto SIOCNT_NORMAL = registral<const_ptr<volatile siocnt_normal>(0x4000128)>{};
+
+    /**
+     * @brief Serial IO control register for Multiplayer mode.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000128h---siocnt---sio-control-usage-in-multi-player-mode-rw">4000128h - SIOCNT - SIO Control, usage in MULTI-PLAYER Mode (R/W)</a>
+     *
+     * Incoming 16-bit data received from the other multiplayer clients.
+     *
+     * @sa SIOMLT_SEND
+     * @sa SIOMULTI0
+     * @sa SIOMULTI1
+     * @sa SIOMULTI2
+     * @sa SIOMULTI3
+     * @sa SIOMULTI
+     * @sa SIOCNT_NORMAL
+     * @sa SIOCNT_UART
+     * @sa RCNT
+     * @sa siocnt_multi
+     */
     inline constexpr auto SIOCNT_MULTI = registral<const_ptr<volatile siocnt_multi>(0x4000128)>{};
+
+    /**
+     * @brief Serial IO control register for UART mode.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000128h---sccnt_l---sio-control-usage-in-uart-mode-rw">4000128h - SCCNT_L - SIO Control, usage in UART Mode (R/W)</a>
+     *
+     * @sa SIODATA8
+     * @sa SIOCNT_NORMAL
+     * @sa SIOCNT_MULTI
+     * @sa RCNT
+     * @sa siocnt_multi
+     */
     inline constexpr auto SIOCNT_UART = registral<const_ptr<volatile siocnt_uart>(0x4000128)>{};
 
+    /**
+     * @brief Serial IO 8-bit data read/write register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400012ah---siodata8---sio-normal-communication-8bit-data-rw">400012Ah - SIODATA8 - SIO Normal Communication 8bit Data (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400012ah---siodata8---usage-in-uart-mode-rw">400012Ah - SIODATA8 - usage in UART Mode (R/W)</a>
+     *
+     * @sa SIOCNT_NORMAL
+     * @sa SIOCNT_UART
+     * @sa SIODATA32
+     */
     inline constexpr auto SIODATA8 = registral<const_ptr<volatile u8>(0x400012A)>{};
+
+    /**
+     * @brief Serial IO 16-bit data write register for Multiplayer mode.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#400012ah---siomlt_send---data-send-register-rw">400012Ah - SIOMLT_SEND - Data Send Register (R/W)</a>
+     *
+     * Outgoing 16-bit data to be sent to the other multiplayer clients.
+     *
+     * @sa SIOMULTI0
+     * @sa SIOMULTI1
+     * @sa SIOMULTI2
+     * @sa SIOMULTI3
+     * @sa SIOMULTI
+     * @sa SIOCNT_MULTI
+     */
     inline constexpr auto SIOMLT_SEND = registral<const_ptr<volatile u16>(0x400012A)>{};
 
     // Keys
@@ -1654,6 +1791,31 @@ namespace gba::mmio {
 
     // RCNT
 
+    /**
+     * @brief Mode selection register for Normal/Multiplayer/UART.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000134h---rcnt-r---mode-selection-in-normalmultiplayeruart-modes-rw">4000134h - RCNT (R) - Mode Selection, in Normal/Multiplayer/UART modes (R/W)</a>
+     *
+     * @warning This register must be set to zero before Normal/Multiplayer/UART serial modes can be used.
+     *
+     * @code{cpp}
+     * // Reset RCNT to zero for Normal/Multiplayer/UART modes.
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::RCNT.reset();
+     *     // SIOCNT_NORMAL, SIOCNT_MULTI, SIOCNT_UART can now be used
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa SIOCNT_NORMAL
+     * @sa SIOCNT_MULTI
+     * @sa SIOCNT_UART
+     */
+    inline constexpr auto RCNT = registral<const_ptr<volatile u16>(0x4000134)>{};
     inline constexpr auto RCNT_JOYBUS = registral<const_ptr<volatile rcnt_joybus>(0x4000134)>{};
     inline constexpr auto RCNT_GPIO = registral<const_ptr<volatile rcnt_gpio>(0x4000134)>{};
 

@@ -77,6 +77,8 @@ namespace gba {
         using type = std::remove_cvref_t<decltype(x)>;
         if constexpr (Vector<type>) {
             return __builtin_convertvector(std::forward<type>(x), T);
+        } else if constexpr (Vector<T>) {
+            return static_cast<vector_traits<T>::value_type>(std::forward<type>(x));
         } else {
             return static_cast<T>(std::forward<type>(x));
         }

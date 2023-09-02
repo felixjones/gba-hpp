@@ -65,27 +65,21 @@ namespace gba {
     /**
      * @brief Converts vector x to type T.
      *
-     * @tparam T Vector type to convert x to.
-     * @param x Vector to be converted to T.
-     * @return Vector x converted to vector type T.
-     */
-    template <Vector T>
-    [[gnu::always_inline]]
-    constexpr auto vector_cast(Vector auto&& x) noexcept {
-        return __builtin_convertvector(x, T);
-    }
-
-    /**
-     * @brief Static casts x to type T.
+     * @tparam T Type to cast x to.
+     * @param x Value to be cast to T.
+     * @return x cast to type T.
      *
-     * @tparam T Type to static cast x to.
-     * @param x Value to be static cast to T.
-     * @return x static cast to type T.
+     * @note If x is not a vector it will instead be static cast.
      */
     template <typename T>
     [[gnu::always_inline]]
     constexpr auto vector_cast(auto&& x) noexcept {
-        return static_cast<T>(x);
+        using type = std::remove_cvref_t<decltype(x)>;
+        if constexpr (Vector<type>) {
+            return __builtin_convertvector(std::forward<type>(x), T);
+        } else {
+            return static_cast<T>(std::forward<type>(x));
+        }
     }
 
     /**

@@ -264,6 +264,19 @@ struct fixed {
     explicit constexpr fixed(const std::array<value_type, size>& data) requires Vector<data_type> :
             m_data{__builtin_bit_cast(data_type, data)} {}
 
+    /**
+     * @brief Convert from fixed point to integer.
+     *
+     * @note This behaves similar to floating point to integer conversion.
+     *
+     * @tparam Lhs Destination integer type.
+     * @return Integer conversion of the fixed point value.
+     */
+    template <Vector Lhs> requires std::integral<typename vector_traits<Lhs>::value_type> && (!std::same_as<typename vector_traits<Lhs>::value_type, bool>)
+    explicit constexpr operator Lhs() const noexcept requires Vector<data_type> {
+        return vector_cast<Lhs>(m_data >> fractional_bits);
+    }
+
     // Vector access
 
     /**
@@ -457,12 +470,12 @@ struct fixed {
 
     // Simple arithmetic
     constexpr fixed& operator+=(Fixed auto rhs) noexcept {
-        m_data += shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
+        m_data += shift_to<decltype(rhs)::fractional_bits, fractional_bits>(vector_cast<data_type>(rhs.m_data));
         return *this;
     }
 
     constexpr fixed& operator-=(Fixed auto rhs) noexcept {
-        m_data -= shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data);
+        m_data -= shift_to<decltype(rhs)::fractional_bits, fractional_bits>(vector_cast<data_type>(rhs.m_data));
         return *this;
     }
 
@@ -609,7 +622,7 @@ constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
     constexpr auto frac_bits = bits_combined / 2;
 
     if constexpr (Vector<data_type>) {
-        const auto data = __builtin_convertvector(lhs.data(), bigger_type) * __builtin_convertvector(rhs.data(), bigger_type);
+        const auto data = __builtin_convertvector(lhs.data(), bigger_type) * vector_cast<bigger_type>(rhs.data());
         return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(shift_to<bits_combined, frac_bits>(data), data_type));
     } else {
         const auto data = bigger_type(lhs.data()) * rhs.data();
@@ -618,7 +631,7 @@ constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
 }
 
 constexpr auto operator*(Fixed auto lhs, Fundamental auto rhs) noexcept {
-    return decltype(lhs)::from_data(lhs.data() * rhs);
+    return decltype(lhs)::from_data(lhs.data() * vector_cast<typename decltype(lhs)::data_type>(rhs));
 }
 
 constexpr auto operator*(Fundamental auto lhs, Fixed auto rhs) noexcept {

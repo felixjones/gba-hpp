@@ -1922,7 +1922,9 @@ namespace gba::mmio {
     inline constexpr auto CHARBLOCK2_8BPP = const_ptr<volatile tile8bpp[256]>(0x6009000);
     inline constexpr auto CHARBLOCK3_8BPP = const_ptr<volatile tile8bpp[256]>(0x600C000);
 
-    inline constexpr auto TEXT_SCREENBLOCKS = const_ptr<volatile textscreen[1024]>(0x6000000);
+    inline constexpr auto CHARBLOCKS_4BPP = const_ptr<tile4bpp[4][512]>(0x6000000);
+    inline constexpr auto CHARBLOCKS_8BPP = const_ptr<tile8bpp[4][256]>(0x6000000);
+    inline constexpr auto TEXT_SCREENBLOCKS = const_ptr<textscreen[32][1024]>(0x6000000);
 
     inline constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     inline constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);

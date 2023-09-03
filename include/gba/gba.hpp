@@ -59,7 +59,7 @@ namespace gba {
      *
      * @sa screen_width
      */
-    inline constexpr auto screen_height = screen_width_v<int>;
+    inline constexpr auto screen_height = screen_height_v<int>;
 
 } // namespace gba
 

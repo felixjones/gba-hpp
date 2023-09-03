@@ -215,7 +215,7 @@ struct fixed {
      */
     template <std::integral Lhs> requires (!std::same_as<Lhs, bool>)
     explicit constexpr operator Lhs() const noexcept {
-        return m_data >> fractional_bits;
+        return static_cast<Lhs>(m_data >> fractional_bits);
     }
 
     // Vector conversion
@@ -626,7 +626,7 @@ constexpr auto operator*(Lhs lhs, Rhs rhs) noexcept {
         return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(shift_to<bits_combined, frac_bits>(data), data_type));
     } else {
         const auto data = bigger_type(lhs.data()) * rhs.data();
-        return fixed<data_type, frac_bits>::from_data(shift_to<bits_combined, frac_bits>(data));
+        return fixed<data_type, frac_bits>::from_data(static_cast<data_type>(shift_to<bits_combined, frac_bits>(data)));
     }
 }
 
@@ -651,7 +651,7 @@ constexpr auto operator/(Lhs lhs, Rhs rhs) noexcept {
     if constexpr (Vector<data_type>) {
         return fixed<data_type, frac_bits>::from_data(__builtin_convertvector(data / __builtin_convertvector(rhs.data(), bigger_type), data_type));
     } else {
-        return fixed<data_type, frac_bits>::from_data(data / rhs.data());
+        return fixed<data_type, frac_bits>::from_data(static_cast<data_type>(data / rhs.data()));
     }
 }
 

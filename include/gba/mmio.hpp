@@ -2334,12 +2334,68 @@ namespace gba::mmio {
      */
     inline constexpr auto AFFINE_SCREENBLOCKS = const_ptr<u8[32][16384]>(0x6000000);
 
+    /**
+     * @brief Mode 3 bitmap background memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#bg-mode-3---240x160-pixels-32768-colors">BG Mode 3 - 240x160 pixels, 32768 colors</a>
+     *
+     * Bitmap is 16-bpp with a resolution of 240x160.
+     */
     inline constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
+
+    /**
+     * @brief Mode 4 bitmap background memory (first page).
+     * @see <a href="https://mgba-emu.github.io/gbatek/#bg-mode-4---240x160-pixels-256-colors-out-of-32768-colors">BG Mode 4 - 240x160 pixels, 256 colors (out of 32768 colors)</a>
+     *
+     * Bitmap is 8-bpp with a resolution of 240x160. The page is selected with dispcnt::page.
+     *
+     * @sa VIDEO4_VRAM_FRAME1
+     * @sa BG_PALETTE
+     * @sa dispcnt
+     */
     inline constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
+
+    /**
+     * @brief Mode 4 bitmap background memory (second page).
+     * @see <a href="https://mgba-emu.github.io/gbatek/#bg-mode-4---240x160-pixels-256-colors-out-of-32768-colors">BG Mode 4 - 240x160 pixels, 256 colors (out of 32768 colors)</a>
+     *
+     * Bitmap is 8-bpp with a resolution of 240x160. The page is selected with dispcnt::page.
+     *
+     * @sa VIDEO4_VRAM
+     * @sa BG_PALETTE
+     * @sa dispcnt
+     */
     inline constexpr auto VIDEO4_VRAM_FRAME1 = VIDEO4_VRAM + 0xA000;
-    inline constexpr auto VIDEO5_VRAM = const_ptr<volatile u16[160][128]>(0x6000000);
+
+    /**
+     * @brief Mode 5 bitmap background memory (first page).
+     * @see <a href="https://mgba-emu.github.io/gbatek/#bg-mode-5---160x128-pixels-32768-colors">BG Mode 5 - 160x128 pixels, 32768 colors</a>
+     *
+     * Bitmap is 16-bpp with a resolution of 160x128. The page is selected with dispcnt::page.
+     *
+     * @sa VIDEO5_VRAM_FRAME1
+     * @sa dispcnt
+     */
+    inline constexpr auto VIDEO5_VRAM = const_ptr<volatile u16[128][160]>(0x6000000);
+
+    /**
+     * @brief Mode 5 bitmap background memory (second page).
+     * @see <a href="https://mgba-emu.github.io/gbatek/#bg-mode-5---160x128-pixels-32768-colors">BG Mode 5 - 160x128 pixels, 32768 colors</a>
+     *
+     * Bitmap is 16-bpp with a resolution of 160x128. The page is selected with dispcnt::page.
+     *
+     * @sa VIDEO5_VRAM
+     * @sa dispcnt
+     */
     inline constexpr auto VIDEO5_VRAM_FRAME1 = VIDEO5_VRAM + 0xA000;
 
+    /**
+     * @brief Object tile 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#vram---character-data">VRAM - Character Data</a>
+     *
+     * Each tile is 32 bytes. There are 1024 tiles.
+     *
+     * @sa tile4bpp
+     */
     inline constexpr auto OBJ_TILES = const_ptr<volatile tile4bpp[1024]>(0x6010000);
 
     // Object Attribute Memory

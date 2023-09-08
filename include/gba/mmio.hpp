@@ -55,6 +55,7 @@ namespace gba::mmio {
      * @warning The handler function must be implemented with 32-bit ARM instructions.
      *
      * @code{cpp}
+     * // Handle VBlank and keypad interrupts
      * #include <gba/gba.hpp>
      *
      * [[gnu::interrupt("IRQ"), gnu::target("arm")]]
@@ -128,6 +129,14 @@ namespace gba::mmio {
      * @sa dispcnt
      */
     inline constexpr auto DISPCNT = registral<const_ptr<volatile dispcnt>(0x4000000)>{};
+
+    /**
+     * @brief Green swap flag.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000002h---undocumented---green-swap-rw">4000002h - Undocumented - Green Swap (R/W)</a>
+     *
+     * @note This is an undocumented feature.
+     */
+    inline constexpr auto GREEN_SWAP = registral<const_ptr<volatile bool>(0x4000002)>{};
 
     /**
      * @brief Display status register.
@@ -1884,25 +1893,265 @@ namespace gba::mmio {
      * @sa SIOCNT_UART
      */
     inline constexpr auto RCNT = registral<const_ptr<volatile u16>(0x4000134)>{};
+
+    /**
+     * @brief Mode selection register for JOY BUS.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000134h---rcnt-r---mode-selection-in-joy-bus-mode-rw">4000134h - RCNT (R) - Mode Selection, in JOY BUS mode (R/W)</a>
+     *
+     * @warning This register must be set to the default constructor of rcnt_joybus to use JOY BUS serial mode.
+     *
+     * @code{cpp}
+     * // Reset RCNT_JOYBUS to zero for JOY BUS mode.
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::RCNT_JOYBUS.reset();
+     *     // JOY BUS can now be used
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa RCNT
+     * @sa JOYCNT
+     * @sa JOY_RECV
+     * @sa JOY_TRANS
+     * @sa JOYSTAT
+     */
     inline constexpr auto RCNT_JOYBUS = registral<const_ptr<volatile rcnt_joybus>(0x4000134)>{};
+
+    /**
+     * @brief Mode selection register for GPIO.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000134h---rcnt-r---sio-mode-usage-in-general-purpose-mode-rw">4000134h - RCNT (R) - SIO Mode, usage in GENERAL-PURPOSE Mode (R/W)</a>
+     *
+     * @warning This register must be set to the default constructor of rcnt_gpio to use GPIO serial mode.
+     *
+     * @code{cpp}
+     * // Reset RCNT_GPIO to zero for GPIO mode.
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::RCNT_GPIO.reset();
+     *     // GPIO can now be used
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa RCNT
+     */
     inline constexpr auto RCNT_GPIO = registral<const_ptr<volatile rcnt_gpio>(0x4000134)>{};
 
     // Joybus
 
+    /**
+     * @brief Serial IO control register for JOY BUS mode.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000140h---joycnt---joy-bus-control-register-rw">4000140h - JOYCNT - JOY BUS Control Register (R/W)</a>
+     *
+     * @sa JOY_RECV
+     * @sa JOY_TRANS
+     * @sa JOYSTAT
+     * @sa RCNT_JOYBUS
+     * @sa joycnt
+     */
     inline constexpr auto JOYCNT = registral<const_ptr<volatile joycnt>(0x4000140)>{};
+
+    /**
+     * @brief JOY BUS receive register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000150h---joy_recv_l---receive-data-register-low-rw">4000150h - JOY_RECV_L - Receive Data Register low (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000152h---joy_recv_h---receive-data-register-high-rw">4000152h - JOY_RECV_H - Receive Data Register high (R/W)</a>
+     *
+     * @sa JOYCNT
+     * @sa JOY_TRANS
+     * @sa JOYSTAT
+     * @sa RCNT_JOYBUS
+     */
     inline constexpr auto JOY_RECV = registral<const_ptr<volatile u32>(0x4000150)>{};
+
+    /**
+     * @brief JOY BUS transfer/send register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000154h---joy_trans_l---send-data-register-low-rw">4000154h - JOY_TRANS_L - Send Data Register low (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000156h---joy_trans_h---send-data-register-high-rw">4000156h - JOY_TRANS_H - Send Data Register high (R/W)</a>
+     *
+     * @sa JOYCNT
+     * @sa JOY_RECV
+     * @sa JOYSTAT
+     * @sa RCNT_JOYBUS
+     */
     inline constexpr auto JOY_TRANS = registral<const_ptr<volatile u32>(0x4000154)>{};
+
+    /**
+     * @brief JOY BUS receive status register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000158h---joystat---receive-status-register-rw">4000158h - JOYSTAT - Receive Status Register (R/W)</a>
+     *
+     * @sa JOYCNT
+     * @sa JOY_RECV
+     * @sa JOYSTAT
+     * @sa RCNT_JOYBUS
+     * @sa joystat
+     */
     inline constexpr auto JOYSTAT = registral<const_ptr<volatile joystat>(0x4000158)>{};
 
     // Interrupts
 
+    /**
+     * @brief Interrupt enable parameters.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000200h---ie---interrupt-enable-register-rw">4000200h - IE - Interrupt Enable Register (R/W)</a>
+     *
+     * @code{cpp}
+     * // Enable VBlank and keypad interrupts
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::IRQ_HANDLER = agbabi::irq_empty;
+     *
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::KEYCNT = {.irq_enabled = true};
+     *
+     *     // Enable VBlank and keypad IRQs
+     *     mmio::IE = {.vblank = true, .keypad = true};
+     *
+     *     mmio::IME = true; // Activate IRQ interrupt handling
+     *
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *         bios::IntrWait(true, irq{.keypad=true}); // Wait for keypad press
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa IF
+     * @sa IME
+     * @sa irq
+     */
     inline constexpr auto IE = registral<const_ptr<volatile irq>(0x4000200)>{};
+
+    /**
+     * @brief Acknowledge/inspect raised IRQ flags.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000202h---if---interrupt-request-flags--irq-acknowledge-rw-see-below">4000202h - IF - Interrupt Request Flags / IRQ Acknowledge (R/W, see below)</a>
+     *
+     * @warning Interrupts must be manually acknowledged by writing to this register.
+     *
+     * @code{cpp}
+     * // Read and acknowledge interrupts
+     * #include <gba/gba.hpp>
+     *
+     * [[gnu::interrupt("IRQ"), gnu::target("arm")]]
+     * void my_handler() {
+     *     using namespace gba;
+     *
+     *     const auto irq = *mmio::IF; // Read the raised IRQs
+     *
+     *     // Deal with raised IRQs
+     *     if (irq.vblank) {
+     *     } else if (irq.keypad) {
+     *     }
+     *
+     *     mmio::IF = irq; // Acknowledge the raised IRQs
+     * }
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::IRQ_HANDLER = my_handler;
+     *
+     *     // Enable VBlank and keypad IRQs
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::KEYCNT = {.irq_enabled = true};
+     *     mmio::IE = {.vblank = true, .keypad = true};
+     *
+     *     mmio::IME = true;
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa IE
+     * @sa IME
+     * @sa irq
+     */
     inline constexpr auto IF = registral<const_ptr<volatile irq>(0x4000202)>{};
+
+    /**
+     * @brief Waitstate control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000204h---waitcnt---waitstate-control-rw">4000204h - WAITCNT - Waitstate Control (R/W)</a>
+     *
+     * Use to configure gamepak waitstate access timings.
+     *
+     * @code{cpp}
+     * // Setup default waitstate
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::WAITCNT = waitcnt_default; // Set default waitstate control
+     *
+     *     while (true);
+     * }
+     * @endcode
+     *
+     * @sa waitcnt
+     */
     inline constexpr auto WAITCNT = registral<const_ptr<volatile waitcnt>(0x4000204)>{};
+
+    /**
+     * @brief Main interrupt enable flag.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000208h---ime---interrupt-master-enable-register-rw">4000208h - IME - Interrupt Master Enable Register (R/W)</a>
+     *
+     * @code{cpp}
+     * // Enable VBlank interrupts
+     * #include <gba/gba.hpp>
+     *
+     * int main() {
+     *     using namespace gba;
+     *
+     *     mmio::IRQ_HANDLER = agbabi::irq_empty;
+     *
+     *     mmio::DISPSTAT = {.irq_vblank = true};
+     *     mmio::IE = {.vblank = true};
+     *
+     *     mmio::IME = true; // Activate IRQ interrupt handling
+     *
+     *     while (true) {
+     *         bios::VBlankIntrWait();
+     *     }
+     * }
+     * @endcode
+     *
+     * @sa IE
+     * @sa IF
+     */
     inline constexpr auto IME = registral<const_ptr<volatile bool>(0x4000208)>{};
+
+    // Post flag
+
+    /**
+     * @brief Hardware reset flag.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000300h---postflg---byte---undocumented---post-boot--debug-control-rw">4000300h - POSTFLG - BYTE - Undocumented - Post Boot / Debug Control (R/W)</a>
+     *
+     * Returns false when the device has gone through the hardware BIOS startup, otherwise true if it has soft reset.
+     *
+     * @note This is an undocumented feature.
+     */
+    inline constexpr auto POSTFLG = registral<const_ptr<volatile bool>(0x4000300)>{};
 
     // Memory control
 
+    /**
+     * @brief Memory control register.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4000800h---32bit---undocumented---internal-memory-control-rw">4000800h - 32bit - Undocumented - Internal Memory Control (R/W)</a>
+     *
+     * @note This is an undocumented feature.
+     *
+     * @sa memcnt
+     */
     inline constexpr auto MEMCNT = registral<const_ptr<volatile memcnt>(0x4000800)>{};
 
     // Palette RAM

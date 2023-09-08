@@ -75,7 +75,7 @@ namespace gba {
          * @param a Other binary angle to convert from.
          */
         template <std::integral U, std::size_t B2>
-        explicit constexpr angle(angle<U, B2> a) noexcept : m_data(shift_to<B2, B>(a.data())) {}
+        explicit constexpr angle(angle<U, B2> a) noexcept : m_data(static_cast<T>(shift_to<B2, B>(a.data()))) {}
 
 #ifdef _DEBUG
         /**

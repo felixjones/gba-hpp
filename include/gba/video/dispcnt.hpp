@@ -26,10 +26,10 @@ namespace gba {
      *
      * @sa mmio::DISPCNT
      */
-     struct alignas(int) dispcnt {
-        unsigned int video_mode : 3{}; /**< 0, 1, 2 are tiled modes. 3, 4, 5 are bitmap modes. @warning 6 and 7 are invalid values. */
-        int : 1;
-        u32 page : 1{}; /**< Current bitmap page to be displayed. @warning Only available with bitmap modes 4 & 5. */
+     struct alignas(short) dispcnt {
+        short int video_mode : 3{}; /**< 0, 1, 2 are tiled modes. 3, 4, 5 are bitmap modes. @warning 6 and 7 are invalid values. */
+        short : 1;
+        u16 page : 1{}; /**< Current bitmap page to be displayed. @warning Only available with bitmap modes 4 & 5. */
         bool hblank_oam_free : 1{}; /**< Enable reading/writing OAM during HBlank. @note This flag is poorly understood as OAM is seemingly always available, regardless of this setting. */
         bool obj_vram_1d : 1{}; /**< Sprite character graphics mapping mode. 2D mapping treats the VRAM as a large bitmap texture. 1D mapping will map subsequent characters based on the object shape/size. */
         bool forced_blank : 1{}; /**< Turns off the display. */

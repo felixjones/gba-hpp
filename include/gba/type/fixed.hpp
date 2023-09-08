@@ -148,7 +148,7 @@ struct fixed {
      *
      * @param rhs Floating point number.
      */
-    explicit consteval fixed(std::floating_point auto rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
+    consteval fixed(std::floating_point auto rhs) requires (!Vector<data_type>) : m_data{round_float<data_type>(rhs * data_unit)} {}
 
     /**
      * @brief Convert from a floating point value to a vector.
@@ -157,7 +157,7 @@ struct fixed {
      *
      * @note This is only available in constexpr context.
      */
-    explicit consteval fixed(std::floating_point auto rhs) requires Vector<data_type> {
+    consteval fixed(std::floating_point auto rhs) requires Vector<data_type> {
         const auto val = round_float<data_type>(rhs * data_unit);
         for (size_type ii = 0; ii < size; ++ii) {
             m_data[ii] = val;

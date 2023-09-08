@@ -2156,28 +2156,189 @@ namespace gba::mmio {
 
     // Palette RAM
 
+    /**
+     * @brief Background palette memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#color-palette-ram">Color Palette RAM</a>
+     *
+     * @sa OBJ_PALETTE
+     */
     inline constexpr auto BG_PALETTE = const_ptr<volatile u16[256]>(0x5000000);
+
+    /**
+     * @brief Object palette memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#color-palette-ram">Color Palette RAM</a>
+     *
+     * @sa BG_PALETTE
+     */
     inline constexpr auto OBJ_PALETTE = const_ptr<volatile u16[256]>(0x5000200);
 
     // Video RAM
 
+    /**
+     * @brief Character block 0 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4bit-depth-16-colors-16-palettes">4bit depth (16 colors, 16 palettes)</a>
+     *
+     * Each tile is 32 bytes. There are 512 tiles.
+     *
+     * @sa CHARBLOCK1_4BPP
+     * @sa CHARBLOCK2_4BPP
+     * @sa CHARBLOCK3_4BPP
+     * @sa CHARBLOCKS_4BPP
+     * @sa tile4bpp
+     */
     inline constexpr auto CHARBLOCK0_4BPP = const_ptr<volatile tile4bpp[512]>(0x6000000);
+
+    /**
+     * @brief Character block 1 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4bit-depth-16-colors-16-palettes">4bit depth (16 colors, 16 palettes)</a>
+     *
+     * Each tile is 32 bytes. There are 512 tiles.
+     *
+     * @sa CHARBLOCK0_4BPP
+     * @sa CHARBLOCK2_4BPP
+     * @sa CHARBLOCK3_4BPP
+     * @sa CHARBLOCKS_4BPP
+     * @sa tile4bpp
+     */
     inline constexpr auto CHARBLOCK1_4BPP = const_ptr<volatile tile4bpp[512]>(0x6004000);
+
+    /**
+     * @brief Character block 2 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4bit-depth-16-colors-16-palettes">4bit depth (16 colors, 16 palettes)</a>
+     *
+     * Each tile is 32 bytes. There are 512 tiles.
+     *
+     * @sa CHARBLOCK0_4BPP
+     * @sa CHARBLOCK1_4BPP
+     * @sa CHARBLOCK3_4BPP
+     * @sa CHARBLOCKS_4BPP
+     * @sa tile4bpp
+     */
     inline constexpr auto CHARBLOCK2_4BPP = const_ptr<volatile tile4bpp[512]>(0x6009000);
+
+    /**
+     * @brief Character block 3 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4bit-depth-16-colors-16-palettes">4bit depth (16 colors, 16 palettes)</a>
+     *
+     * Each tile is 32 bytes. There are 512 tiles.
+     *
+     * @sa CHARBLOCK0_4BPP
+     * @sa CHARBLOCK1_4BPP
+     * @sa CHARBLOCK2_4BPP
+     * @sa CHARBLOCKS_4BPP
+     * @sa tile4bpp
+     */
     inline constexpr auto CHARBLOCK3_4BPP = const_ptr<volatile tile4bpp[512]>(0x600C000);
 
+    /**
+     * @brief Character block 0 8-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#8bit-depth-256-colors-1-palette">8bit depth (256 colors, 1 palette)</a>
+     *
+     * Each tile is 64 bytes. There are 256 tiles.
+     *
+     * @sa CHARBLOCK1_8BPP
+     * @sa CHARBLOCK2_8BPP
+     * @sa CHARBLOCK3_8BPP
+     * @sa CHARBLOCKS_8BPP
+     * @sa tile8bpp
+     */
     inline constexpr auto CHARBLOCK0_8BPP = const_ptr<volatile tile8bpp[256]>(0x6000000);
+
+    /**
+     * @brief Character block 1 8-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#8bit-depth-256-colors-1-palette">8bit depth (256 colors, 1 palette)</a>
+     *
+     * Each tile is 64 bytes. There are 256 tiles.
+     *
+     * @sa CHARBLOCK0_8BPP
+     * @sa CHARBLOCK2_8BPP
+     * @sa CHARBLOCK3_8BPP
+     * @sa CHARBLOCKS_8BPP
+     * @sa tile8bpp
+     */
     inline constexpr auto CHARBLOCK1_8BPP = const_ptr<volatile tile8bpp[256]>(0x6004000);
+
+    /**
+     * @brief Character block 2 8-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#8bit-depth-256-colors-1-palette">8bit depth (256 colors, 1 palette)</a>
+     *
+     * Each tile is 64 bytes. There are 256 tiles.
+     *
+     * @sa CHARBLOCK0_8BPP
+     * @sa CHARBLOCK1_8BPP
+     * @sa CHARBLOCK3_8BPP
+     * @sa CHARBLOCKS_8BPP
+     * @sa tile8bpp
+     */
     inline constexpr auto CHARBLOCK2_8BPP = const_ptr<volatile tile8bpp[256]>(0x6009000);
+
+    /**
+     * @brief Character block 3 8-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#8bit-depth-256-colors-1-palette">8bit depth (256 colors, 1 palette)</a>
+     *
+     * Each tile is 64 bytes. There are 256 tiles.
+     *
+     * @sa CHARBLOCK0_8BPP
+     * @sa CHARBLOCK1_8BPP
+     * @sa CHARBLOCK2_8BPP
+     * @sa CHARBLOCKS_8BPP
+     * @sa tile8bpp
+     */
     inline constexpr auto CHARBLOCK3_8BPP = const_ptr<volatile tile8bpp[256]>(0x600C000);
 
+    /**
+     * @brief Character 4-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#4bit-depth-16-colors-16-palettes">4bit depth (16 colors, 16 palettes)</a>
+     *
+     * Each tile is 32 bytes. There are 512 tiles. There are 4 blocks.
+     *
+     * @sa CHARBLOCK0_4BPP
+     * @sa CHARBLOCK1_4BPP
+     * @sa CHARBLOCK2_4BPP
+     * @sa CHARBLOCK3_4BPP
+     * @sa tile4bpp
+     */
     inline constexpr auto CHARBLOCKS_4BPP = const_ptr<tile4bpp[4][512]>(0x6000000);
+
+    /**
+     * @brief Character 8-bpp image memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#8bit-depth-256-colors-1-palette">8bit depth (256 colors, 1 palette)</a>
+     *
+     * Each tile is 64 bytes. There are 256 tiles. There are 4 blocks.
+     *
+     * @sa CHARBLOCK0_8BPP
+     * @sa CHARBLOCK1_8BPP
+     * @sa CHARBLOCK2_8BPP
+     * @sa CHARBLOCK3_8BPP
+     * @sa tile8bpp
+     */
     inline constexpr auto CHARBLOCKS_8BPP = const_ptr<tile8bpp[4][256]>(0x6000000);
+
+    /**
+     * @brief Screen/background tilemap memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#text-bg-screen-2-bytes-per-entry">Text BG Screen (2 bytes per entry)</a>
+     *
+     * Each screen has 1024 tiles (32x32). There are 32 screens.
+     *
+     * @sa textscreen
+     */
     inline constexpr auto TEXT_SCREENBLOCKS = const_ptr<textscreen[32][1024]>(0x6000000);
+
+    /**
+     * @brief Screen/background tilemap memory for affine backgrounds.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#rotationscaling-bg-screen-1-byte-per-entry">Rotation/Scaling BG Screen (1 byte per entry)</a>
+     *
+     * Each tile is an 8-bit entry into a 8-bpp character block. Largest map size is 128x128 tiles.
+     *
+     * @sa CHARBLOCKS_8BPP
+     */
+    inline constexpr auto AFFINE_SCREENBLOCKS = const_ptr<u8[32][16384]>(0x6000000);
 
     inline constexpr auto VIDEO3_VRAM = const_ptr<volatile u16[160][240]>(0x6000000);
     inline constexpr auto VIDEO4_VRAM = const_ptr<volatile u8x2[160][120]>(0x6000000);
-    inline constexpr auto VIDEO4_VRAM_FRAME1 = VIDEO4_VRAM + 0xa000;
+    inline constexpr auto VIDEO4_VRAM_FRAME1 = VIDEO4_VRAM + 0xA000;
+    inline constexpr auto VIDEO5_VRAM = const_ptr<volatile u16[160][128]>(0x6000000);
+    inline constexpr auto VIDEO5_VRAM_FRAME1 = VIDEO5_VRAM + 0xA000;
 
     inline constexpr auto OBJ_TILES = const_ptr<volatile tile4bpp[1024]>(0x6010000);
 

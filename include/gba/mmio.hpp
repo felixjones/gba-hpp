@@ -2400,23 +2400,151 @@ namespace gba::mmio {
 
     // Object Attribute Memory
 
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-0-rw">OBJ Attribute 0 (R/W)</a>
+     *
+     * Includes the Y position and shape of objects.
+     *
+     * @sa OBJ_ATTR
+     * @sa objattr0
+     */
     inline constexpr auto OBJ_ATTR0 = registral_series<const_ptr<volatile objattr0[128]>(0x7000000), 8>{};
+
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-1-rw">OBJ Attribute 1 (R/W)</a>
+     *
+     * Includes the X position and size of objects.
+     *
+     * @sa OBJ_ATTR1_AFFINE
+     * @sa OBJ_ATTR
+     * @sa objattr1
+     */
     inline constexpr auto OBJ_ATTR1 = registral_series<const_ptr<volatile objattr1[128]>(0x7000002), 8>{};
+
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-2-rw">OBJ Attribute 2 (R/W)</a>
+     *
+     * Includes the tile ID and palette bank of objects.
+     *
+     * @sa OBJ_ATTR
+     * @sa objattr2
+     */
     inline constexpr auto OBJ_ATTR2 = registral_series<const_ptr<volatile objattr2[128]>(0x7000004), 8>{};
+
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-0-rw">OBJ Attribute 0 (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-1-rw">OBJ Attribute 1 (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-2-rw">OBJ Attribute 2 (R/W)</a>
+     *
+     * Combines all the object attributes for regular objects.
+     *
+     * @sa OBJ_ATTR_AFFINE
+     * @sa objattr
+     */
     inline constexpr auto OBJ_ATTR = registral_series<const_ptr<volatile objattr[128]>(0x7000000), 8>{};
 
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-1-rw">OBJ Attribute 1 (R/W)</a>
+     *
+     * Objects attribute 1 for affine objects.
+     *
+     * @sa OBJ_ATTR1
+     * @sa OBJ_ATTR_AFFINE
+     * @sa objattr1_affine
+     */
     inline constexpr auto OBJ_ATTR1_AFFINE = registral_series<const_ptr<volatile objattr1_affine[128]>(0x7000002), 8>{};
+
+    /**
+     * @brief Object attribute memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-0-rw">OBJ Attribute 0 (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-1-rw">OBJ Attribute 1 (R/W)</a>
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-2-rw">OBJ Attribute 2 (R/W)</a>
+     *
+     * Combines all the object attributes for affine objects.
+     *
+     * @sa OBJ_ATTR
+     * @sa objattr_affine
+     */
     inline constexpr auto OBJ_ATTR_AFFINE = registral_series<const_ptr<volatile objattr_affine[128]>(0x7000000), 8>{};
 
+    /**
+     * @brief Affine object matrix memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-rotationscaling-papbpcpd-parameters-rw">OBJ Rotation/Scaling PA,PB,PC,PD Parameters (R/W)</a>
+     *
+     * @sa AFFINE_PARAM_B
+     * @sa AFFINE_PARAM_C
+     * @sa AFFINE_PARAM_D
+     */
     inline constexpr auto AFFINE_PARAM_A = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x7000006), 32>{};
+
+    /**
+     * @brief Affine object matrix memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-rotationscaling-papbpcpd-parameters-rw">OBJ Rotation/Scaling PA,PB,PC,PD Parameters (R/W)</a>
+     *
+     * @sa AFFINE_PARAM_A
+     * @sa AFFINE_PARAM_C
+     * @sa AFFINE_PARAM_D
+     */
     inline constexpr auto AFFINE_PARAM_B = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700000E), 32>{};
+
+    /**
+     * @brief Affine object matrix memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-rotationscaling-papbpcpd-parameters-rw">OBJ Rotation/Scaling PA,PB,PC,PD Parameters (R/W)</a>
+     *
+     * @sa AFFINE_PARAM_A
+     * @sa AFFINE_PARAM_B
+     * @sa AFFINE_PARAM_D
+     */
     inline constexpr auto AFFINE_PARAM_C = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x7000016), 32>{};
+
+    /**
+     * @brief Affine object matrix memory.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#obj-rotationscaling-papbpcpd-parameters-rw">OBJ Rotation/Scaling PA,PB,PC,PD Parameters (R/W)</a>
+     *
+     * @sa AFFINE_PARAM_A
+     * @sa AFFINE_PARAM_B
+     * @sa AFFINE_PARAM_C
+     */
     inline constexpr auto AFFINE_PARAM_D = registral_series<const_ptr<volatile fixed<short, 8>[32]>(0x700001E), 32>{};
 
     // Cartridge IO
 
+    /**
+     * @brief Gamepak IO port data bits.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#80000c4h---io-port-data-selectable-w-or-rw">80000C4h - I/O Port Data (selectable W or R/W)</a>
+     *
+     * @sa IO_PORT_DIRECTION
+     * @sa IO_PORT_CONTROL
+     */
     inline constexpr auto IO_PORT_DATA = registral<const_ptr<volatile u16>(0x080000C4)>{};
+
+    /**
+     * @brief Gamepak IO port data direction.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#80000c6h---io-port-direction-for-above-data-port-selectable-w-or-rw">80000C6h - I/O Port Direction (for above Data Port) (selectable W or R/W)</a>
+     *
+     * 0 for read, 1 for write.
+     *
+     * @sa IO_PORT_DATA
+     * @sa IO_PORT_CONTROL
+     * @sa cartdirection
+     */
     inline constexpr auto IO_PORT_DIRECTION = registral<const_ptr<volatile cartdirection>(0x080000C6)>{};
+
+    /**
+     * @brief Gamepak IO port control.
+     * @see <a href="https://mgba-emu.github.io/gbatek/#80000c8h---io-port-control-selectable-w-or-rw">80000C8h - I/O Port Control (selectable W or R/W)</a>
+     *
+     * Contains the GPIO enable boolean flag.
+     *
+     * @sa IO_PORT_DATA
+     * @sa IO_PORT_DIRECTION
+     * @sa cartcontrol
+     */
     inline constexpr auto IO_PORT_CONTROL = registral<const_ptr<volatile cartcontrol>(0x080000C8)>{};
 
 } // namespace gba::mmio

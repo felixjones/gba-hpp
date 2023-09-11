@@ -54,7 +54,7 @@ namespace gba {
          *
          * @param radian The angle in radians.
          */
-        explicit consteval angle(std::floating_point auto radian) : m_data{T(round_float<T>(radians_to_turns(radian) * (1LL << B)) & mask)} {}
+        consteval angle(std::floating_point auto radian) : m_data{T(round_float<T>(radians_to_turns(radian) * (1LL << B)) & mask)} {}
 
         angle() = default;
 
@@ -65,7 +65,7 @@ namespace gba {
          * @param data Binary angle in raw integer format.
          */
         template <std::integral U>
-        explicit constexpr angle(U data) noexcept : m_data(data) {}
+        constexpr angle(U data) noexcept : m_data(static_cast<T>(data)) {}
 
         /**
          * @brief Convert from a binary angle of another format.
@@ -75,7 +75,7 @@ namespace gba {
          * @param a Other binary angle to convert from.
          */
         template <std::integral U, std::size_t B2>
-        explicit constexpr angle(angle<U, B2> a) noexcept : m_data(static_cast<T>(shift_to<B2, B>(a.data()))) {}
+        constexpr angle(angle<U, B2> a) noexcept : m_data(static_cast<T>(shift_to<B2, B>(a.data()))) {}
 
 #ifdef _DEBUG
         /**

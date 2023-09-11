@@ -131,7 +131,7 @@ struct fixed {
      *
      * @param rhs Source fixed point number.
      */
-    explicit constexpr fixed(Fixed auto rhs) noexcept requires (Vector<data_type> == Vector<typename decltype(rhs)::data_type>) :
+    constexpr fixed(Fixed auto rhs) noexcept requires (Vector<data_type> == Vector<typename decltype(rhs)::data_type>) :
             m_data{vector_cast<data_type>(shift_to<decltype(rhs)::fractional_bits, fractional_bits>(rhs.m_data))} {}
 
     constexpr fixed& operator=(Fixed auto rhs) noexcept {
@@ -186,14 +186,14 @@ struct fixed {
     /**
      * @brief Convert from integer to fixed point.
      */
-    explicit constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{typename value_type::data_type(rhs << fractional_bits)} {}
+    constexpr fixed(std::integral auto rhs) requires (!Vector<data_type>) : m_data{typename value_type::data_type(rhs << fractional_bits)} {}
 
     /**
      * @brief Convert from integer to fixed point vector.
      *
      * This copies the `rhs` value into all elements of the m_data vector.
      */
-    explicit constexpr fixed(std::integral auto rhs) requires Vector<data_type> {
+    constexpr fixed(std::integral auto rhs) requires Vector<data_type> {
         const auto val = rhs << fractional_bits;
         for (size_type ii = 0; ii < size; ++ii) {
             m_data[ii] = typename value_type::data_type(val);
@@ -230,7 +230,35 @@ struct fixed {
      * @tparam Args The type of the fixed-point arguments.
      */
     template <Fixed... Args>
-    explicit constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
+    constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
+        static_assert(sizeof...(Args) == size);
+    }
+
+    /**
+     * @brief Initializes fixed point value with integer values.
+     *
+     * The number of arguments must match the size of the vector.
+     *
+     * @note This will call a conversion constructor for each argument passed.
+     *
+     * @tparam Args The type of the integer arguments.
+     */
+    template <std::integral... Args>
+    constexpr fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
+        static_assert(sizeof...(Args) == size);
+    }
+
+    /**
+     * @brief Initializes fixed point value with floating-point values.
+     *
+     * The number of arguments must match the size of the vector.
+     *
+     * @note This will call a conversion constructor for each argument passed.
+     *
+     * @tparam Args The type of the floating-point arguments.
+     */
+    template <std::floating_point... Args>
+    consteval fixed(Args... args) requires Vector<data_type> : m_data{value_type(std::forward<Args>(args)).m_data...} {
         static_assert(sizeof...(Args) == size);
     }
 
@@ -261,7 +289,7 @@ struct fixed {
      *
      * @note The array must be the same type and size as the vector.
      */
-    explicit constexpr fixed(const std::array<value_type, size>& data) requires Vector<data_type> :
+    constexpr fixed(const std::array<value_type, size>& data) requires Vector<data_type> :
             m_data{__builtin_bit_cast(data_type, data)} {}
 
     /**

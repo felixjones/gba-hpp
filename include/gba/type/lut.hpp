@@ -53,6 +53,8 @@ namespace gba::lut {
      */
     template <typename T, Angle U>
     struct angle_array : public std::array<T, 1 << U::bits> {
+        using angle_type = U;
+
         template <Angle V>
         constexpr T operator[](V i) const noexcept {
             constexpr auto mask = (1 << U::bits) - 1;

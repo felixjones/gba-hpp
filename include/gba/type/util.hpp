@@ -82,6 +82,19 @@ namespace gba {
     }
 
     /**
+     * @brief Extends the sign of an integer type to a given number of bits.
+     *
+     * @tparam Bits Number of desired low bits of x.
+     * @param x The variable to be sign extended.
+     * @return The variable sign extended.
+     */
+    template <std::size_t Bits>
+    constexpr auto sign_extend(std::integral auto x) noexcept {
+        constexpr auto shift = (sizeof(x) * 8) - Bits;
+        return (x << shift) >> shift;
+    }
+
+    /**
      * @brief Utility to copy the sign from one type to another.
      *
      * @tparam Sign The source type to copy the sign from.

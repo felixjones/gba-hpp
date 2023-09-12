@@ -166,7 +166,7 @@ namespace gba {
         constexpr auto bits = (Lhs::bits + Rhs::bits) / 2;
         using data_type = decltype(typename Lhs::data_type() + typename Rhs::data_type());
 
-        return shift_to<Lhs::bits, bits>(data_type(lhs.data())) <=> shift_to<Rhs::bits, bits>(data_type(rhs.data()));
+        return sign_extend<bits>(shift_to<Lhs::bits, bits>(data_type(lhs.data()))) <=> sign_extend<bits>(shift_to<Rhs::bits, bits>(data_type(rhs.data())));
     }
 
     template <Angle Lhs, Angle Rhs>

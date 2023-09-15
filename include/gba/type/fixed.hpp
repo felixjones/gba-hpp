@@ -748,6 +748,32 @@ constexpr auto frac(Fixed auto x) noexcept {
     return decltype(x)::from_data(x.data() & mask);
 }
 
+/**
+ * @brief Returns the smaller value between lhs and rhs.
+ *
+ * @param lhs Fixed-point first value.
+ * @param rhs Fixed-point second value.
+ * @return The smaller value between lhs and rhs.
+ *
+ * @sa max()
+ */
+constexpr auto min(Fixed auto lhs, Fixed auto rhs) noexcept {
+    return lhs < rhs ? lhs : rhs;
+}
+
+/**
+ * @brief Returns the larger value between lhs and rhs.
+ *
+ * @param lhs Fixed-point first value.
+ * @param rhs Fixed-point second value.
+ * @return The larger value between lhs and rhs.
+ *
+ * @sa min()
+ */
+constexpr auto max(Fixed auto lhs, Fixed auto rhs) noexcept {
+    return lhs > rhs ? lhs : rhs;
+}
+
 } // namespace gba
 
 namespace std {

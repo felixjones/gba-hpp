@@ -54,7 +54,7 @@ namespace gba {
          *
          * @param radian The angle in radians.
          */
-        consteval angle(std::floating_point auto radian) : m_data{T(round_float<T>(radians_to_turns(radian) * (1LL << B)) & mask)} {}
+        consteval angle(std::floating_point auto radian) : m_data(static_cast<T>(radians_to_turns(radian) * (1LL << B))) {}
 
         angle() = default;
 

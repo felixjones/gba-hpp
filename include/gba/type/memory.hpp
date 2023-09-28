@@ -651,8 +651,8 @@ namespace gba {
         private:
             friend registral_series;
 
-            constexpr explicit scoped_ref(const std::uintptr_t address) noexcept : m_address{address},
-                std::remove_cvref_t<element_type>{volatile_load(reinterpret_cast<element_type*>(address))} {}
+            constexpr explicit scoped_ref(const std::uintptr_t address) noexcept :
+                std::remove_cvref_t<element_type>{volatile_load(reinterpret_cast<element_type*>(address))}, m_address{address} {}
 
             std::uintptr_t m_address;
         };

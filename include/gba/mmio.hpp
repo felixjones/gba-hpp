@@ -395,7 +395,7 @@ namespace gba::mmio {
      * @sa BG3HOFS
      * @sa BG3VOFS
      */
-    inline constexpr auto BGOFS = registral_series<const_ptr<volatile make_vector<u16, 2>[4]>(0x4000010)>{};
+    inline constexpr auto BGOFS = registral_series<const_ptr<volatile u16x2[4]>(0x4000010)>{};
 
     /**
      * @brief Background 2 affine matrix "A" register.

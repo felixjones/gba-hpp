@@ -41,7 +41,7 @@ namespace gba::bios {
      * @sa CpuFastSet()
      */
     struct alignas(int) cpu_fast_set {
-        u32 count : 21{}; /**< Number of 32-bit words to copy. @note Must be a multiple of 8 words. */
+        u32 count : 21{}; /**< Number of 32-bit words to copy. @note Must be a multiple of 4 bytes. */
         int : 3;
         bool fill : 1{}; /**< Switch between memcpy() and memset() behavior. */
     };
@@ -54,7 +54,7 @@ namespace gba::bios {
      * @param dest Pointer to the destination memory region.
      * @param lenmode The length (multiple of 8) and mode (copy/fill) of the data to be copied.
      *
-     * @note The lenmode::count must be a multiple of 8 words.
+     * @note The lenmode::count must be a multiple of 4 (will be rounded to 8 words).
      * @note When lenmode::fill is true this function performs a faster memset() than using DMA (Direct Memory Access)
      *       registers.
      * @note This function assumes that the provided source buffer and destination buffers are word aligned.

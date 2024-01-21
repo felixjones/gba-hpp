@@ -103,6 +103,17 @@ namespace gba {
     static_assert(sizeof(objattr) == 6);
 
     /**
+     * @struct objattr8
+     * @brief 8-byte aligned objattr.
+     *
+     * @sa objattr
+     */
+    struct objattr8 : objattr {
+        char : 8;
+    };
+    static_assert(sizeof(objattr8) == 8);
+
+    /**
      * @struct objattr1_affine
      * @brief The second object attribute parameters, but specialized for affine objects.
      * @see <a href="https://mgba-emu.github.io/gbatek/#obj-attribute-1-rw">OBJ Attribute 1 (R/W)</a>
@@ -123,6 +134,17 @@ namespace gba {
      */
     struct objattr_affine : objattr0, objattr1_affine, objattr2 {};
     static_assert(sizeof(objattr_affine) == 6);
+
+    /**
+     * @struct objattr_affine8
+     * @brief 8-byte aligned objattr_affine.
+     *
+     * @sa objattr_affine
+     */
+    struct objattr_affine8 : objattr_affine {
+        char : 8;
+    };
+    static_assert(sizeof(objattr_affine8) == 8);
 
 } // namespace gba
 

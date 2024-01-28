@@ -25,7 +25,7 @@ namespace gba::bios {
     struct bit_un_pack {
         u16 src_len; /**< Length of the source buffer in bytes. */
         u8 src_bpp; /**< Width of the source units in bits. @note Only 1, 2, 4, and 8 bits-per-pixel supported. */
-        u8 dst_bpp; /**< Length of the destination buffer in bytes. */
+        u8 dst_bpp; /**< Width of the destination units in bits. @note Only 1, 2, 4, and 8 bits-per-pixel supported. */
         u32 dst_ofs : 31; /**< Value to add to the destination units. */
         bool offset_zero : 1; /**< When true, bit_un_pack::dst_ofs will also apply to occurrences of the value zero. */
     };

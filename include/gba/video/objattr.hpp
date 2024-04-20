@@ -104,11 +104,11 @@ namespace gba {
 
     /**
      * @struct objattr8
-     * @brief 8-byte aligned objattr.
+     * @brief 8-byte padded objattr.
      *
      * @sa objattr
      */
-    struct objattr8 : objattr {
+    struct alignas(4) objattr8 : objattr {
         char : 8;
     };
     static_assert(sizeof(objattr8) == 8);
